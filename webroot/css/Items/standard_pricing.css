@@ -1,0 +1,21 @@
+
+.item-edit-grid {
+
+    width: 100%;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 2fr;
+}
+
+.item-link-grid {
+
+    width: 100%;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr .9fr .1fr;
+}
+
+.inv-grid {
+
+    width: 100%;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr;
+}

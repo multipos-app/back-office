@@ -1,0 +1,65 @@
+ .order-select {
+	  
+	  border-radius: 0.25rem;
+ 	  border: 1px solid #000;
+ }
+
+ .pos-app-btn {
+	  background: #008577 !important;
+ }
+ 
+ .inactive-btn {
+	  background: #777 !important;
+	  height: 60px;
+ }
+ 
+ .success-btn {
+	  background: #28a745 !important;
+	  height: 60px;
+ }
+ 
+ 
+ .cancel-btn {
+	  background: #ffc107 !important;
+	  height: 60px;
+ }
+ 
+ .primary-btn {
+	  background: #007bff !important;
+	  height: 60px;
+ }
+
+.continue-btn {
+	  background: #17A2B8 !important;
+	  height: 60px;
+ }
+
+ 
+ 
+ .icon-btn {
+	  color: #fff !important;
+ }
+ 
+ .keypad-btn {
+	  font-size: 25px;
+	  font-weight: 600;
+	  color: #fff !important;
+     border-radius: 4px;
+	  background: #777;
+     display: inline-block;
+	  margin: 2px;
+	  padding-top: 5px;
+	  width: 100%;
+	  height: 80px;
+	  border-radius: 0.25rem;
+	  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+	  cursor:pointer;
+     -webkit-user-select: none
+     -khtml-user-select: none;
+     -moz-user-select: none;
+     -ms-user-select: none;
+     user-select: none;
+	  box-shadow: 2px 2px 2px grey;  
+ }

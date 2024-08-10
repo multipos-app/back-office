@@ -1,0 +1,38 @@
+
+ .controls-grid {
+	  
+     display: grid;
+     width: 100%;
+     grid-template-rows: auto;
+     grid-template-columns: 120px 3fr .1fr 2fr 2fr 3fr;
+	  grid-column-gap: 10px;
+	  margin-top: 25px;
+ }
+ 
+ .item-grid {
+
+     display: grid;
+     width: 100%;
+     grid-template-rows: 1fr;
+     grid-template-columns: .25fr 2fr 3fr 2fr repeat(3, .7fr);
+	  grid-column-gap: 0px;
+ }
+
+ .auto-sku-grid {
+
+     display: grid;
+     width: 100%;
+     grid-template-rows: 1;
+     grid-template-columns: 7fr 1fr;
+	  grid-column-gap: 0px;
+ }
+
+ li a {
+
+	  color: #000 !important;
+ }
+
+ .select {
+
+	  height: 2.2em !important;
+ }

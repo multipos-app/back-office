@@ -1,0 +1,16 @@
+.tickets-search-grid {
+	 
+	 display: grid;
+	 margin-top: 25px;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+ 	 grid-row-gap: 15px;
+}
+
+.sales-type-grid {
+	 
+	 display: grid;
+    grid-template-columns: repeat(2, 1fr);
+ 	 grid-column-gap: 15px;
+ 	 grid-row-gap: 15px;
+}

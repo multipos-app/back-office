@@ -1,0 +1,350 @@
+{
+	 "id": "layout_1",
+	 "desc": "Single Menu",
+    "locale": "en_US",
+    "currency": "USD",
+    "update_interval": "20000",
+    "language": "EN",
+    "country": "en",
+    "variant": "",
+    "prompt_open_amount": false,
+    "show_previous_receipt": true,
+    "disable_quantity_void": true,
+    "root_layout": "layout_2",
+    "item_line_layout": "ticket_item_line",
+    "keypad_layout": "pos_keypad_2",
+    "pos": "generic_tablet",
+    "enter_clerk": false,
+    "confirm_tender": true,
+    "show_previous_receipt_no_print": false,
+    "surveillance": false,
+    "scanner": "keyboard",
+    "customers": true,
+    "cash_management": false,
+    "merge_like_items": false,
+	 "root_layout": "layout_1",
+    "devices": {
+        "receipt_printer": {
+            "name": "star_micronics",
+            "class": "cloud.multipos.pos.devices.StarPrinter",
+            "params": []
+        },
+        "scanner": {
+            "name": "keyboard",
+            "class": "cloud.multipos.pos.devices.KeyboardScanner",
+            "params": []
+        }
+    },
+    "pos_menus": {
+        "main_menu": {
+            "menu_description": "Main Menu",
+				"tabs": "false",
+				"horizontal_menus": [
+					 {
+						  "type": "controls",
+						  "style": "outline",
+						  "name": "ITEM MENUS",
+						  "width": 4,
+						  "buttons": [
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        },
+								{
+                            "class": "Null",
+                            "text": "",
+                            "color": "empty",
+                            "params": []
+                        }
+						  ]
+					 }
+				],
+				"vertical_menus": []
+        }
+    },
+    "pos_displays": [
+        {
+            "name": "ticket",
+            "type": "ticket_display",
+            "layout": "ticket"
+        }
+    ]
+}

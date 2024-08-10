@@ -1,0 +1,32 @@
+<?php 
+
+$menus = [['type' => 'menu',
+			  'controller' => 'sales',
+			  'icon' => 'fa-dollar-sign',
+			  'text' => __ ('Sales Summary')],
+			 ['type' => 'menu',
+			  'controller' => 'item-history',
+			  'icon' => 'fa-rectangle-vertical-history',
+			  'text' => __ ('Item History')],
+			 ['type' => 'menu',
+			  'controller' => 'hourly',
+			  'icon' => 'fa-clock',
+			  'text' => __ ('Hourly Sales')],
+			 ['type' => 'menu',
+			  'controller' => 'tickets',
+			  'icon' => 'fa-receipt',
+			  'text' => __ ('Receipts')],
+			 ['type' => 'menu',
+			  'controller'=> 'items',
+			  'icon' => 'fa-store',
+			  'text' => __ ('Items')],
+			 ['type' => 'menu',
+			  'controller'=> 'departments',
+			  'icon' => 'fa-box',
+			  'text' => __ ('Departments')],
+			 ['type' => 'menu',
+			  'controller'=> 'business-units',
+			  'icon' => 'fa-file-user',
+			  'text' => __ ('Account')]];
+
+?>
