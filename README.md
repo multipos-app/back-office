@@ -1,6 +1,6 @@
 # multiPOS back office application
 
-POS backoffice implemented on top of cakePHP. xs
+POS backoffice implemented on top of cakePHP.
 
 # Standared CakePHP Application readme
 
