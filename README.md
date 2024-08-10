@@ -1,3 +1,9 @@
+# multiPOS back office application
+
+POS backoffice implemented on top of cakePHP. xs
+
+# Standared CakePHP Application readme
+
 # CakePHP Application Skeleton
 
 ![Build Status](https://github.com/cakephp/app/actions/workflows/ci.yml/badge.svg?branch=master)
