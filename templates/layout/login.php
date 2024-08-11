@@ -29,7 +29,7 @@
 		  <meta charset="utf-8">
 		  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-		  <title>posAppliance</title>
+		  <title>multiPOS</title>
 		  <meta content="Cloud POS System" name="descriptison">
 		  <meta content="retail pos cloud" name="keywords">
 		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +50,7 @@
 										  'login',
 										  'default-login-bg']);
 
-		  $logo = 'pos<span class="logo-red">A</span>ppliance';
+		  $logo = 'multi<span class="logo-red">POS';
 		  $serverName = explode ('.', $_SERVER ['HTTP_HOST']) [0];
 		  
 

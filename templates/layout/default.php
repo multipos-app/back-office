@@ -9,7 +9,7 @@ if (!isset ($merchant)) {
 	 exit;
 }
 
-$logo = 'pos<span class="logo-red-small">A</span>ppliance';
+$logo = 'multi<span class="logo-red-small">POS</span>';
 
 ?>
 
@@ -72,7 +72,7 @@ $logo = 'pos<span class="logo-red-small">A</span>ppliance';
 		  <meta charset="utf-8">
 		  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 		  
-		  <title>posAppliance</title>
+		  <title>multiPOS</title>
 		  <meta content="Cloud POS System" name="descriptison">
 		  <meta content="retail pos cloud" name="keywords">
 
