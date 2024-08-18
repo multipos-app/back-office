@@ -14,7 +14,6 @@ function select (c) {
 	 
 	 container = c;
 	 menu = $('#' + container + '_select').val ();
-	 console.log ('select... ' + container + ' ' + menu);
 	 render (c);
 }
 
@@ -40,9 +39,7 @@ function render (c) {
 	 let width = 0;
 	 
 	 if (posConfig.config ['pos_menus'] [container] ['horizontal_menus'].length > 0) {
-		  
-		  console.log ('render... ' + container + ' ' + menu);
-		  
+		  		  
 		  let buttons = menus [menu] ['buttons'];
 
 		  name = menus [menu] ['name'];
@@ -66,9 +63,7 @@ function render (c) {
 				let backgroundClass = '" ';
 
 				if (b.color != null) {
-					 
-					 console.log (b);
-					 
+					 					 
 					 if (b.color.startsWith ('color')) {
 						  
 						  backgroundClass = ' ' + b.color + '"';
@@ -111,8 +106,6 @@ function render (c) {
 	 $('#' + container + '_name').val (name);
 	 $('#' + container + '_rows').val (height);
 	 $('#' + container + '_cols').val (width);
-
-	 console.log ('render... ' + container + ' ' + menu + ' ' + name + ' ' + height + " " + width);
 }
 
 /**
@@ -122,8 +115,6 @@ function render (c) {
  */
 
 function actions (c) {
-
-	 console.log (posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu]);
 
 	 switch ($('#' + c + '_action').val ()) {
 
@@ -140,7 +131,6 @@ function actions (c) {
 
 	 case 'delete':
 
-		  console.log ('delete... ' + c + ' ' + menu);
 		  if (confirm ('Are you sure you want to delete ' + posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['name'])) {
 				
 				posConfig.config ['pos_menus'] [c] ['horizontal_menus'].splice (menu, 1);
@@ -176,8 +166,6 @@ function addMenu (c, m, where) {
 		  insert = m + 1;
 		  break;
 	 }
-
-	 console.log ('add menu... ' + c + ' ' + m + ' ' + where + ' ' + insert);
 	 
 	 container = c
 	 buttons = Array ();
@@ -192,9 +180,6 @@ function addMenu (c, m, where) {
 																									  "name": $('#' + container + '_name').val ().toUpperCase (),
 																									  "width": parseInt ($('#' + container + '_cols').val ()),
 																									  "buttons": buttons});
- 	 console.log ('add menu... ' + container);
- 	 console.log (posConfig.config ['pos_menus'] [container]);
-
 	 menu = 0;
 	 pos = 0;
 	 dirty (true);
@@ -207,8 +192,6 @@ function addMenu (c, m, where) {
  */
 
 function button (c, m, p) {
-
-	 console.log ('button... ' + c + ' ' + m + ' ' + p);
 	 
 	 let url = '/menus/button';
 
@@ -234,8 +217,6 @@ function button (c, m, p) {
 				 success: function (data) {
 
 					  data = JSON.parse (data);
-					  console.log (data);
-
 					  $('#button_container').html (data.html);
 				 }
 				});
@@ -274,8 +255,6 @@ function dirty (d) {
 $('#menu_update').on ('click', function (e){
 
  	 let url = '/menus/update/' + posConfig.id;
-
-	 console.log ('update menu...');
 	 
 	 $.ajax ({type: "POST",
 				 url: url,

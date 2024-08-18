@@ -96,7 +96,10 @@ $colors = ['#7B0100',
 
 <script>
  
- b = <?php echo json_encode ($button); ?>; 
+ b = <?php echo json_encode ($button); ?>;
+
+ console.log (b);
+ 
  $('#' + b ['menu'] + '_' + b ['pos']).removeClass ('empty-button');
  posConfig.config.pos_menus [b.container].horizontal_menus [b.menu].buttons [b.pos] = b;
  
@@ -160,8 +163,6 @@ $colors = ['#7B0100',
  });
  
  function color (color) {
-
-	  console.log ("set color... " + color);
 	  
      $('#button_text').css ({'background-color': '"' + color + '"'});
 	  $('#' + container + '_' + menu + '_' + pos).css ({'background-color': '"' + color + '"'});	  

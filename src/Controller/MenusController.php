@@ -47,7 +47,7 @@ class MenusController extends PosAppController {
     function button () {
 
         $button = $this->request->getData ();
-
+		  
 		  $template = 'empty';
 		  $data = [];
 
@@ -62,7 +62,7 @@ class MenusController extends PosAppController {
 
 						  $button ["text"] = "";
 						  $button ["class"] = $button ['class'];
-						  $button ["color"] =  "#eee";
+						  $button ["color"] =  "#999";
 						  $button ["params"] = ["sku" =>  ""];
 					 }
 					 
@@ -70,8 +70,6 @@ class MenusController extends PosAppController {
 
 				case 'CashTender':
 
-					 $button ["text"] = "";
-					 $button ["color"] =  "#eee";
 					 $template = 'cash_tender';
 					 break;
 
@@ -80,7 +78,7 @@ class MenusController extends PosAppController {
 					 $template = 'navigate';
 					 $button ["text"] = "";
 					 $button ["class"] = "Navigate";
-					 $button ["color"] =  "#eee";
+					 $button ["color"] =  "#999";
 					 break;
 
 				case 'Null':
@@ -105,7 +103,7 @@ class MenusController extends PosAppController {
 					 }
 					 
 					 $button ["text"] = "";
-					 $button ["color"] =  "#eee";
+					 $button ["color"] =  "#999";
 					 $template = 'empty';
 					 $button ['controls'] = $controls;
 					 break;
@@ -115,12 +113,12 @@ class MenusController extends PosAppController {
 					 $template = 'no_params';
 					 $button ["text"] = "";
 					 $button ["class"] = $button ['class'];
-					 $button ["color"] =  "#eee";
+					 $button ["color"] =  "#999";
 					 break;
         }
 		  
 		  $data ['button'] = $button;
-		  
+
         return ($this->response (__ ('Menus'),
                                  'Menus',
                                  $template,

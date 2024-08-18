@@ -1,8 +1,13 @@
 <div class="form-submit-grid">
 	 
 	 <div>
+		  <button type="button" class="btn btn-success" onclick="buttonClose ()"><?= __ ('Save') ?></button>
+	 </div>
+	 
+	 <div>
 		  <button type="button" class="btn btn-warning" onclick="del ()"><?= __ ('Clear') ?></button>
 	 </div>
+	 
 </div>
 
 <script>
