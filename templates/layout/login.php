@@ -144,7 +144,6 @@
 		  <footer id="login-footer" class="login-footer">
 				<div class="container">
 					 <div class="copyright">
-						  &copy; Copyright&nbsp;2023&nbsp;<strong><span>VideoRegister LLC</span></strong>&nbsp;US Patent Nos.&nbsp;9,400,640&nbsp;9,715,371&nbsp;10,083,012&nbsp;11,226,793
 					 </div>
 				</div>
 		  </footer>
