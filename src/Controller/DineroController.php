@@ -42,7 +42,7 @@ class DineroController extends PosAppController {
 								$this->bus [$this->bu] ['params'] = ['accounting' => ['provider' => 'dinero',
 																										'account_id' => '',
 																										'client_id' => 'POSappliance',
-																										'client_secret' => 'vbAb00ZaeEqKkubIsRw2HrS6rKgNaesZv1zohPRN4',
+																										'client_secret' => '<client secret>',
 																										'encoded_token_auth' => '',
 																										'username' => '',
 																										'password' => '',
