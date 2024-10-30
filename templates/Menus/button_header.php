@@ -12,7 +12,7 @@ $colors = ['#7B0100',
 			  '#8F2703',
 			  '#646500',
 			  '#007002',
-			  '#004A93',
+			  '#21512D',
 			  '#42008A',
 			  '#B2005B',
 			  '#4F4F4F',
@@ -32,6 +32,24 @@ $colors = ['#7B0100',
 			  '#140135',
 			  '#50012A',
 			  '#000000'];
+
+$colors = ['#006482',
+			  '#0172BB',
+			  '#018380',
+			  '#026851',
+			  '#0A0A0A',
+			  '#0E4E93',
+			  '#111E6C',
+			  '#1A3A46',
+			  '#264E3A',
+			  '#2C262D',
+			  '#2E183D',
+			  '#3062A5',
+			  '#512D55',
+			  '#679ACD',
+			  '#696969',
+			  '#8C0306'];
+
 ?>
 
 <style>
@@ -75,8 +93,8 @@ $colors = ['#7B0100',
 	  height: 100%;
      grid-template-rows: auto;
      grid-template-columns: repeat(8, 1fr);
-	  grid-row-gap: 2px;
-	  grid-column-gap: 2px;
+	  grid-row-gap: 12px;
+	  grid-column-gap: 12px;
  }
  
  .btn {
@@ -88,8 +106,8 @@ $colors = ['#7B0100',
  
  .button-edit-color {
 
-	  width: 100%;
-	  height: 100%;
+	  width: 50px;
+	  height: 50px;
  }
  
 </style>
@@ -137,7 +155,7 @@ $colors = ['#7B0100',
 
 					 <div class="grid-cell">
 						  
-						  <button type="button" class="btn btn-block" style="background: <?= $color ?>;" onclick="color ('<?= $color ?>')"></button>
+						  <button type="button" class="btn btn-block button-edit-color" style="background: <?= $color ?>;" onclick="color ('<?= $color ?>')"></button>
 						  
 					 </div>
 					 
