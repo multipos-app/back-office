@@ -63,12 +63,14 @@ $actions = [null => __ ('Actions'),
 		  $height = null;
 		  $width = null;
 		  $name = '';
+		  $style = '';
 		  
 		  if (count ($menus ['horizontal_menus'])) {
 				
 				$height = intVal (count ($menus ['horizontal_menus'] [0] ['buttons']) / $menus ['horizontal_menus'] [0] ['width']);
 				$width = intVal ($menus ['horizontal_menus'] [0] ['width']);
 				$name = $menus ['horizontal_menus'] [0] ['name'];
+				$style = $menus ['horizontal_menus'] [0] ['style'];
 		  }
 		  
 		  $this->debug ("width... $height $width");
@@ -134,7 +136,7 @@ $actions = [null => __ ('Actions'),
 																 ['id' => 'style',
 																  'onchange' => 'changeStyle (\'' . $container . '\')',
 																  'class' => 'custom-dropdown',
-																  'value' => 'solid',
+																  'value' => $style,
 																  'label' => false]);
 								?>
 								
