@@ -68,8 +68,6 @@ class SalesController extends PeriodController {
 
         $this->getPeriods ($startDate, $this->periodType);
         $len = count ($this->periods);
-
-		  $this->debug ($this->periods);
         
         // initialize report rows
 		  
