@@ -136,13 +136,15 @@ $logo = 'multi<span class="logo-red-small">POS</span>';
 										  $businessUnits [$index] = $bu ['business_name'];
 										  $index ++;
 									 }
-									 
-									 echo $this->Form->select ('bu_select',
+
+									 echo '<div style="margin-left:15px;margin-right:15px">' . 
+											$this->Form->select ('bu_select',
 																		$businessUnits,
 																		['id' => 'bu_select',
 																		 'class' => 'custom-dropdown',
 																		 'onchange' => 'buSelect ()',
-																		 'label' => false]);
+																		 'label' => false]) .
+											'</div>';
 									 
 								}
 								?>
@@ -160,9 +162,7 @@ $logo = 'multi<span class="logo-red-small">POS</span>';
 									 </ul>
 									 
 								</nav>
-								
-								<div id="locations"/>
-																
+																								
 						  </div>
  
 					 </header> <!-- End Header -->
