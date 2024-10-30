@@ -185,7 +185,7 @@ return [
      */
     'Error' => [
         'errorLevel' => E_ALL,
-        'skipLog' => [],
+        'skipLog' => ['Cake\Http\Exception\MissingControllerException'],
         'log' => true,
         'trace' => true,
         'ignoredDeprecationPaths' => [],
