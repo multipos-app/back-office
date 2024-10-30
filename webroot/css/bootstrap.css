@@ -55,8 +55,9 @@
   /* --bs-body-font-family: var(--bs-font-sans-serif); */
   /* --bs-body-font-family: var("Open sans", sans-serif); */
   /* --bs-body-font-family: var("Square Sans Text VF","Square Sans Text",helvetica,arial,sans-serif); */
-  --bs-body-font-family: var(Lato,sans-serif);
-  --bs-body-font-size: .8rem;
+  /* --bs-body-font-family: var(Lato,sans-serif); */
+  --bs-body-font-family: Graphik Web, arial, helvetica, verdana, sans-serif;
+  --bs-body-font-size: 1.2rem;
   --bs-body-nav-font-size: 14pxrem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
@@ -84,14 +85,15 @@ body {
   /* font-family: "Gordita","Arial",sans-serif; */
   /* font-family: "Graphik Web",sans-serif; */
   /* font-family: "Square Sans Text VF","Square Sans Text",helvetica,arial,sans-serif; */
-  font-family: Lato,sans-serif;
+  /* font-family: Lato,sans-serif; */
+  font-family: Work Sans,sans-serif;
   font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
   background-color: var(--bs-body-bg);
-  -webkit-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 120%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
