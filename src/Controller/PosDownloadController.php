@@ -112,11 +112,17 @@ class PosDownloadController extends PosApiController {
 
 													 $item [$assoc] = [];
 												}
-												
+
+												$where = ['item_id' => $item ['id']];
+												if ($table == 'item_prices') {
+
+													 $where ['business_unit_id'] = $buID;
+												}
+													 
 												$query = TableRegistry::get ($table)
 																			 ->find ()
-																			 ->where (['item_id' => $item ['id'],
-																						  'business_unit_id' => $buID]);												
+																			 ->where ($where);
+												
 												foreach ($query as $t) {
 
 													 $item [$assoc] [] = $t->toArray ();
