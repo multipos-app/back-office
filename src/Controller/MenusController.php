@@ -62,7 +62,7 @@ class MenusController extends PosAppController {
 
 						  $button ["text"] = "";
 						  $button ["class"] = $button ['class'];
-						  $button ["color"] =  "#999";
+						  $button ["color"] =  "#999999";
 						  $button ["params"] = ["sku" =>  ""];
 					 }
 					 
@@ -78,7 +78,7 @@ class MenusController extends PosAppController {
 					 $template = 'navigate';
 					 $button ["text"] = "";
 					 $button ["class"] = "Navigate";
-					 $button ["color"] =  "#999";
+					 $button ["color"] =  "#999999";
 					 break;
 
 				case 'Null':
@@ -103,7 +103,7 @@ class MenusController extends PosAppController {
 					 }
 					 
 					 $button ["text"] = "";
-					 $button ["color"] =  "#999";
+					 $button ["color"] =  "#999999";
 					 $template = 'empty';
 					 $button ['controls'] = $controls;
 					 break;
@@ -113,7 +113,7 @@ class MenusController extends PosAppController {
 					 $template = 'no_params';
 					 $button ["text"] = "";
 					 $button ["class"] = $button ['class'];
-					 $button ["color"] =  "#999";
+					 $button ["color"] =  "#999999";
 					 break;
         }
 		  
@@ -131,8 +131,6 @@ class MenusController extends PosAppController {
 		  $response = ['status' => 1];
 		  
 		  if (($id > 0) && !empty ($this->request->getData ())) {
-
-				$this->debug ($this->request->getData ());
 				
 				$config = json_encode ($this->request->getData () ['config']);
 
