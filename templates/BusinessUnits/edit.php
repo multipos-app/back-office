@@ -31,6 +31,11 @@
  }
 </style>
 
+<?php
+$this->debug ("bu edit...");
+$this->debug ($bu);
+?>
+
 <script>
 
  let primaryBusiness = <?php echo json_encode ($primaryBusiness, true); ?>;
@@ -63,8 +68,8 @@
 
 <form id="bu_edit" name="bu_edit">
 
-	 <input type="hidden" name="business_unit_id" id="business_unit_id" value="<?= $primaryBusiness ['id'] ?>">
-	 <input type="hidden" name="business_type" id="business_type" value="2">
+	 <input type="hidden" name="id" id="id" value="<?= $bu ['id'] ?>"/>
+	 <input type="hidden" name="business_type" id="business_type" value="2"/>
 
 	 <div class="form-grid bu-grid">
 
@@ -177,7 +182,7 @@ $('#bu_update').on ('click', function (e){
 				  data: $('#bu_edit').serialize (),
 				  success: function (data) {
 
-						window.close ();
+						window.close ()
 				  },
 				  fail: function () {
 
