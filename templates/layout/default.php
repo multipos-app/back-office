@@ -55,16 +55,6 @@ $logo = 'multi<span class="logo-red-small">POS</span>';
 
 </script>
 
-<style>
- 
- .main-grid {
-	  
- 	  display: grid;
- 	  grid-template-columns: 1fr 5fr;
-     grid-column-gap: 0;
- }
-
-</style>
 
 <html lang="en">
 
@@ -99,95 +89,54 @@ $logo = 'multi<span class="logo-red-small">POS</span>';
 		  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.4/css/tether.min.css'>
 		  <link rel='stylesheet' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.css'>
 		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
-		  
+
 		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> 
 		  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 		  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+		  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+
 
 		  <?= $this->Html->script ('typeahead.js') ?>
 		  <?= $this->Html->script ('tools.js') ?>
 		  
-
 	 </head>
 
 	 <body>
-
-		  <div class="main-grid">
-
-				<div>
-					 <i class="bi bi-list mobile-nav-toggle d-xl-none"></i>
-					 
-					 <header id="header">
+		  
+		  <div class="container">
+				<div class="row">
+					 <div id="sidebar" class="sidebar">
 						  
-						  <div class="d-flex flex-column" style="font-family: 'Carter One' cursive;">
-
-								<div class="logo logo-small">
-									 <?= $logo?>
-								</div>
-																	 
-								<?php
+						  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="fa fa-circle-x"></i></a>
+						  
+						  <ul class="mainmenu">
 								
-								if (count ($merchant ['business_units']) > 2) {
-									 
-									 $businessUnits = [];
-									 $index = 0;
-									 foreach ($merchant ['business_units'] as $bu) {
-										  
-										  $businessUnits [$index] = $bu ['business_name'];
-										  $index ++;
-									 }
-
-									 echo '<div style="margin-left:15px;margin-right:15px">' . 
-											$this->Form->select ('bu_select',
-																		$businessUnits,
-																		['id' => 'bu_select',
-																		 'class' => 'custom-dropdown',
-																		 'onchange' => 'buSelect ()',
-																		 'label' => false]) .
-											'</div>';
-									 
-								}
-								?>
-	
-								<nav id="navbar" class="navbar nav-inverse" id="sidebar-wrapper" role="navigation">
-									 
-									 <ul id="main_nav" class="nav sidebar-nav">
-
-										  <?php
-										  echo render ($merchant ['menus'], $this);
-										  ?>
-
-										  <li><a href="/" class="nav-link"><i class="fa fa-right-from-bracket fa-small"></i><span><?= __ ('Logout') ?></span></a></li>
-
-									 </ul>
-									 
-								</nav>
-																								
-						  </div>
- 
-					 </header> <!-- End Header -->
-				</div>
-				
-				<div>
-					 <section id="main" class="main">
-						  
-						  <!-- <div id="notifications" class="notifications">
-								 <i id="alerts" class="fa fa-bell fa-med"></i>
-								 <i id="messages" class="fa fa-messages fa-med"></i>
-								 </div> -->
-						  <div id="main_content" class="main-content"></div>
-						  
-					 </section>
-				</div>
-		  </div>
-
-		  <footer id="footer">
-				<div class="container">
-					 <div class="copyright">
-						  &copy; Copyright 2023 <strong><span>VideoRegister LLC</span></strong>
+								<?php echo render ($merchant ['menus'], $this) ?>
+								<li><a href="/"><i class="fa fa-right-from-bracket fa-small"></i><span><?= __ ('Logout') ?></span></a></li>
+								
+						  </ul>
 					 </div>
 				</div>
-		  </footer>
+		  </div>
+		  
+		  <div id="main">
+
+				<div class="top-grid">
+					 <div id="nav_button">
+						  <button class="openbtn" onclick="openNav()"><i class="fa fa-bars"></i></button>
+					 </div>
+					 <div class="grid-cell grid-cell-right">
+						  <span class="logo logo-small">
+								multi<span class="logo-red-small">POS</span>
+						  </span>
+					 </br>
+					 <span class="logo-tiny">Back Office</span>
+					 </div>
+				</div>
+				
+				<div id="main_content" class="main-content"></div>
+
+		  </div>
 		  
 		  <?php
 		  
@@ -224,15 +173,15 @@ function render ($menus, $view) {
 					 $icon = $menu ['icon'];
 					 $text = __ ($menu ['text']);
 					 
-					 $html .= "<li><a onclick=\"controller ('$controller', false);\" class=\"nav-link\"><i class=\"fa $icon fa-small\"></i><span>$text</span></a></li>";
+					 $html .= "<li><a onclick=\"controller ('$controller', false);\"><i class=\"fa $icon fa-small\"></i><span>$text</span></a></li>";
 					 break;
 
 				case 'submenu':
 
 					 $icon = $menu ['icon'];
-					 $html .= '<li class="dropdown">' .
-								 '<a href="#works" class="dropdown-toggle active" data-toggle="dropdown"><i class="fa ' . $icon . ' fa-small"></i>' . $menu ['text']. '<span class="caret"></span></a>'.
-								 '<ul class="dropdown-menu" role="menu">' .
+					 $html .= '<li>' .
+								 '<a><i class="fa ' . $icon . ' fa-small"></i>' . $menu ['text']. '&nbsp;<i class="fa fa-caret-down fa-small"></i></a>'.
+								 '<ul class="submenu">' .
 								 render ($menu ['submenu'], $view) .
 								 '</ul>' .
 								 '</li>';
@@ -243,3 +192,23 @@ function render ($menus, $view) {
 	 return $html;
 }
 ?>
+
+<script>
+ 
+ function openNav() {
+	  
+	  document.getElementById("sidebar").style.width = "250px";
+	  document.getElementById("main").style.marginLeft = "250px";
+	  $('#nav_button').html ('')
+	  $('.dropdown-menu').show ()
+ }
+ 
+ function closeNav() {
+	  
+	  document.getElementById("sidebar").style.width = "0";
+	  document.getElementById("main").style.marginLeft= "0";
+	  $('#nav_button').html ('<button class="openbtn" onclick="openNav()">☰</button>')
+ }
+ 
+</script>
+

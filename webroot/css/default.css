@@ -56,7 +56,7 @@
 	  font-optical-sizing: auto;
 	  font-weight: 600 !important;
 	  font-style: normal;
-	  width: 300px !important;
+	  width: 200px !important;
 	  margin-top: 15px;
 	  text-align: center;
 	  color: #111;
@@ -78,17 +78,29 @@
 
  	  font-family: "Caveat", cursive;
 	  font-optical-sizing: auto;
-	  font-size: 42px;
+	  font-size: 62px;
 	  font-weight: 600 !important;
 	  font-style: normal;
-	  width: 300px !important;
-	  margin-top: 15px;
+	  margin-top: 10px;
 	  text-align: center;
 	  color: #111;
 	  text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
  }
  
- .logo-red-small {
+  .logo-tiny {
+
+ 	  font-family: "Caveat", cursive;
+	  font-optical-sizing: auto;
+	  font-size: 24px;
+	  font-weight: 600 !important;
+	  font-style: normal;
+	  margin-top: 10px;
+	  text-align: center;
+	  color: #111;
+	  text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
+ }
+
+  .logo-red-small {
 	  
 	  color: #eb1010;
 	  font-size: 50px;
