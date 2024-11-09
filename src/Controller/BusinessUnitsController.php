@@ -42,9 +42,6 @@ class BusinessUnitsController extends PosAppController {
         
         if (!empty ($this->request->getData ())) {
 
-            $this->debug ('bu name... ' . $this->request->getData () ['business_name']);
-            
-            $this->debug ($this->request->getData ());
 				
             $businessUnitsTable
                 ->updateAll (['business_name' => strtoupper ($this->request->getData () ['business_name']),
@@ -92,34 +89,32 @@ class BusinessUnitsController extends PosAppController {
                          ->find ()
                          ->where (['business_type = 1'])
                          ->first ();
-
-        if (!empty ($this->request->getData ())) {
-            
-            if ($id == 0) {
-                
-                $bu = $businessUnits
-                    ->newEntity ($this->request->getData ());
-                $businessUnits
-                    ->save ($bu);
-            }
-            else {
-                
-                $businessUnitsTable
-                 ->updateAll (['business_name' => strtoupper ($this->request->getData () ['business_name']),
-                               'email' => strtoupper ($this->request->getData () ['email']),
-                               'addr_1' => strtoupper ($this->request->getData () ['addr_1']),
-                               'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
-                               'city' => strtoupper ($this->request->getData () ['city']),
-                               'state' => $this->request->getData () ['state'],
-                               'postal_code' => $this->request->getData () ['postal_code'],
-                               'phone_1' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_1']),
-                               'phone_2' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_2']),
-                               'timezone' => $this->request->getData () ['timezone']],
-                              ['business_type' => 1]);
-            }
-        }
 		  
-        $bu = ['business_name' => '',
+        if (!empty ($this->request->getData ())) {
+
+				if ($this->request->getData () ['business_name']) {
+					 
+					 $bu = $businessUnits->newEntity ($this->request->getData ());
+					 $businessUnits->save ($bu);
+				}
+				else {
+					 
+					 $businessUnitsTable->updateAll (['business_name' => strtoupper ($this->request->getData () ['business_name']),
+																 'email' => $this->request->getData () ['email'],
+																 'addr_1' => strtoupper ($this->request->getData () ['addr_1']),
+																 'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
+																 'city' => strtoupper ($this->request->getData () ['city']),
+																 'state' => $this->request->getData () ['state'],
+																 'postal_code' => $this->request->getData () ['postal_code'],
+																 'phone_1' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_1']),
+																 'phone_2' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_2']),
+																 'timezone' => $this->request->getData () ['timezone']],
+																['business_type' => 1]);
+				}
+		  }
+		  
+        $bu = ['id' => $id,
+					'business_name' => '',
 					'email' => '',
 					'addr_1' => '',
 					'addr_2' => '',
@@ -154,8 +149,6 @@ class BusinessUnitsController extends PosAppController {
                       ->find ()
                       ->where (['id' => $buID])
                       ->first ();
-
-        $this->debug ($this->request->getData ());
         
         if (!empty ($this->request->getData ())) {
 
@@ -204,8 +197,6 @@ class BusinessUnitsController extends PosAppController {
         // $batchEntryTable = TableRegistry::get ('BatchEntries');
 
         if (!empty ($this->request->getData ())) {
-
-            $this->debug ($this->request->getData ());
             
             $pos = [];
             $method = false;
@@ -235,9 +226,7 @@ class BusinessUnitsController extends PosAppController {
                 
                 $token = $posUnit ['token'];
                 $message = '[]';
-                
-                $this->debug ('pos... ' . $p);
-                
+                                
                 switch ($method) {
 								
 						  case 'z':
@@ -357,8 +346,6 @@ class BusinessUnitsController extends PosAppController {
         
         if (!empty ($this->request->getData ())) {
 
-            $this->debug ($this->request->getData ());
-
             $posUnit = $pos
                      ->find ()
                      ->where (['id' => $this->request->getData () ['pos_id']])
@@ -375,21 +362,11 @@ class BusinessUnitsController extends PosAppController {
 
     private function queueMessage ($posUnit, $posMessage) {
 
-        $this->debug ('queue message... ');
-        $this->debug ($posUnit);
-
         $posMessages = TableRegistry::get ('PosMessages');
         $batchEntryTable = TableRegistry::get ('BatchEntries');
 
         $posMessage = $posMessages->newEntity ($posMessage);
         $posMessage = $posMessages->save ($posMessage);
-
-        $this->debug (['business_unit_id' => $posUnit ['business_unit_id'],
-                       'pos_unit_id' => $posUnit ['id'],
-                       'update_table' => 'pos_messages',
-                       'update_id' =>  $posMessage ['id'],
-                       'update_action' => 0,
-                       'execution_time' => time ()]);
         
         $batchEntry = $batchEntryTable->newEntity (['business_unit_id' => $posUnit ['business_unit_id'],
 																	 'pos_unit_id' => $posUnit ['id'],
@@ -406,10 +383,7 @@ class BusinessUnitsController extends PosAppController {
             $firebase = new  \App\Controller\Firebase ($this);
             
             $result = $firebase->send ($posUnit ['token'], ['method' => 'update']);
-
-            $this->debug ('send message... ');
-            $this->debug ($result);
-        }
+       }
     }
 
     public function batches () {
@@ -449,7 +423,6 @@ class BusinessUnitsController extends PosAppController {
         if (!empty ($this->request->getData ())) {
             
 				$this->loadComponent ('Batch');
-				$this->debug ($this->request->getData ());
             
             $submit = null;
             if (strlen ($this->request->getData () ['submit_date']) > 0) {
@@ -515,32 +488,13 @@ class BusinessUnitsController extends PosAppController {
     }
 
     public function apps () {
-        
-        // $dir = new Folder('/multipos/apps');
-        // $files = $dir->find('.*\.apk');
-
-        // foreach ($files as $file) {
-
-        //     $this->debug ($file);
-        // }
-        
+               
         $appsDir = '/multipos/www/d/webroot/apps';
-        $this->debug ("apps dir... $appsDir");
 
         foreach (scandir ($appsDir, SCANDIR_SORT_DESCENDING) as $file) {
             
             $fname = getcwd () . '/apps/' . $file;
-            $this->debug ("apps... $appsDir $file $fname");
-            
-            // $tmp = json_decode ($config ['config'], true);
-            // $json = json_encode ($tmp, JSON_PRETTY_PRINT);    
-
-            // file_put_contents ($fname , $json);
         }
-
-        // $this->response->file ($fname, ['download' => true,
-        //                                 'name' => 'pos-config-' . $config ['id'] . '.json']);
-        // return $this->response;
 
         $apps = '';
         return ($this->response (__ ('POS'),
@@ -612,9 +566,6 @@ class BusinessUnitsController extends PosAppController {
 
     public function updateReceipt ($buID) {
 
-		  $this->debug ("update receipt... " . $buID);
-        $this->debug ($this->request->getData ());
-
 		  $receipts = ['receipt_header' => [],
 							'receipt_footer' => []];
 		  
@@ -625,8 +576,6 @@ class BusinessUnitsController extends PosAppController {
 					 $receipts [$section] = $this->request->getData () [$section];
 				}
 		  }
-
-		  $this->debug ($receipts);
 		  
 		  $businessUnitsTable = TableRegistry::get ('BusinessUnits');
 		  $bu = $businessUnitsTable->find ()
