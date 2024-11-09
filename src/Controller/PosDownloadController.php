@@ -50,8 +50,11 @@ class PosDownloadController extends PosApiController {
                        'pos_messages' => 'PosMessages'];
 
     public function index () {
-        
-        $this->debug ($this->request->getData ());
+
+		  $post = $this->request->getData ();
+		  $post ['remote'] = $_SERVER ['HTTP_X_FORWARDED_FOR'];
+        $this->debug ($post);
+		  
 		  $buID = $this->request->getData () ['business_unit_id'];
         
         if (!isset ($this->request->getData ()  ['merchant_id'])) {
@@ -184,7 +187,7 @@ class PosDownloadController extends PosApiController {
 													 break;
 													 
 												case 'pos_configs':
-
+													 
 													 if ($entity ['id'] != $this->request->getData () ['pos_config_id']) {
 														  
 														  $update = null;
