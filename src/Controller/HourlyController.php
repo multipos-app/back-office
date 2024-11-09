@@ -106,26 +106,32 @@ class HourlyController extends PeriodController {
 				$date = date ('Y-m-d', $period ['date']);
 
 				$t = strtotime ($period ['start']);
-				$t = $period ['date'];
+				// $t = $period ['date'];
+
+				$this->debug ("period start... {$period ['start']}");
 				
 				for ($index = 0, $hour = 0; $hour < 24; $hour++, $index++) {
 
-					 $start = $this->isDST () ?  $t + ($hour * 60 * 60) : $t + (($hour - 1) * 60 * 60);
+					 /* $start = $this->isDST () ?  $t + ($hour * 60 * 60) : $t + (($hour - 1) * 60 * 60);
+						 $start = $t + ($hour * 60 * 60);*/
 					 
-					 $start = $t + ($hour * 60 * 60);
-					 
-					 $date = date ('Y-m-d H:00:00', $start);
+					 $start = $t + (($hour + $this->tzOffset ($this->tz ())) * 60 * 60);			 
+					 $date = date ('Y-m-d H:00:00', strtotime ($period ['start']) + (ONE_HOUR * $index));
+
+					 $this->debug ("hourly start... $date $hour");
 					 
 					 $conditions = ['summary_type = 0',
 										 'business_unit_id = ' . $this->merchant ['bu_id'],
 										 "start_time = '$date'"];
+					 
+					 // $this->debug ($conditions);
 
 					 $query = TableRegistry::get ('SalesTotals')
 												  ->find ()
 												  ->where ($conditions)
 												  ->limit (24);
 					 
-					 $amount = 0;                
+					 $amount = 0;
 					 foreach ($query as $total) {
 						  
 						  switch ($total ['sales_key']) {
