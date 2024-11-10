@@ -179,7 +179,7 @@ function render ($menus, $view) {
 				case 'submenu':
 
 					 $icon = $menu ['icon'];
-					 $html .= '<li>' .
+					 $html .= '<li class="expand">' .
 								 '<a><i class="fa ' . $icon . ' fa-small"></i>' . $menu ['text']. '&nbsp;<i class="fa fa-caret-down fa-small"></i></a>'.
 								 '<ul class="submenu">' .
 								 render ($menu ['submenu'], $view) .
@@ -194,7 +194,14 @@ function render ($menus, $view) {
 ?>
 
 <script>
- 
+
+ $('.submenu').toggle ();
+
+ $('.expand').click (function (e) {
+	  
+	  $('.submenu').toggle ();
+ });
+
  function openNav() {
 	  
 	  document.getElementById("sidebar").style.width = "250px";
