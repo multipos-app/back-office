@@ -28,7 +28,6 @@ class BatchComponent extends Component {
         $this->updateCount = 0;
 		  
         $models = [['model' => 'BusinessUnits'],
-                   ['model' => 'PosConfigs'],
                    ['model' => 'TaxGroups',
                     'contain' => ['Taxes']],
                    ['model' => 'Customers'],
@@ -43,7 +42,8 @@ class BatchComponent extends Component {
                    ['model' => 'Currencies',
                     'contain' => ['CurrencyDenoms']],
                    ['model' => 'Addons',
-                    'contain' => ['AddonLinks']]];
+                    'contain' => ['AddonLinks']],
+                   ['model' => 'PosConfigs']];
 
         switch ($batchType) {
 
@@ -53,14 +53,11 @@ class BatchComponent extends Component {
 									['model' => 'Employees'],
 									['model' => 'Profiles',
 									 'contain'=> ['ProfilePermissions']]];
-                // ['model' => 'Currencies',
-                //  'contain' => ['CurrencyDenoms']]];
-					 break;
+ 					 break;
 
 				case 3:
                 
 					 $models = [['model' => 'BusinessUnits'],
-									['model' => 'PosConfigs'],
 									['model' => 'TaxGroups',
 									 'contain' => ['Taxes']],
 									['model' => 'Customers'],
@@ -72,8 +69,9 @@ class BatchComponent extends Component {
 									['model' => 'Suppliers'],
 									['model' => 'Tenders'],
 									['model' => 'Currencies',
-									 'contain' => ['CurrencyDenoms']]];
-					 
+									 'contain' => ['CurrencyDenoms']],
+					 				['model' => 'PosConfigs']];
+
 					 break;
         }
 
