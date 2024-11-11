@@ -196,13 +196,14 @@ function render ($menus, $view) {
 <script>
 
  $('.submenu').toggle ();
-
+ openNav ();
+ 
  $('.expand').click (function (e) {
 	  
 	  $('.submenu').toggle ();
  });
 
- function openNav() {
+ function openNav () {
 	  
 	  document.getElementById("sidebar").style.width = "250px";
 	  document.getElementById("main").style.marginLeft = "250px";
@@ -210,7 +211,7 @@ function render ($menus, $view) {
 	  $('.dropdown-menu').show ()
  }
  
- function closeNav() {
+ function closeNav () {
 	  
 	  document.getElementById("sidebar").style.width = "0";
 	  document.getElementById("main").style.marginLeft= "0";
