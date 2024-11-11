@@ -107,8 +107,6 @@ class HourlyController extends PeriodController {
 
 				$t = strtotime ($period ['start']);
 				// $t = $period ['date'];
-
-				$this->debug ("period start... {$period ['start']}");
 				
 				for ($index = 0, $hour = 0; $hour < 24; $hour++, $index++) {
 
@@ -117,15 +115,11 @@ class HourlyController extends PeriodController {
 					 
 					 $start = $t + (($hour + $this->tzOffset ($this->tz ())) * 60 * 60);			 
 					 $date = date ('Y-m-d H:00:00', strtotime ($period ['start']) + (ONE_HOUR * $index));
-
-					 $this->debug ("hourly start... $date $hour");
 					 
 					 $conditions = ['summary_type = 0',
 										 'business_unit_id = ' . $this->merchant ['bu_id'],
 										 "start_time = '$date'"];
 					 
-					 // $this->debug ($conditions);
-
 					 $query = TableRegistry::get ('SalesTotals')
 												  ->find ()
 												  ->where ($conditions)
