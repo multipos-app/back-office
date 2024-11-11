@@ -124,7 +124,7 @@ class ItemsController extends PosAppController {
         
         $pricingOptions = [null => __ ('Add Item'),
 									'standard_pricing' => 'Standard pricing, one price per item',
-									'size_pricing' => 'Price by item size, small, medium, large...',
+									'size_pricing' => 'Variant pricing',
 									'open_pricing' => 'Open/enter price',
 									'metric_pricing' => 'Price by volume/weight'];
 
