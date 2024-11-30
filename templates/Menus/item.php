@@ -1,62 +1,141 @@
 
-<?php include ('button_header.php'); ?>
+<?php
 
-<div class="form-grid button-edit-grid">
+/**
+ *
+ * prompt for add item options
+ *
+ **/
 
-	 <div class="form-cell form-desc-cell"><?= __ ('SKU') ?>/<?= __ ('Description') ?></div>
+include ('button_header.php');
 
-	 <?php
+$this->debug ('menus item...');
 
-	 $this->debug ($button);
+?>
+
+<div class="form-grid">
+
+	 <div id="add_item_container" class="form-grid button-edit-grid">
+		  
+		  <div class="grid-cell grid-span-all">
+				
+				<?php
+				
+				echo $this->Form->select ('add_item',
+												  $pricingOptions,
+												  ['id' => 'add_item',
+													'class' => 'custom-dropdown',
+													'label' => false]);
+				?>
+		  </div>
+	 </div>
+</div>
+
+<div class="form-submit-grid">
 	 
-	 $desc = '';
-	 if (isset ($button ['params'] ['sku']) && (strlen ($button ['params'] ['sku']) > 0)) {
-
-		  $desc = $button ['params'] ['sku'] . '/' . $button ['text'];
-	 }
+	 <div>
+		  <button type="button" class="btn btn-success" onclick="itemUpdate ()"><?= __ ('Save') ?></button>
+	 </div>
 	 
-	 echo $this->input ('fa-barcode',
-							  ['id' =>'sku',
-								'name' => 'button[sku]',
-								'value' => $desc,
-								'class' =>'form-control',
-								'placeholder' => __ ('SKU')]);
-	 ?>
+	 <div>
+		  <button type="button" class="btn btn-warning" onclick="buttonClose ()"><?= __ ('Cancel') ?></button>
+	 </div>
 	 
 </div>
 
-<?php include ('button_footer.php'); ?>
-
 <script>
-	 
-$('#sku').typeahead ({
-	 
-    source: function (query, result) {
-		  
-		  $.ajax ({
-            url: "/search/items/sku_and_desc/" + query,
-            type: "GET",
-            success: function (data) {
 
-					 data = JSON.parse (data);
-					 
-					 result ($.map (data, function (item) {
-						  
-						  return item
-                }));
-            }
-        });
-    },
-	 updater: function (item) {		  
-		  
- 		  $('#button_desc').val (item.item.item_desc);
- 		  $('#button_text').html ($('#button_desc').val ().toUpperCase ());
- 		  $('#' + container + '_' + menu + '_' + pos).html ($('#button_desc').val ().toUpperCase ());	  
-
-  		  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].class = 'Item';
-  		  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].text = item.item.item_desc.toUpperCase ();
- 		  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {sku: item.item.sku};
-	 }
- });
+ var existingItem = false;
  
+ $('#add_item').change (function () {
+
+ 	  console.log ('add item... ' + existingItem);
+	  
+	  if (!existingItem) {
+			
+ 			if ($('#add_item').val ()) {
+				 
+				 console.log ('add item...');
+ 				 console.log (b);
+ 				 
+ 				 $.ajax ({
+ 					  url: "/items/edit/0/" + $('#add_item').val () + '/0',
+ 					  type: "GET",
+ 					  success: function (data) {
+ 							
+ 							data = JSON.parse (data);
+ 							
+ 							console.log (data);
+ 							$('#add_item_container').html (data.html);	 
+ 					  }
+ 				 });
+			}
+	  }
+ });
+
+ function itemUpdate () {
+
+ 	  console.log ('item update... ' + existingItem);
+
+	  if (!existingItem) {
+
+			var item = $('#item_edit');
+			var data = getFormData (item);
+			
+			console.log ('create item...');
+			console.log (b);
+			console.log (data);
+
+			data ['button'] = b;
+
+			/* var form = document.querySelector ('form');
+				if (!form.checkValidity()) {
+
+				form.reportValidity ();
+				return;
+				}
+			 */
+			
+			let url = '/items/item/0';
+
+			$.ajax ({type: "POST",
+						url: url,
+						data: data,
+						success: function (data) {
+							 
+							 data = JSON.parse (data);
+							 
+							 console.log ('menu item add...');
+							 console.log (data);
+
+							 var button = data.button;
+							 posConfig.config.pos_menus [button.container] ['horizontal_menus'] [button.menu] ['buttons'] [button.pos] = button;
+							 render (button.container);
+						},
+						fail: function () {
+
+							 console.log ('fail...');
+						},
+						always: function () {
+
+							 console.log ('always...');
+						}
+				 
+			});
+	  }
+ }
+
+ function getFormData ($form){
+	  
+     var unindexed_array = $form.serializeArray ();
+     var indexed_array = {};
+
+     $.map (unindexed_array, function (n, i) {
+			
+			indexed_array[n['name']] = n['value'];
+     });
+
+     return indexed_array;
+ }
+
 </script>

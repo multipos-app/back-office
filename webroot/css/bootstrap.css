@@ -373,7 +373,7 @@ select {
   word-wrap: normal;
 }
 select:disabled {
-  opacity: 1;
+	 opacity: 1;
 }
 
 [list]::-webkit-calendar-picker-indicator {

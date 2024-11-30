@@ -1,3 +1,9 @@
+<?php
+
+$this->debug ('menu button footer...');
+
+?>
+
 <div class="form-submit-grid">
 	 
 	 <div>
@@ -5,20 +11,24 @@
 	 </div>
 	 
 	 <div>
-		  <button type="button" class="btn btn-warning" onclick="del ()"><?= __ ('Clear') ?></button>
+		  <button type="button" class="btn btn-warning" onclick="buttonClear ()"><?= __ ('Clear Button') ?></button>
 	 </div>
 	 
 </div>
 
 <script>
+
+ /**
+  *
+  * clear a button
+  *
+  */
  
- function del () {
+ function buttonClear () {
 	  
- 	  console.log ('del... ' + container + ' ' + menu + ' ' + pos);
-	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null", "color": "#fff"};
+	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null", "color": "#999"};
 	  render (container);
 	  dirty (true);
- 	  $('#button_container').toggleClass ('on');
-}
+ }
  
 </script>

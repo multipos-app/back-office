@@ -94,7 +94,7 @@
 .form-submit-grid {
 
     display: grid;
-    width: 25%;
+    width: 100%;
     grid-template-rows: 1fr;
     grid-template-columns: 1fr 1fr;
  	 grid-column-gap: 15px;

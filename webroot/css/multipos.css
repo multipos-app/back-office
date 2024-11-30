@@ -9,22 +9,15 @@ select {
 	 flex: 1;
 	 padding: 0;
 	 color: #fff;
-	 background-color: #aaa;  // var(--darkgray);
+	 background-color: var(--darkgray);
 	 background-image: none;
 	 border-radius: 0.25rem !important;
 	 cursor: pointer;
 }
 
 select.custom-dropdown {
-	 -webkit-appearance: none;  /*REMOVES DEFAULT CHROME & SAFARI STYLE*/
-	 -moz-appearance: none;  /*REMOVES DEFAULT FIREFOX STYLE*/
-	 /* border: 0 !important;  /\*REMOVES BORDER*\/ */
-	 /* color: #fff; */
 	 color: #000;
-	 /* -webkit-border-radius: 3px; */
-	 /* border-radius: 5px; */
 	 font-size: 16px;
-	 /* padding: 3px 3px 3px 10px; */
 	 margin-top: 0px;
 	 padding-left: 5px;
 	 width: 100%;
@@ -32,7 +25,6 @@ select.custom-dropdown {
 	 height: 38px;
 	 border: none;
 	 border-radius: .25em;
-	 /* background: #999 url(img/dropdown.png) no-repeat right center; */
 	 background: #ddd url(img/dropdown.png) no-repeat right center;
 	 background-size: 40px 37px; /*TO ACCOUNT FOR @2X IMAGE FOR RETINA */
 }

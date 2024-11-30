@@ -992,43 +992,16 @@ class PosTicketsController extends PosApiController {
         }
     }
 
-    private function message ($buID, $msg) {
-
-        $message = ['business_unit_id' => $buID,
-                    'pos_unit_id' => 0,
-                    'method' =>'message',
-                    'message' => json_encode (['header' => __ ('Incoming Message'),
-                                               'prority' => 0,
-                                               'body' => $msg])];
-        
-        $posMessages = TableRegistry::get ('PosMessages');
-        $batchEntriesTable = TableRegistry::get ('BatchEntries');
-
-        $posMessage = $posMessages->newEntity ($message);
-        $posMessage = $posMessages->save ($posMessage);
-
-        $m = ['business_unit_id' => $buID,
-              'pos_unit_id' => 0,
-              'update_table' => 'pos_messages',
-              'update_id' =>  $posMessage ['id'],
-              'update_action' => 0,
-              'execution_time' => time ()];
-        
-        $batchEntry = $batchEntriesTable->newEntity ($m);
-        $batchEntriesTable->save ($batchEntry);
-    }
-
-}
-
-function guid () {
+	 private function guid () {
 	 
-	 if (function_exists ('com_create_guid') === true) {
+		  if (function_exists ('com_create_guid') === true) {
+				
+				return trim (com_create_guid (), '{}');
+		  }
 		  
-		  return trim (com_create_guid (), '{}');
+		  $data = openssl_random_pseudo_bytes (16);
+		  $data[6] = chr (ord ($data[6]) & 0x0f | 0x40); // set version to 0100
+		  $data[8] = chr (ord ($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+		  return vsprintf ('%s%s-%s-%s-%s-%s%s%s', str_split (bin2hex ($data), 4));
 	 }
-	 
-	 $data = openssl_random_pseudo_bytes (16);
-	 $data[6] = chr (ord ($data[6]) & 0x0f | 0x40); // set version to 0100
-	 $data[8] = chr (ord ($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
-	 return vsprintf ('%s%s-%s-%s-%s-%s%s%s', str_split (bin2hex ($data), 4));
 }

@@ -205,11 +205,15 @@ function button (c, m, p) {
 	 data ['container'] = c;
 	 data ['menu'] = m;
 	 data ['pos'] = p;
+	 data ['exists'] = true;
 	 	 
 	 if (!$('#button_container').hasClass ('on')) {
 	  
 		  $('#button_container').toggleClass ('on');
 	 }
+
+	 console.log ('menus index button...');
+	 console.log (data);
 	 
 	 $.ajax ({type: "POST",
 				 url: url,
@@ -223,6 +227,18 @@ function button (c, m, p) {
 	 
 	 dirty (true);
 }
+
+/**
+ *
+ * close the button edit dialog
+ *
+ */
+
+ function buttonClose () {
+	  
+	  $('#button_container').html ('');
+	  $('#button_container').toggleClass ('on');
+ }
 
 function changeStyle (c) {
 	 

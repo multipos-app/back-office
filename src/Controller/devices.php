@@ -92,5 +92,7 @@ $devices = [
 					  ['name' => 'pax',
 						'desc' => __ ('PAX/EPX'),
 						'class' => 'cloud.multipos.pos.devices.PaxPayment',
-						'params' => []]]]];
+						'params' => []]]
+		  ]
+];
 ?>

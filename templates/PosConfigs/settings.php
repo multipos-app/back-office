@@ -1,6 +1,16 @@
 <style>
  
- .main-grid {
+  .controls-grid {
+	  
+     display: grid;
+     width: 100%;
+     grid-template-rows: auto;
+     grid-template-columns: 120px 3fr .1fr 2fr 2fr 3fr;
+	  grid-column-gap: 10px;
+	  margin-top: 25px;
+ }
+
+.main-grid {
 
      display: grid;
      width: 100%;
@@ -26,9 +36,22 @@
  	  grid-row-gap: 25px;
  	  margin-top: 25px;
  }
+
+ label {
+
+	  font-size: 1.2em !important;
+ }
  
 </style>
 
+<div class="form-grid controls-grid">
+	 <div class="form-cell">
+		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
+				<?= __ ('Back') ?>
+		  </button>
+	 </div>
+</div>
+	 
 <form id="settings" name ="settings">
 
 	 <input type="hidden" name="pos_config_id" value="<?= $posConfigID ?>"/>
@@ -49,12 +72,13 @@
 						  <?= $device ['desc'] ?>
 					 </div>
 					 
-					 <div class="form-cell select">
+					 <div class="select">
 						  
 						  <?= $this->Form->select ('devices[' . $name . ']',
 															$device ['options'],
 															['value' => $device ['selected'],
 															 'label' => false,
+															 'class' => 'custom-dropdown',
 															 'required' => 'required']);
 						  ?>
 					 </div>

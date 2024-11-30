@@ -66,7 +66,7 @@ class PosDownloadController extends PosApiController {
         
         $this->dbconnect ('m_' . $this->request->getData ()  ['merchant_id']);
 		          
-        $limit = 100;
+        $limit = 25;
 
         $where = ['id > ' . $this->request->getData ()  ['update_id']];
 		  
@@ -263,6 +263,16 @@ class PosDownloadController extends PosApiController {
 							'updates' => $updates];
 		  
 		  $this->jsonResponse ($response);
+	 }
+
+	 public function posMessage () {
+		  
+		  if (!empty ($this->request->getData ())) {
+				
+				$this->debug ($this->request->getData ());
+		  }
+		  
+		  $this->jsonResponse (['status' => 0]);
 	 }
 }
 ?>

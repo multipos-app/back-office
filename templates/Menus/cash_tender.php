@@ -4,8 +4,8 @@
 	 
 	 <select id="cash_options" class="custom-dropdown" onchange="cash ()">
 		  <option disabled selected>Select tender amount</option> 
-		  <option value=0>Round up</option>
 		  <option value=-1>Amount of sale</option>
+		  <option value=0>Round up</option>
 		  <option value=500>$5</option>
 		  <option value=1000>$10</option>
 		  <option value=2000>$20</option>
@@ -18,8 +18,20 @@
 <script>
 
  function cash () {
-	  
- 	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {value: $('#cash_options').val ()};
+
+	  let value = parseInt ($('#cash_options').val ());
+	  switch (value) {
+
+			case -1:
+
+				 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {tender_id: 1};
+				 break;
+				 
+			default:
+				 
+ 				 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {tender_id: 1, value: value};
+				 break;
+	  }
  }
 
 </script>

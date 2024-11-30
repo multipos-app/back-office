@@ -35,7 +35,7 @@ class MenusController extends PosAppController {
         
         $posConfig = $posConfig->toArray ();
         $posConfig ['config'] = json_decode ($posConfig ['config'], true);
-	  
+		  
         $data = ['posConfig' => $posConfig];
 		  
         return ($this->response (__ ('Menus'),
@@ -46,85 +46,111 @@ class MenusController extends PosAppController {
 
     function button () {
 
-        $button = $this->request->getData ();
-		  
-		  $template = 'empty';
-		  $data = [];
+		  if (!empty ($this->request->getData ())) {
 
-        switch ($button ['class']) {
-
-				case 'Item':
-				case 'OpenItem':
-					 
-					 $template = 'item';
-					 
-					 if (!isset ($button ['text'])) {
-
-						  $button ["text"] = "";
-						  $button ["class"] = $button ['class'];
-						  $button ["color"] =  "#999999";
-						  $button ["params"] = ["sku" =>  ""];
-					 }
-					 
-					 break;
-
-				case 'CashTender':
-
-					 $template = 'cash_tender';
-					 break;
-
-				case 'Navigate':
-
-					 $template = 'navigate';
-					 $button ["text"] = "";
-					 $button ["class"] = "Navigate";
-					 $button ["color"] =  "#999999";
-					 break;
-
-				case 'Null':
-					 
-					 $query = TableRegistry::get ('PosControlCategories')
-												  ->find ('all', ['contain' => ['PosControls']])
-												  ->where (['enabled' => 1]);
-
-					 $controls = [];
-					 foreach ($query as $controlCategories) {
+				$button = $this->request->getData ();
+				
+				$this->debug ($button);
+			
+				$template = 'empty';
+				$data = [];
+				
+				switch ($button ['class']) {
 						  
-						  $controls ['separator-' . $controlCategories ['id']] =
-								['desc' => $controlCategories ['name']];
-						  
-						  foreach ($controlCategories ['pos_controls'] as $control) {
+					 case 'Item':
+					 case 'DefaultItem':
+
+						  if (!isset ($button ['exists'])) {
 								
-								$controls [$control ['class']] = ['desc' => $control ['description'],
-																			 'class' => $control ['class'],
-																			 'params' => json_decode ($control ['params'], true),
-																			 'help' => $control ['help_text']];
+								$template = 'item';
+								
+								if (!isset ($button ['text'])) {
+									 
+									 $button ["text"] = "";
+									 $button ["class"] = $button ['class'];
+									 $button ["color"] =  "#999999";
+									 $button ["params"] = ["sku" =>  ""];
+								}
 						  }
-					 }
-					 
-					 $button ["text"] = "";
-					 $button ["color"] =  "#999999";
-					 $template = 'empty';
-					 $button ['controls'] = $controls;
-					 break;
+						  else {
+								
+								$template = 'no_params';
+						  }
+								
+						  break;
 
-				default:
-					 
-					 $template = 'no_params';
-					 $button ["text"] = "";
-					 $button ["class"] = $button ['class'];
-					 $button ["color"] =  "#999999";
-					 break;
-        }
-		  
-		  $data ['button'] = $button;
+					 case 'CashTender':
 
-        return ($this->response (__ ('Menus'),
-                                 'Menus',
-                                 $template,
-                                 $data));
+						  $template = 'cash_tender';
+						  break;
 
-    }
+					 case 'Navigate':
+
+						  $template = 'navigate';
+						  $button ["text"] = "";
+						  $button ["class"] = "Navigate";
+						  $button ["color"] =  "#999999";
+						  break;
+
+					 case 'Null':
+						  
+						  $query = TableRegistry::get ('PosControlCategories')
+														->find ('all', ['contain' => ['PosControls']])
+														->where (['enabled' => 1]);
+
+						  $controls = [];
+						  foreach ($query as $controlCategories) {
+								
+								$controls ['separator-' . $controlCategories ['id']] =
+									 ['desc' => $controlCategories ['name']];
+								
+								foreach ($controlCategories ['pos_controls'] as $control) {
+									 
+									 $controls [$control ['class']] = ['desc' => $control ['description'],
+																				  'class' => $control ['class'],
+																				  'params' => json_decode ($control ['params'], true),
+																				  'help' => $control ['help_text']];
+								}
+						  }
+						  
+						  $button ["text"] = "";
+						  $button ["color"] = "#999999";
+						  $template = 'empty';
+						  $button ['controls'] = $controls;
+						  break;
+
+					 default:
+						  
+						  $template = 'no_params';
+						  break;
+				}
+				
+				$data = ['status' => 0,
+							'button' => $button,
+							'pricingOptions' => [null => __ ('Add Item'),
+													  'existing' => 'Existing item',
+													  'standard_pricing' => 'Standard pricing, one price per item',
+													  'size_pricing' => 'Variant pricing',
+													  'open_pricing' => 'Open/enter price',
+													  'metric_pricing' => 'Price by volume/weight']];
+				
+				$this->debug ("button template... $template");
+				$this->debug ($data);
+				
+				return ($this->response (__ ('Menus'),
+												 'Menus',
+												 $template,
+												 $data));
+		  }
+		  else {
+				
+				return ($this->response (__ ('Menus'),
+												 'Menus',
+												 'empty',
+												 ['status' => 1]));
+		  }
+
+	 }
 
 	 function update ($id) {
 
@@ -146,8 +172,8 @@ class MenusController extends PosAppController {
 				$this->notifyPos ();
 		  }
 		  
-        $this->set ('response', $response);
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->RequestHandler->respondAs ('json');
+		  $this->set ('response', $response);
+		  $this->viewBuilder ()->setLayout ('ajax');
+		  $this->RequestHandler->respondAs ('json');
 	 }
 }

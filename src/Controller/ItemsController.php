@@ -148,7 +148,9 @@ class ItemsController extends PosAppController {
      *
      */
     
-    public function edit ($id, $template = 'standard_pricing') {
+    public function edit ($id, $template = 'standard_pricing', $controls = true) {
+
+		  $this->debug ("edit item... $id $template $controls");
 		  
         $item = null;
         $where = false;
@@ -338,7 +340,8 @@ class ItemsController extends PosAppController {
                                           'taxGroups',
                                           'linkTypes',
                                           'measures',
-														'decimalPlaces')));
+														'decimalPlaces',
+														'controls')));
 
     }
     
@@ -350,20 +353,36 @@ class ItemsController extends PosAppController {
     
     public function item ($id) {
 		  
-        $status = -1;
+		  $response = ['status' => -1];
 		  
         if (!empty ($this->request->getData ())) {
+
+				$this->debug ($this->request->getData ());
 				
             if ($id == 0) {
 					 
                 $status = $this->add ($this->request->getData ());
-            }
+					 if (isset ($this->request->getData () ['button'])) {
+						  
+						  $item = $this->request->getData () ['item'];
+						  $button = $this->request->getData () ['button'];
+						  
+						  $button ['text'] = strtoupper ($item ['item_desc']);
+						  $button ['params'] ['sku'] = strtoupper ($item ['sku']);
+
+						  $response = ['status' => $status,
+											'button' => $button];
+						  
+					 }
+				}
             else {
+					 
                 $status = $this->update ($this->request->getData ());
+					 $response = ['status' => $status];
 				}
 		  }
 
-		  $this->set ('response', ['status' => $status]);
+		  $this->set ('response', $response);
         $this->viewBuilder ()->setLayout ('ajax');
         $this->RequestHandler->respondAs ('json');
 	 }

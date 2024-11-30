@@ -113,6 +113,46 @@ class PosApiController extends AppController {
 							 
 		  return $timezones [$tz];
     }
+	 
+    private function notifyPOS () {
+		  
+		  $exec = 'mosquitto_pub -h localhost -t ' . $this->merchant ['mqtt_broker'] .
+					 ' -m \'{"method": "download"}\'' .
+					 ' -t \'multipos/' . $this->merchant ['merchant_id'] . '\'';
+
+		  $this->debug ($exec);
+		  
+		  shell_exec ($exec);
+	 }
+	 
+	 public function message ($merchantID) {
+
+		  $response = ['status' => 1];
+		  if (!empty ($this->request->getData ())) {
+				
+				$this->dbconnect ("m_$merchantID");
+		  
+				$posMessages = TableRegistry::get ('PosMessages');
+				$batchEntryTable = TableRegistry::get ('BatchEntries');
+
+				$posMessage = $posMessages->newEntity (["message" => json_encode ($this->request->getData ())]);
+				$posMessage = $posMessages->save ($posMessage);
+				
+				$batchEntry = $batchEntryTable->newEntity (['business_unit_id' => 1,
+																		  'update_table' => 'pos_messages',
+																		  'update_id' =>  $posMessage ['id'],
+																		  'update_action' => 0,
+																		  'execution_time' => time ()]);
+				$batchEntryTable->save ($batchEntry);
+
+
+				$exec = 'mosquitto_pub -h localhost -t ' . "multipos/$merchantID" . ' -m \'{"method": "download"}\'';
+				$this->debug ($exec);
+				shell_exec ($exec);
+		  }
+
+		  $this->jsonResponse ($response);
+	 }
 }
 
 

@@ -6,6 +6,12 @@
      grid-template-rows: 1fr;
      grid-template-columns: 1fr 2fr;
  }
+
+ .select-separator {
+
+	  color: #fff !important;
+	  font-weight: 600 !important;
+ }
  
 </style>
 
@@ -21,7 +27,7 @@
 	 <input type="hidden" id="pos" value="<?= $button ['pos'] ?>">
 	 
 	 <div class="form-cell form-desc-cell"><?= __ ('Add button') ?></div>
-	 <div id="controls" class="form-cell select"></div>  <!-- controller picker -->
+	 <div id="controls" class="select"></div>  <!-- controller picker -->
 	 
 </div>
 
@@ -31,14 +37,8 @@
  b = <?php echo json_encode ($button); ?>;
  controllers = <?= json_encode ($button ['controls']) ?>;
  
- function buttonClose () {
-	  
-	  $('#button_container').html ('');
-	  $('#button_container').toggleClass ('on');
- }
-  
  html =
-     '<select id="select_control" name="select_control" onchange="control ();">' +
+     '<select id="select_control" name="select_control" class="custom-dropdown" onchange="control ();">' +
      '<option selected value="">Select a button action</option>';
  
  for (var className in controllers) {
@@ -50,6 +50,7 @@
          html += '<option value="' + className + '">' + controllers [className] ['desc'] + '</option>';
 	  }
  }
+ 
  html += '</select>';
  
  function control () {
@@ -69,11 +70,12 @@
 				  success: function (data) {
 						
 						data = JSON.parse (data);
-						
 						console.log (data);
-						
-						$('#button_container').html (data.html);
 
+						if (data.status == 0) {
+							 
+							 $('#button_container').html (data.html);
+						}
 				  }
 	  });
  }

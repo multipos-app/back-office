@@ -128,21 +128,20 @@ $colors = ['#006482',
 </div>
 
 <div class="form-grid button-edit-grid">
-	 
-	 <div class="form-cell button" id="button_text" style="background-color: <?= $button ['color'] ?>">
-		  <?= $button ['text'] ?>
-	 </div>
-		  
-	 <div class="grid-cell button-desc">
-		  <?php if (isset ($button ['desc'])) echo $button ['desc']; ?>
-	 </div>
 
 	 <div class="form-cell form-desc-cell"><?= __('Button text') ?></div>
 	 <?php
+
+	 $text = '';
+	 if (isset ($button ['text'])) {
+
+		  $text = $button ['text'];
+	 }
+	 
 	 echo $this->input ('fa-text-size',
 							  ['id' =>'button_desc',
 								'name' => 'button[button_desc]',
-								'value' => $button ['text'],
+								'value' => $text,
 								'class' =>'form-control button_control',
 								'placeholder' => __ ('Button text')]);
 	 ?>
@@ -168,6 +167,9 @@ $colors = ['#006482',
 <script>
  
  function buttonClose () {
+
+	  console.log ('button close...');
+	  console.log (b);
 	  
 	  $('#button_container').toggleClass ('on');
  }

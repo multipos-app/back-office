@@ -1,25 +1,30 @@
 <?= $this->Html->css ("Items/standard_pricing") ?>
-
 <script>
- 
- var item = <?php echo json_encode ($item, true); ?>;
- var itemLinks = <?php echo json_encode ($item ['item_links'], true); ?>;
- var linkTypes = <?php echo json_encode ($linkTypes, true); ?>;
- 
- if (itemLinks == null) {
-	  
-	  itemLinks = [];
- }
 
- var addLinkID = 0;
-
+	 var item = <?php echo json_encode ($item, true); ?>;
+	 var itemLinks = <?php echo json_encode ($item ['item_links'], true); ?>;
+	 var linkTypes = <?php echo json_encode ($linkTypes, true); ?>;
+	 
+	 if (itemLinks == null) {
+	 
+	 itemLinks = [];
+	 }
+	 
+	 var addLinkID = 0;
 </script>
 
-<div class="form-section">
-	 <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $item ['item_desc']?>
-</div>
+<?php
 
-<form id="item_edit" name="item_edit">
+$this->debug ('controls... ' . $controls);
+
+if ($controls) {
+	 
+	 include ('item_header.php');
+}
+
+?>
+
+<form id="item_edit" name="item_edit" class="grid-span-all">
 	 
 	 <?= $this->Form->hidden ('item[id]', ['value' => $item ['id']]) ?>
 	 	 
@@ -214,9 +219,15 @@
 		  ?>
 		  
 	 </div>
+</form>
+
+<?= $this->Html->script ("Items/standard_pricing") ?>
+
+<?php 
+if ($controls) {
+?>
 
 	 <div class="form-submit-grid">
-		  
 		  <div class="item-input">
 				<button type="submit" id="item_update" class="btn btn-success"><?= __ ('Save') ?></button>
 		  </div>
@@ -225,13 +236,9 @@
 				<button type="button" class="btn btn-warning" onclick="del ('items', <?= $item ['id']?>, '<?= __ ('Delete') ?> <?= $item ['item_desc'] ?>')"><?= __ ('Delete') ?></button>
 		  </div>
 	 </div>
+	 <?= $this->Html->script ("Items/edit"); ?>
 
-</form>
-
-<script>
- $(".currency-format").mask ("<?= __ ('currency_format') ?>", {reverse: true});
- $(".integer-format").mask ("<?= __ ('currency_format') ?>", {reverse: true});
-</script>
-
-<?= $this->Html->script ("Items/edit") ?>
-<?= $this->Html->script ("Items/standard_pricing") ?>
+	 <?php 
+	 
+	 }
+?>

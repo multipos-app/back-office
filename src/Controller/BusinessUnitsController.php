@@ -214,9 +214,6 @@ class BusinessUnitsController extends PosAppController {
 				
             $tokens = [];
 
-            require_once ROOT . DS . 'vendor' . DS  . 'firebase' . DS . 'firebase.php';
-            $firebase = new  \App\Controller\Firebase ($this);
-
             foreach ($pos as $p) {
                 
                 $posUnit = $pu 
@@ -364,7 +361,7 @@ class BusinessUnitsController extends PosAppController {
 
         $posMessages = TableRegistry::get ('PosMessages');
         $batchEntryTable = TableRegistry::get ('BatchEntries');
-
+		  
         $posMessage = $posMessages->newEntity ($posMessage);
         $posMessage = $posMessages->save ($posMessage);
         
@@ -375,18 +372,9 @@ class BusinessUnitsController extends PosAppController {
 																	 'update_action' => 0,
 																	 'execution_time' => time ()]);
         $batchEntryTable->save ($batchEntry);
-        
-        
-        if (strlen ($posUnit ['token']) > 0) {  // notifiy POS if Google Messaging registered
-            
-            require_once ROOT . DS . 'vendor' . DS  . 'firebase' . DS . 'firebase.php';
-            $firebase = new  \App\Controller\Firebase ($this);
-            
-            $result = $firebase->send ($posUnit ['token'], ['method' => 'update']);
-       }
     }
 
-    public function batches () {
+	 public function batches () {
         
         $paginate = ['Batches' => ['limit' => 20,
                                    'Batches.id asc']];
@@ -446,6 +434,7 @@ class BusinessUnitsController extends PosAppController {
 																  date ('Y-m-d H:i:s', time ()));
 
             $status = 0;
+				$this->notifyPOS ();
         }
 
         $this->viewBuilder ()->setLayout ('ajax');

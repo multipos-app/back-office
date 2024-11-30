@@ -145,7 +145,7 @@ class DepartmentsController extends PosAppController {
     }
   
     public function delete ($id) {
-    
+    		  
 		  $status = 1;
         $department = $this->Departments->findById ($id)->firstOrFail ();
         if ($this->Departments->delete ($department)) {
@@ -153,7 +153,8 @@ class DepartmentsController extends PosAppController {
             $status = 0;
         }
 		  
-		  $this->ajax (['status' => $status]);
+        $this->viewBuilder ()->setLayout ('ajax');
+        $this->set ('response', ['status' => $status]);
     }
 }
 

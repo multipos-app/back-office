@@ -56,10 +56,7 @@ $actions = [null => __ ('Actions'),
 	 
 	 <?php 
 	 foreach ($posConfig ['config'] ['pos_menus'] as $container => $menus) {
-		  
-		  $this->debug ("container... $container");
-		  $this->debug ($menus);
-		  
+		  		  
 		  $height = null;
 		  $width = null;
 		  $name = '';
@@ -72,8 +69,6 @@ $actions = [null => __ ('Actions'),
 				$name = $menus ['horizontal_menus'] [0] ['name'];
 				$style = $menus ['horizontal_menus'] [0] ['style'];
 		  }
-		  
-		  $this->debug ("width... $height $width");
 	 ?>		
 
 	 <div class="sub-menu-grid">
@@ -172,6 +167,12 @@ $actions = [null => __ ('Actions'),
 <div class="container">
 
 	 <div id="button_container"></div>
+
+</div>
+
+<div class="container">
+
+	 <div id="item_edit_container"></div>
 
 </div>
 

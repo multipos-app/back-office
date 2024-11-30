@@ -46,6 +46,8 @@ class TicketsController extends PosAppController {
 		  $this->debug ($args);
 		  
 		  $this->conditions ($args);
+		  
+		  $this->debug ($this->conditions);
 
         $timestamp = function ($t) {
             
@@ -340,8 +342,25 @@ class TicketsController extends PosAppController {
 	 function search () {
 
 		  $data = [];
-		  
-		  $this->set ($data);
+
+		  $this->set (['tender' => [null => 'Tender type',
+										  'cash' => 'Cash',
+											 'credit' => 'Credit'],
+							'type' => [null => 'Ticket type',
+										  0 => 'Sale',
+										  1 => 'Void',
+										  2 => 'No Sale',
+										  3 => 'Comp Sale',
+										  4 => 'Log-in',
+										  5 => 'Log-out',
+										  6 => 'X Report',
+										  7 => 'Z Report',
+										  8 => 'Return Sale',
+										  9 => 'Non-tax',
+										  10 => 'Bank/Drop'],
+							'exceptions' => [null => 'Exceptions',
+												  'refunds' => 'Refunds',
+												  'discounts' => 'Discounts']]);
         
         return ($this->response (__ ('Tickets'),
                                  'Tickets',
@@ -461,6 +480,24 @@ class TicketsController extends PosAppController {
 
 						  $this->conditions [] = "tender_desc = '" . $val . "'";
 						  break;
+
+						  
+					 case 'exceptions':
+
+						  switch ($val) {
+
+									 
+								case 'refunds':
+									 
+									 $this->conditions [] = "return_items > 0";
+									 break;
+						  
+								case 'discounts':
+									 
+									 $this->conditions [] = "discounts > 0";
+									 break;
+						  }
+						  break;
 						  
 					 case 'clerk_id':
 
@@ -478,26 +515,10 @@ class TicketsController extends PosAppController {
 						  break;
 						  
 					 case 'ticket_type':
-
-						  switch ($val) {
-									 
-								case 'void_sales':
-								case 'no_sales':
-								case 'refund_sales':
-								case 'comp_sales':
-								case 'void_sales':
-								case 'logins':
-								case 'logouts':
-								case 'x_sessions':
-								case 'z_sessions':
-								case 'bank':
-								case 'manager_override':
-								case 'open_amount':
-                            
-									 $this->conditions [] = $key . " = " . $this->ticketTypeMap [$val];
-									 break;
-						  }
-
+                
+						  $this->conditions [] = "$key = $val";
+						  break;
+				
 						  switch ($val) {
 									 
 								case 'return_items':

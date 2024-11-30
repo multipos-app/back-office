@@ -18,9 +18,9 @@
 	 <div class="form-cell form-control-cell">
 		  <?php
 		  
-		  echo $this->Form->select ('tender',
+		  echo $this->Form->select ('tender_desc',
 											 $tender,
-											 ['id' => 'tender',
+											 ['id' => 'tender_desc',
 											  'onchange' => 'addSearch (this)',
 											  'class' => 'custom-dropdown search-condition',
 											  'label' => false]);
@@ -31,9 +31,9 @@
 	 <div class="form-cell form-control-cell">
 		  <?php
 		  
-		  echo $this->Form->select ('type',
+		  echo $this->Form->select ('ticket_type',
 											 $type,
-											 ['id' => 'type',
+											 ['id' => 'ticket_type',
 											  'class' => 'custom-dropdown search-condition',
 											  'label' => false]);
 		  ?>
@@ -43,9 +43,9 @@
 	 <div class="form-cell form-control-cell">
 		  <?php
 		  
-		  echo $this->Form->select ('exception',
-											 $exception,
-											 ['id' => 'exception',
+		  echo $this->Form->select ('exceptions',
+											 $exceptions,
+											 ['id' => 'exceptions',
 											  'class' => 'custom-dropdown search-condition',
 											  'label' => false]);
 		  ?>

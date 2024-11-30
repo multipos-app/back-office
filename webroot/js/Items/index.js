@@ -56,21 +56,3 @@ $('#item_desc').typeahead ({
 	 }
 });
 
-function autoSku () {
-
-	 $.ajax ({
-        url: "/items/auto-sku/",
-        type: "GET",
-        success: function (data) {
-				
-				data = JSON.parse (data);
-				
-				console.log (data);
-
-				if (data.status == 0) {
-					 
-					 $('#sku').val (data.sku);
-				}
-        }
-    });
-}
