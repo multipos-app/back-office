@@ -3,7 +3,6 @@
 <script>
 
  posConfig = <?php echo json_encode ($posConfig); ?>;
- console.log (posConfig.config.pos_menus);
  
 </script>
 
@@ -73,6 +72,12 @@ $actions = [null => __ ('Actions'),
 
 	 <div class="sub-menu-grid">
 
+		  <div class="grid-cell grid-cell-center grid-span-all">
+
+				<h3><?= $menus ['menu_description'] ?></h3>
+				
+		  </div>
+		  
 		  <div id="<?= $container ?>" class="grid-cell grid-cell-center">
 		  </div>
 		  
@@ -157,7 +162,7 @@ $actions = [null => __ ('Actions'),
 		  
 		  <div class="form-submit-grid">
 				
-				<div class="button-input">
+				<div class="button-input grid-span-all">
 					 <button type="button" id="menu_update" class="btn btn-secondary"><?= __ ('Save') ?></button>
 				</div>
 				

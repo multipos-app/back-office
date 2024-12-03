@@ -61,16 +61,13 @@
 	  control ['container'] = $('#container').val ();
 	  control ['menu'] = $('#menu').val ();
 	  control ['pos'] = $('#pos').val ();
-	  
-	  console.log (control);
-	  
 	  $.ajax ({type: "POST",
+	  	  
 				  url: '/menus/button/',
 				  data: control,
 				  success: function (data) {
 						
 						data = JSON.parse (data);
-						console.log (data);
 
 						if (data.status == 0) {
 							 

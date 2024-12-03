@@ -20,6 +20,9 @@
  function cash () {
 
 	  let value = parseInt ($('#cash_options').val ());
+	  
+	  buttonDesc ($('#cash_options :selected').text ());
+	  	  
 	  switch (value) {
 
 			case -1:

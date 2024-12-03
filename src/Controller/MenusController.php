@@ -49,34 +49,41 @@ class MenusController extends PosAppController {
 		  if (!empty ($this->request->getData ())) {
 
 				$button = $this->request->getData ();
-				
+
 				$this->debug ($button);
-			
+				
 				$template = 'empty';
 				$data = [];
+				$extras = [];
 				
 				switch ($button ['class']) {
 						  
 					 case 'Item':
 					 case 'DefaultItem':
 
-						  if (!isset ($button ['exists'])) {
+						  if (isset ($button ['exists']) && $button ['exists']) {
+
+								$template = 'item_edit';
+						  }
+						  else {
 								
 								$template = 'item';
-								
 								if (!isset ($button ['text'])) {
 									 
 									 $button ["text"] = "";
 									 $button ["class"] = $button ['class'];
 									 $button ["color"] =  "#999999";
 									 $button ["params"] = ["sku" =>  ""];
+									 
+									 $extras ['pricingOptions'] = [null => __ ('Add Item'),
+																			 'existing' => 'Existing item',
+																			 'standard_pricing' => 'Standard pricing, one price per item',
+													 						 'variant_pricing' => 'Variant pricing (size, color...)',
+																			 'open_pricing' => 'Open/enter price, prompt for price',
+																			 'metric_pricing' => 'Price by volume/weight, prompt for value'];
+									 
 								}
-						  }
-						  else {
-								
-								$template = 'no_params';
-						  }
-								
+						  }	
 						  break;
 
 					 case 'CashTender':
@@ -126,13 +133,15 @@ class MenusController extends PosAppController {
 				}
 				
 				$data = ['status' => 0,
-							'button' => $button,
-							'pricingOptions' => [null => __ ('Add Item'),
-													  'existing' => 'Existing item',
-													  'standard_pricing' => 'Standard pricing, one price per item',
-													  'size_pricing' => 'Variant pricing',
-													  'open_pricing' => 'Open/enter price',
-													  'metric_pricing' => 'Price by volume/weight']];
+							'button' => $button];
+
+				if (count ($extras)) {
+
+					 foreach ($extras as $key => $value) {
+
+						  $data [$key] = $value;
+					 }
+				}
 				
 				$this->debug ("button template... $template");
 				$this->debug ($data);

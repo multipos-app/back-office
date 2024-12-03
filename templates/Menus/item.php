@@ -48,24 +48,17 @@ $this->debug ('menus item...');
  var existingItem = false;
  
  $('#add_item').change (function () {
-
- 	  console.log ('add item... ' + existingItem);
 	  
 	  if (!existingItem) {
 			
  			if ($('#add_item').val ()) {
 				 
-				 console.log ('add item...');
- 				 console.log (b);
- 				 
  				 $.ajax ({
  					  url: "/items/edit/0/" + $('#add_item').val () + '/0',
  					  type: "GET",
  					  success: function (data) {
  							
  							data = JSON.parse (data);
- 							
- 							console.log (data);
  							$('#add_item_container').html (data.html);	 
  					  }
  				 });
@@ -74,18 +67,12 @@ $this->debug ('menus item...');
  });
 
  function itemUpdate () {
-
- 	  console.log ('item update... ' + existingItem);
-
+	  
 	  if (!existingItem) {
 
 			var item = $('#item_edit');
 			var data = getFormData (item);
 			
-			console.log ('create item...');
-			console.log (b);
-			console.log (data);
-
 			data ['button'] = b;
 
 			/* var form = document.querySelector ('form');
@@ -105,12 +92,10 @@ $this->debug ('menus item...');
 							 
 							 data = JSON.parse (data);
 							 
-							 console.log ('menu item add...');
-							 console.log (data);
-
 							 var button = data.button;
 							 posConfig.config.pos_menus [button.container] ['horizontal_menus'] [button.menu] ['buttons'] [button.pos] = button;
 							 render (button.container);
+							 buttonClose ();
 						},
 						fail: function () {
 
@@ -122,6 +107,10 @@ $this->debug ('menus item...');
 						}
 				 
 			});
+	  }
+	  else {
+			
+			buttonClose ();
 	  }
  }
 

@@ -23,6 +23,7 @@
 	 grid-template-columns: 1fr 1fr;
 	 margin-top: 3px;
 	 grid-column-gap: 15px;
+	 margin-top: 25px;
 }
 
 .container-grid {
@@ -36,10 +37,15 @@
 	 display: grid;
 	 width: 100%;
 	 grid-template-columns: 1fr;
-	 margin-top: 5px;
+	 margin-top: 15px;
 	 grid-row-gap: 5px;
 	 grid-column-gap: 5px;
 	 vertical-align: top;
+}
+
+.menu-picker {
+
+	 margin-top: 10px !important;
 }
 
 .controls-size-grid {

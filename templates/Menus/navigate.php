@@ -9,9 +9,6 @@
 
 <script>
 
- console.log (b);
- console.log (posConfig.config.pos_menus [b.container].horizontal_menus);
- 
  html = 
  	  '<select id="menus" class="custom_dropdown" onchange="menuSelect ()">' +
 	  '<option disabled>Select menu</option>';
@@ -28,7 +25,6 @@
 
  function menuSelect () {
 
-	  console.log ($('#menus').val ());
   	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].class = 'Navigate';
   	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].text = $('#button_desc').val ().toUpperCase ();
  	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {menu_index: $('#menus').val ()};

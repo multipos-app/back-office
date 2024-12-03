@@ -1,16 +1,16 @@
 <?= $this->Html->css ("Items/standard_pricing") ?>
 <script>
 
-	 var item = <?php echo json_encode ($item, true); ?>;
-	 var itemLinks = <?php echo json_encode ($item ['item_links'], true); ?>;
-	 var linkTypes = <?php echo json_encode ($linkTypes, true); ?>;
-	 
-	 if (itemLinks == null) {
-	 
-	 itemLinks = [];
-	 }
-	 
-	 var addLinkID = 0;
+ var item = <?php echo json_encode ($item, true); ?>;
+ var itemLinks = <?php echo json_encode ($item ['item_links'], true); ?>;
+ var linkTypes = <?php echo json_encode ($linkTypes, true); ?>;
+ 
+ if (itemLinks == null) {
+	  
+	  itemLinks = [];
+ }
+ 
+ var addLinkID = 0;
 </script>
 
 <?php
@@ -27,7 +27,6 @@ if ($controls) {
 <form id="item_edit" name="item_edit" class="grid-span-all">
 	 
 	 <?= $this->Form->hidden ('item[id]', ['value' => $item ['id']]) ?>
-	 	 
 	 <?= $this->Form->hidden ('item[bu_index]', ['value' => $buIndex]) ?>
 	 <?= $this->Form->hidden ('item[item_price][id]', ['value' => $item ['item_price'] ['id']]) ?>
 	 <?= $this->Form->hidden ('item[item_price][class]', ['value' => 'standard']) ?>
@@ -182,7 +181,7 @@ if ($controls) {
 
 		  <div class="form-cell form-desc-cell"><?= __('Supplier package size') ?></div>
 		  <?php 
-	  
+		  
 		  echo $this->input ('fa-hashtag',
 									['id' => 'package_quantity',
 									 'name' =>'item[inv_item][package_quantity]',
@@ -236,9 +235,8 @@ if ($controls) {
 				<button type="button" class="btn btn-warning" onclick="del ('items', <?= $item ['id']?>, '<?= __ ('Delete') ?> <?= $item ['item_desc'] ?>')"><?= __ ('Delete') ?></button>
 		  </div>
 	 </div>
-	 <?= $this->Html->script ("Items/edit"); ?>
 
-	 <?php 
-	 
-	 }
+<?php 
+}
 ?>
+<?= $this->Html->script ("Items/edit"); ?>

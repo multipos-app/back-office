@@ -32,6 +32,14 @@
     box-shadow: 0 2px 5px 0 rgb(213 217 217 / 50%);
 }
 
+.form-display-cell {
+	 color: #000 !important;
+	 background: #ffffff !important;
+	 padding: 10px !important;
+	 font-size: 18px !important;
+    box-shadow: 0 2px 5px 0 rgb(213 217 217 / 50%);
+}
+
 .form-control-cell {
 	 background: #fff !important;
 	 font-size: 16px !important;

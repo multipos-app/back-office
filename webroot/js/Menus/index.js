@@ -26,6 +26,8 @@ function select (c) {
 function render (c) {
 
 	 container = c;
+
+	 console.log (posConfig.config ['pos_menus'] [container] ['menu_description']);
 	 
 	 if (typeof posConfig.config ['pos_menus'] [container] ['horizontal_menus'] === "undefined") {
 
@@ -51,6 +53,7 @@ function render (c) {
 		  for (i = 0; i < buttons.length; i ++) {
 
 				b = buttons [i];
+				
 				let text = '';
 				if (b.text != null) {
 
@@ -73,7 +76,7 @@ function render (c) {
 						  backgroundStyle = 'style="color:white;background: ' + b.color + ';"';
 					 }
 				}
-
+				
 				html +=
 					 '<div id="' + container + '_' + menu + '_' + i + '" ' +
 					 'class="grid-cell grid-cell-left button' + backgroundClass +
@@ -82,6 +85,12 @@ function render (c) {
 					 '>' +
 					 text +
 					 '</div>';
+
+				if (i == 0) {
+					 
+					 console.log ('button 0... ' + html);
+					 console.log (b);
+				}
 		  }
 		  
 		  html += '</div>';
@@ -90,7 +99,7 @@ function render (c) {
 	 }
 	 
 	 html =
-		  '<select id="' + container + '_select" onchange="select (\'' + container + '\')" class="custom-dropdown">' +
+		  '<select id="' + container + '_select" onchange="select (\'' + container + '\')" class="custom-dropdown menu-picker">' +
 		  '<option disabled>Select menu</option>';
 	 
 	 for (i = 0; i < menus.length; i ++) {
@@ -221,11 +230,29 @@ function button (c, m, p) {
 				 success: function (data) {
 
 					  data = JSON.parse (data);
+
+					  console.log ('button... ');
+					  console.log (data);
+					  
 					  $('#button_container').html (data.html);
 				 }
 				});
 	 
 	 dirty (true);
+}
+
+/**
+ *
+ * update the edit and button text
+ *
+ */
+
+function buttonDesc (text) {
+
+	 $('#button_desc').val (text);
+	 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos] ['text'] = text;
+	 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos] ['color'] = '#999999';
+	 render (container);
 }
 
 /**
@@ -240,6 +267,19 @@ function button (c, m, p) {
 	  $('#button_container').toggleClass ('on');
  }
 
+ /**
+  *
+  * clear button
+  *
+  */
+ 
+ function buttonClear () {
+	  
+	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null", "color": "#999"};
+	  render (container);
+	  dirty (true);
+ }
+ 
 function changeStyle (c) {
 	 
 	 posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['style'] = $('#style').val ();
@@ -270,10 +310,8 @@ function dirty (d) {
 
 $('#menu_update').on ('click', function (e){
 
- 	 let url = '/menus/update/' + posConfig.id;
-	 
 	 $.ajax ({type: "POST",
-				 url: url,
+				 url: '/menus/update/' + posConfig.id,
 				 data: posConfig,
 				 success: function (data) {
 					  

@@ -7,7 +7,7 @@ echo $this->input ('fa-barcode',
 						  'name' => 'button[sku]',
 						  'value' => '',
 						  'class' =>'form-control',
-						  'placeholder' => __ ('SKU')]);
+						  'placeholder' => __ ('Enter Item Description or SKU')]);
 ?>
 
 <script>

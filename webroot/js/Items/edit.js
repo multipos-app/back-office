@@ -1,4 +1,3 @@
-var currencyPlaceholder = "<?php echo __ ('0.00'); ?>";
 
 $('#item_update').on ('click', function (e) {
 
@@ -10,7 +9,7 @@ $('#item_update').on ('click', function (e) {
 		  form.reportValidity ();
 		  return;
 	 }
-
+	 
 	 let url = '/items/item/' + item.id;
 
 	 $.ajax ({type: "POST",

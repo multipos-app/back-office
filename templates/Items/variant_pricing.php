@@ -1,17 +1,33 @@
 <?= $this->Html->css ("Items/variant_pricing") ?>
+<?php
+
+
+?>
 
 <script>
  
  var item = <?php echo json_encode ($item, true); ?>;
+
  console.log (item);
 
 </script>
 
-<div class="form-section">
-	 <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $item ['item_desc']?>
-</div>
+<?php
 
-<form id="item_edit" name="item_edit">
+$this->debug ('variant controls... ' . $controls);
+
+if ($controls) {
+	 
+	 include ('item_header.php');
+}
+
+?>
+
+<!-- <div class="form-section">
+	  <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $item ['item_desc']?>
+	  </div>
+	-->
+<form id="item_edit" name="item_edit" class="grid-span-all">
 	 
 	 <?= $this->Form->hidden ('item[id]', ['value' => $item ['id']]) ?>
 	 
@@ -87,8 +103,14 @@
 		  <div class="form-cell">&nbsp;</div>
 		  
 	 </div>
-	 
+
 	 <div id="variants"></div>
+
+</form>
+
+<?php 
+if ($controls) {
+?>
 
 	 <div class="form-submit-grid">
 		  
@@ -101,7 +123,9 @@
 		  </div>
 	 </div>
 
-</form>
+<?php 
+}
+?>
 
 <script>
  $(".currency-format").mask ("<?= __ ('currency_format') ?>", {reverse: true});

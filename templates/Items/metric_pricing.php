@@ -6,11 +6,17 @@
 
 </script>
 
-<div class="form-section">
-	 <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $item ['item_desc']?>
-</div>
+<?php 
+if ($controls) {
+?>
+	 <div class="form-section">
+		  <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $item ['item_desc']?>
+	 </div>
+<?php
+}
+?>
 
-<form id="item_edit" name="item_edit">
+<form id="item_edit" name="item_edit" class="grid-span-all">
 	 
 	 <?= $this->Form->hidden ('item[id]', ['value' => $item ['id']]) ?>
 	 <?= $this->Form->hidden ('item[item_price][class]', ['value' => $item ['item_price'] ['class']]) ?>
@@ -155,19 +161,26 @@
 													'label' => false]); ?>
 		  </div>
 	 </div>
-
-	 <div class="form-submit-grid">
-		  
-		  <div class="item-input">
-				<button type="submit" id="item_update" class="btn btn-success"><?= __ ('Save') ?></button>
-		  </div>
-		  
-		  <div>
-				<button type="button" class="btn btn-warning" onclick="del ('items', <?= $item ['id']?>, '<?= __ ('Delete') ?> <?= $item ['item_desc'] ?>')"><?= __ ('Delete') ?></button>
-		  </div>
-	 </div>
-
 </form>
+
+<?php 
+if ($controls) {
+?>
+
+<div class="form-submit-grid">
+	 
+	 <div class="item-input">
+		  <button type="submit" id="item_update" class="btn btn-success"><?= __ ('Save') ?></button>
+	 </div>
+	 
+	 <div>
+		  <button type="button" class="btn btn-warning" onclick="del ('items', <?= $item ['id']?>, '<?= __ ('Delete') ?> <?= $item ['item_desc'] ?>')"><?= __ ('Delete') ?></button>
+	 </div>
+</div>
+<?php 
+}
+?>
+
 
 <script>
  $(".currency-format").mask ("<?= __ ('currency_format') ?>", {reverse: true});

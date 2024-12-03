@@ -124,9 +124,9 @@ class ItemsController extends PosAppController {
         
         $pricingOptions = [null => __ ('Add Item'),
 									'standard_pricing' => 'Standard pricing, one price per item',
-									'size_pricing' => 'Variant pricing',
-									'open_pricing' => 'Open/enter price',
-									'metric_pricing' => 'Price by volume/weight'];
+									'variant_pricing' => 'Variant pricing (size, color...)',
+									'open_pricing' => 'Open/enter price, prompt for price',
+									'metric_pricing' => 'Price by volume/weight, prompt for value'];
 
 		  $data = ['departments' => $departments,
 					  'suppliers' => $suppliers,
@@ -150,7 +150,7 @@ class ItemsController extends PosAppController {
     
     public function edit ($id, $template = 'standard_pricing', $controls = true) {
 
-		  $this->debug ("edit item... $id $template $controls");
+		  $this->debug ("item edit... $id, $template, $controls");
 		  
         $item = null;
         $where = false;
@@ -172,8 +172,6 @@ class ItemsController extends PosAppController {
 											->first ();
 
             if ($item) {
-
-					 $this->debug ($item);
 
 					 $buIndex = 0;
 					 if ($this->merchant ['bu_index'] > 0) {
@@ -238,17 +236,17 @@ class ItemsController extends PosAppController {
 														  'supplier_id' => 0];
 						  break;
 						  
-					 case 'size_pricing':
+					 case 'variant_pricing':
 						  
 						  $item ['item_price'] = ['id' => 0,
 														  'tax_group_id' => 0,
 														  'tax_inclusive' => 0,
 														  'tax_exempt' => 0,
-														  'class' => 'size',
+														  'class' => 'variant',
 														  'price' => 0,
 														  'cost' => 0,
 														  'pricing' => ['description' => '',
-																			 'sizes' => []]];
+																			 'variants' => []]];
 						  break;
 						  
 					 case 'open_pricing':
@@ -356,8 +354,6 @@ class ItemsController extends PosAppController {
 		  $response = ['status' => -1];
 		  
         if (!empty ($this->request->getData ())) {
-
-				$this->debug ($this->request->getData ());
 				
             if ($id == 0) {
 					 
@@ -387,7 +383,6 @@ class ItemsController extends PosAppController {
         $this->RequestHandler->respondAs ('json');
 	 }
 
-
  	 /**
      *
      * add item
@@ -409,7 +404,10 @@ class ItemsController extends PosAppController {
                                       'enabled' => 1]);
         $itemsTable->save ($i);
         $itemID = $i ['id'];
-		  
+
+		  $this->debug ('add item...');
+		  $this->debug ($item);
+
 		  foreach ($this->merchant ['business_units'] as $bu) {
 
 				if ($bu ['business_type'] ==  BU_LOCATION) {
@@ -427,9 +425,9 @@ class ItemsController extends PosAppController {
 										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
 										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
 										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-					 
+								
 								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
-					 
+								
 								$ii = $invItemsTable->newEntity (['item_id' => $itemID,
 																			 'business_unit_id' => $bu ['id'],
 																			 'package_quantity' => intVal ($item ['item'] ['inv_item'] ['package_quantity']),
@@ -438,18 +436,18 @@ class ItemsController extends PosAppController {
 								$invItemsTable->save ($ii);
 								break;
 
-						  case 'size':
+						  case 'variant':
 
 								$pricing = json_encode ($item ['item'] ['item_price'] ['pricing']);
 								
 								$ip = ['item_id' => $itemID,
 										 'business_unit_id' => $bu ['id'],
-										 'class' => 'size',
+										 'class' => 'variant',
 										 'pricing' => $pricing,
 										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
 										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
 										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-					 
+								
 								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
 								break;
 								
@@ -462,7 +460,7 @@ class ItemsController extends PosAppController {
 										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
 										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
 										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-					 
+								
 								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
 								break;
 								
@@ -477,7 +475,7 @@ class ItemsController extends PosAppController {
 										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
 										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
 										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-					 
+								
 								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
 								break;
 					 }
@@ -541,7 +539,7 @@ class ItemsController extends PosAppController {
 							  'tax_inclusive' => isset ($item ['item'] ['tax_inclusive']) ? 1 : 0];
 					 break;
 
-				case 'size':
+				case 'variant':
 					 
 					 $ip = ['class' => $item ['item'] ['item_price'] ['class'],
 							  'pricing' => json_encode ($item ['item'] ['item_price'] ['pricing']),
@@ -549,7 +547,7 @@ class ItemsController extends PosAppController {
 							  'tax_exempt' => $item ['item'] ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
 							  'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
 					 break;
-		  
+					 
 				case 'metric':
 
 					 $ip = ['class' => $item ['item'] ['item_price'] ['class'],
@@ -581,9 +579,6 @@ class ItemsController extends PosAppController {
 				$where ['business_unit_id'] = $this->merchant ['business_units'] [$this->merchant ['bu_index']] ['id'];
 		  }
 
-		  $this->debug ($ip);
-		  $this->debug ($where);
-		  
         $itemPricesTable->updateAll ($ip, $where);
 		  
 		  // update inventory
@@ -701,8 +696,25 @@ class ItemsController extends PosAppController {
         $this->RequestHandler->respondAs ('json');
 	 }
 	 
-
     /**
+     *
+     * edit a menu item
+     *
+     */
+    
+    public function menuItem ($sku) {
+
+		  $this->debug ("menu item... $sku");
+        $itemsTable = TableRegistry::get ('Items');
+		  $item = TableRegistry::get ('Items')
+									  ->find ()
+									  ->where (['sku' => $sku])
+									  ->first ();
+
+		  return $this->edit ($item ['id'], null, false);
+	 }
+
+	 /**
      *
      * gather items for type ahead/drop down select
      *
@@ -736,7 +748,7 @@ class ItemsController extends PosAppController {
 	 
 
     function jsonImport () {
-		  		  
+		  
         if (!empty ($this->request->getData ())) {
 				
             $json = json_decode ($this->request->getData () ['json'], true);
@@ -760,8 +772,8 @@ class ItemsController extends PosAppController {
 
                     $sku ++;
                     $item = $itemsTable->newEntity (['department_id' => $dept ['id'],
-                                                    'sku' => strval ($sku),
-                                                    'item_desc' => strtoupper ($i ['desc'])]);
+                                                     'sku' => strval ($sku),
+                                                     'item_desc' => strtoupper ($i ['desc'])]);
 
                     $item = $itemsTable->save ($item);
 
@@ -947,7 +959,7 @@ class ItemsController extends PosAppController {
         $this->set (['response' => 0]);
         $this->viewBuilder ()->setLayout ('ajax');
         $this->RequestHandler->respondAs ('json');
-   }
+    }
 	 
     function autoSku () {
 

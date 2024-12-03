@@ -115,8 +115,6 @@ $colors = ['#006482',
 <script>
  
  b = <?php echo json_encode ($button); ?>;
-
- console.log (b);
  
  $('#' + b ['menu'] + '_' + b ['pos']).removeClass ('empty-button');
  posConfig.config.pos_menus [b.container].horizontal_menus [b.menu].buttons [b.pos] = b;
@@ -167,9 +165,6 @@ $colors = ['#006482',
 <script>
  
  function buttonClose () {
-
-	  console.log ('button close...');
-	  console.log (b);
 	  
 	  $('#button_container').toggleClass ('on');
  }

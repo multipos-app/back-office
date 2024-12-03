@@ -15,20 +15,3 @@ $this->debug ('menu button footer...');
 	 </div>
 	 
 </div>
-
-<script>
-
- /**
-  *
-  * clear a button
-  *
-  */
- 
- function buttonClear () {
-	  
-	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null", "color": "#999"};
-	  render (container);
-	  dirty (true);
- }
- 
-</script>

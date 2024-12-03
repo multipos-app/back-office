@@ -45,16 +45,20 @@ function render () {
 
 function addVariant () {
 
-	 item.item_price ['pricing'] ['variants'].push ({"desc": "", "price": currencyPlaceholder, "cost": currencyPlaceholder, "is_default" : false});
-	 console.log (item.item_price ['pricing'] ['variants']);
+	 item.item_price ['pricing'] ['variants'].push ({"desc": "", "price": "0.00", "cost": "0.00", "is_default" : false});
+	 
+	 console.log (item.item_price ['pricing']);
+	 
 	 render ()
 }
 
 function update (i, name) {
-
-	 console.log ('update... ' + i + ' ' + name + ' ' + $('#' + name + '_' + i).val ());
 					  
 	 item.item_price ['pricing'] ['variants'] [i] [name] = $('#' + name + '_' + i).val ();
+	 
+	 console.log (item.item_price ['pricing']);
+	 
+	 render ()
 }
 
 render ();
