@@ -1,237 +1,279 @@
- # nav a {
-	  
-	  color:#000 !important;
- }
- 
- .bu {
-	  
-	  margin-top: 25px !important;
-	  margin-bottom: 25px !important;
-	  padding: 15px !important;
-	  font-size: 1.1em !important;
-	  text-align: center !important;
-	  color:#fff !important;
-	  background:#00000000 !important;
-	  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2) !important;
-	  cursor: pointer;
- }
+# nav a {
+	 
+	 color:#000 !important;
+}
 
- .bu-edit {
-	  
-	  vertical-align: top !important;
-	  color:#000 !important;
- }
- 
- .bu-ver {
-	  
-	  font-size: .5em !important;
- }
- 
- .bu-location {
-	  
-	  margin-left: 15px !important;
- }
+.bu {
+	 
+	 margin-top: 25px !important;
+	 margin-bottom: 25px !important;
+	 padding: 15px !important;
+	 font-size: 1.1em !important;
+	 text-align: center !important;
+	 color:#fff !important;
+	 background:#00000000 !important;
+	 box-shadow: 0 3px 10px rgb(0 0 0 / 0.2) !important;
+	 cursor: pointer;
+}
 
- img {
-	  
-	  margin-top: 50px;
- }
+.bu-edit {
+	 
+	 vertical-align: top !important;
+	 color:#000 !important;
+}
 
- .sub-link {
+.bu-ver {
+	 
+	 font-size: .5em !important;
+}
 
-	  margin-left: 10px;
- }
- 
+.bu-location {
+	 
+	 margin-left: 15px !important;
+}
+
+img {
+	 
+	 margin-top: 50px;
+}
+
+.sub-link {
+
+	 margin-left: 10px;
+}
+
 /**
-*
-* multipos logo and merchant name header
-*
-*/
- 
- .logo {
-	  
-	  /* font-family: 'Carter One', cursive !important; */
-	  
-	  font-family: "Caveat", cursive;
-	  font-optical-sizing: auto;
-	  font-weight: 600 !important;
-	  font-style: normal;
-	  width: 200px !important;
-	  margin-top: 15px;
-	  text-align: center;
-	  color: #111;
-	  font-size: 65px;
-	  /* font-weight: 500; */
-	  text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
- }
- 
- .logo-red {
-	  
-	  color: #eb1010;
-	  font-size: 70px;
-	  font-weight: 700;
-	  font-style: italic;
-	  margin: 3px;
- }
- 
- .logo-small {
+ *
+ * multipos logo and merchant name header
+ *
+ */
 
- 	  font-family: "Caveat", cursive;
-	  font-optical-sizing: auto;
-	  font-size: 62px;
-	  font-weight: 600 !important;
-	  font-style: normal;
-	  margin-top: 10px;
-	  text-align: center;
-	  color: #111;
-	  text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
- }
- 
-  .logo-tiny {
+.logo {
+	 
+	 /* font-family: 'Carter One', cursive !important; */
+	 
+	 font-family: "Caveat", cursive;
+	 font-optical-sizing: auto;
+	 font-weight: 600 !important;
+	 font-style: normal;
+	 width: 200px !important;
+	 margin-top: 15px;
+	 text-align: center;
+	 color: #111;
+	 font-size: 65px;
+	 /* font-weight: 500; */
+	 text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
+}
 
- 	  font-family: "Caveat", cursive;
-	  font-optical-sizing: auto;
-	  font-size: 24px;
-	  font-weight: 600 !important;
-	  font-style: normal;
-	  margin-top: 10px;
-	  text-align: center;
-	  color: #111;
-	  text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
- }
+.logo-red {
+	 
+	 color: #eb1010;
+	 font-size: 70px;
+	 font-weight: 700;
+	 font-style: italic;
+	 margin: 3px;
+}
 
-  .logo-red-small {
-	  
-	  color: #eb1010;
-	  font-size: 50px;
-	  font-weight: 700;
-	  font-style: italic;
-	  margin: 3px;
- }
+.logo-small {
 
- .logo-bu {
-	  
-	  color: #000;
-	  text-align: center;
-	  font-size: 12px;
-	  font-style: italic;
- }
- 
+ 	 font-family: "Caveat", cursive;
+	 font-optical-sizing: auto;
+	 font-size: 62px;
+	 font-weight: 600 !important;
+	 font-style: normal;
+	 margin-top: 10px;
+	 text-align: center;
+	 color: #111;
+	 text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
+}
+
+.logo-tiny {
+
+ 	 font-family: "Caveat", cursive;
+	 font-optical-sizing: auto;
+	 font-size: 24px;
+	 font-weight: 600 !important;
+	 font-style: normal;
+	 margin-top: 10px;
+	 text-align: center;
+	 color: #111;
+	 text-shadow: rgba(128,128,128,.6) 0px 3px 8px;
+}
+
+.logo-red-small {
+	 
+	 color: #eb1010;
+	 font-size: 50px;
+	 font-weight: 700;
+	 font-style: italic;
+	 margin: 3px;
+}
+
+.logo-bu {
+	 
+	 color: #000;
+	 text-align: center;
+	 font-size: 12px;
+	 font-style: italic;
+}
+
 /**
-*
-* detail slide out holds details and edit forms
-*
-*/
- 
- .detail {
-	  
-	  background: #fff;
-	  color: #333;
-	  position: fixed;
-	  top: 10px;
-	  right: -50%;
-	  width: 50%;
-	  height: 100%;
-	  padding: 15px;
-	  -webkit-transition-duration: 0.5s;
-	  -moz-transition-duration: 0.5s;
-	  -o-transition-duration: 0.5s;
-	  transition-duration: 0.5s;
-	  border: solid 1px #999;
-	  border-radius: 5px;
-	  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-	  overflow: scroll;
- }
+ *
+ * detail slide out holds details and edit forms
+ *
+ */
 
- .detail.on {
-	  right: 0;
- }
+.detail {
+	 
+	 background: #fff;
+	 color: #333;
+	 position: fixed;
+	 top: 10px;
+	 right: -50%;
+	 width: 50%;
+	 height: 100%;
+	 padding: 15px;
+	 -webkit-transition-duration: 0.5s;
+	 -moz-transition-duration: 0.5s;
+	 -o-transition-duration: 0.5s;
+	 transition-duration: 0.5s;
+	 border: solid 1px #999;
+	 border-radius: 5px;
+	 box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+	 overflow: scroll;
+}
 
- .detail-close {
+.detail.on {
+	 right: 0;
+}
 
-	  cursor: pointer;
-	  color: #555;
-	  background-color: #fff;
-	  font-size: 32px !important;
-	  margin: 20px;
-	  border-radius: 50%;
-	  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2) !important;
- }
+.detail-close {
 
- .detail-current {
+	 cursor: pointer;
+	 color: #555;
+	 background-color: #fff;
+	 font-size: 32px !important;
+	 margin: 20px;
+	 border-radius: 50%;
+	 box-shadow: 0 3px 10px rgb(0 0 0 / 0.2) !important;
+}
 
-	  border-bottom: solid 1px black; 
-	  /* font-weight: 600; */
-	  /* color: red; */
- }
- 
- /* .detail-current::before { */
-	  
- /* 	  content: "*"; */
- /* } */
- 
- @media (max-width: 500px) {
+.detail-current {
 
-	  body {
+	 border-bottom: solid 1px black; 
+	 /* font-weight: 600; */
+	 /* color: red; */
+}
 
-			font-size: 12px !important;
-	  }
-	  
-	  button {
+/* .detail-current::before { */
 
-			font-size: 12px !important;
-	  }
-	  
-	  .form-cell {
+/* 	  content: "*"; */
+/* } */
 
-			font-size: 12px !important;
-	  }
-	  
-	  .detail {
-			right: -90%;
-			width: 90%;
-	  }
- }
+@media (max-width: 500px) {
 
- .business-units {
+	 body {
 
-	  display: block !important;
-	  float: right !important;
-	  height: 100% !important;
-	  margin: 30px 15px;
-	  // padding: 0px;
- 	  background-color: #111;
-	  width: 100%;
-     // padding: 15px !important;
-     background: #000 !important;
-     vertical-align: middle !important;
-     // margin-top: 25px !important;
-     // margin-bottom: 25px !important;
- }
- 
- .business-unit-select {
-	  position: relative;
- }
- 
- .business-unit-select::before,
- .business-unit-select::after {
-	  --size: 0.3rem;
-	  position: absolute;
-	  content: "";
-	  right: 1rem;
-	  pointer-events: none;
- }
- 
- .business-unit-select::before {
-	  border-left: var(--size) solid transparent;
-	  border-right: var(--size) solid transparent;
-	  border-bottom: var(--size) solid black;
-	  top: 40%;
- }
- 
- .business-unit-select::after {
-	  border-left: var(--size) solid transparent;
-	  border-right: var(--size) solid transparent;
-	  border-top: var(--size) solid black;
-	  top: 55%;
- }
+		  font-size: 12px !important;
+	 }
+	 
+	 button {
+
+		  font-size: 12px !important;
+	 }
+	 
+	 .form-cell {
+
+		  font-size: 12px !important;
+	 }
+	 
+	 .detail {
+		  right: -90%;
+		  width: 90%;
+	 }
+}
+
+.business-units {
+
+	 display: block !important;
+	 float: right !important;
+	 height: 100% !important;
+	 margin: 30px 15px;
+	 // padding: 0px;
+ 	 background-color: #111;
+	 width: 100%;
+    // padding: 15px !important;
+    background: #000 !important;
+    vertical-align: middle !important;
+    // margin-top: 25px !important;
+    // margin-bottom: 25px !important;
+}
+
+.business-unit-select {
+	 position: relative;
+}
+
+.business-unit-select::before,
+.business-unit-select::after {
+	 --size: 0.3rem;
+	 position: absolute;
+	 content: "";
+	 right: 1rem;
+	 pointer-events: none;
+}
+
+.business-unit-select::before {
+	 border-left: var(--size) solid transparent;
+	 border-right: var(--size) solid transparent;
+	 border-bottom: var(--size) solid black;
+	 top: 40%;
+}
+
+.business-unit-select::after {
+	 border-left: var(--size) solid transparent;
+	 border-right: var(--size) solid transparent;
+	 border-top: var(--size) solid black;
+	 top: 55%;
+}
+
+/* https://loading.io/css/ */
+
+
+.lds-hourglass,
+.lds-hourglass:after {
+  box-sizing: border-box;
+}
+.lds-hourglass {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-left: 250px;  /* for the sidebar */
+}
+.lds-hourglass:after {
+  content: " ";
+  display: block;
+  border-radius: 50%;
+  width: 0;
+  height: 0;
+  margin: 8px;
+  box-sizing: border-box;
+  border: 32px solid currentColor;
+  border-color: currentColor transparent currentColor transparent;
+  animation: lds-hourglass 1.2s infinite;
+}
+@keyframes lds-hourglass {
+  0% {
+    transform: rotate(0);
+    animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  }
+  50% {
+    transform: rotate(900deg);
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  100% {
+    transform: rotate(1800deg);
+  }
+}
+
+

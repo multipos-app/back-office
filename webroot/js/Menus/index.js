@@ -13,7 +13,7 @@ containers = [];
 function select (c) {
 	 
 	 container = c;
-	 menu = $('#' + container + '_select').val ();
+	 menu = $('#' + container + '_select').val ();	 
 	 render (c);
 }
 
@@ -26,8 +26,6 @@ function select (c) {
 function render (c) {
 
 	 container = c;
-
-	 console.log (posConfig.config ['pos_menus'] [container] ['menu_description']);
 	 
 	 if (typeof posConfig.config ['pos_menus'] [container] ['horizontal_menus'] === "undefined") {
 
@@ -85,12 +83,6 @@ function render (c) {
 					 '>' +
 					 text +
 					 '</div>';
-
-				if (i == 0) {
-					 
-					 console.log ('button 0... ' + html);
-					 console.log (b);
-				}
 		  }
 		  
 		  html += '</div>';
@@ -221,24 +213,28 @@ function button (c, m, p) {
 		  $('#button_container').toggleClass ('on');
 	 }
 
-	 console.log ('menus index button...');
-	 console.log (data);
-	 
 	 $.ajax ({type: "POST",
 				 url: url,
 				 data: data,
 				 success: function (data) {
 
 					  data = JSON.parse (data);
-
-					  console.log ('button... ');
-					  console.log (data);
-					  
 					  $('#button_container').html (data.html);
 				 }
 				});
 	 
 	 dirty (true);
+}
+
+/**
+ *
+ * update the edit and button text
+ *
+ */
+
+function updateName (container) {
+
+	 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['name'] = $('#' + container + '_name').val ();
 }
 
 /**

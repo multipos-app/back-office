@@ -156,6 +156,7 @@ section {
 	  overflow-x: hidden;
 	  transition: 0.5s;
 	  padding-top: 60px;
+	  transition: all .5s ease-in-out;
  }
 
 .sidebar a {
@@ -344,3 +345,4 @@ section {
 		  padding-right: 20px 15px;
 	 }
 }
+

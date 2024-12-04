@@ -102,7 +102,13 @@ $logo = 'multi<span class="logo-red-small">POS</span>';
 	 </head>
 
 	 <body>
-		  
+								 
+		  <div id="multipos_modal_overlay" class="multipos-modal">
+				<div id="multipos_modal_content" class="multipos-modal-content">
+					 <div class="lds-hourglass"></div>
+				</div>
+		  </div>
+					 
 		  <div class="container">
 				<div class="row">
 					 <div id="sidebar" class="sidebar">
@@ -134,7 +140,9 @@ $logo = 'multi<span class="logo-red-small">POS</span>';
 					 </div>
 				</div>
 				
-				<div id="main_content" class="main-content"></div>
+				<div id="main_content" class="main-content">
+
+				</div>
 
 		  </div>
 		  

@@ -128,7 +128,8 @@ function controller (action, absolute) {
 		  pages.shift ();
 	 }
 	 
-	 $('#main_content').html ('<div class="loader"></div>');
+	 // $('#main_content').html ('<div class="loader"></div>');
+	  $('#multipos_modal_overlay').show ();
 
 	 let url = '';
 	 if (absolute) {
@@ -160,6 +161,8 @@ function controller (action, absolute) {
 							return;
 					  }
 					  
+					  $('#multipos_modal_overlay').hide ();
+				  
 					  $('head title').text (data.title);
 					  $('#main_content').html (data.html);
 					  $('#pages').html (data.pages);

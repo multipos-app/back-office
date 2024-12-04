@@ -121,7 +121,9 @@
  var selectBatches =  [];
  
  $('#create_batch').on ('click', function (e) {
-
+	  
+	  $('#multipos_modal_overlay').show ();
+	  
      e.preventDefault ();
 
 	  let url = '/business-units/create';
@@ -132,6 +134,7 @@
 				  success: function (data) {
 
 						controller ('business-units/batches', false);
+						$('#multipos_modal_overlay').hide ();
 				  },
 				  fail: function () {
 

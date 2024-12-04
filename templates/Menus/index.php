@@ -53,7 +53,9 @@ $actions = [null => __ ('Actions'),
 
 <div class="menu-grid">
 	 
-	 <?php 
+	 <?php
+
+	 $i = 0;
 	 foreach ($posConfig ['config'] ['pos_menus'] as $container => $menus) {
 		  		  
 		  $height = null;
@@ -96,6 +98,7 @@ $actions = [null => __ ('Actions'),
 														['id' => $container . '_name',
 														 'name' => $container . '_name',
 														 'value' => $name,
+														 'onchange' => "updateName ('$container')",
 														 'class' =>'form-control button_control',
 														 'placeholder' => __ ('Menu name')]);
 								
@@ -126,21 +129,21 @@ $actions = [null => __ ('Actions'),
 									 
 								</div>
 						  </div>
-						  
-						  <div class="form-cell form-desc-cell"><?= __('Style') ?></div>
-						  <div class="grid-cell grid-cell-center">
-								<?= $this->Form->select ('style',
-																 [null => __ ('Style'),
-																  'solid' =>'Solid',
-																  'outline' => 'Outline'],
-																 ['id' => 'style',
-																  'onchange' => 'changeStyle (\'' . $container . '\')',
-																  'class' => 'custom-dropdown',
-																  'value' => $style,
-																  'label' => false]);
-								?>
-								
-						  </div>
+						  <!-- 
+								 <div class="form-cell form-desc-cell"><?= __('Style') ?></div>
+								 <div class="grid-cell grid-cell-center">
+								 <?= $this->Form->select ('style',
+								 [null => __ ('Style'),
+								 'solid' =>'Solid',
+								 'outline' => 'Outline'],
+								 ['id' => 'style',
+								 'onchange' => 'changeStyle (\'' . $container . '\')',
+								 'class' => 'custom-dropdown',
+								 'value' => $style,
+								 'label' => false]);
+								 ?>
+								 
+								 </div> -->
 						  
 						  <div class="grid-cell grid-cell-center grid-span-all">
 								<?= $this->Form->select ($container . '_action',
@@ -156,7 +159,8 @@ $actions = [null => __ ('Actions'),
 				</div>
 		  </div>
 	 </div>
-		  <?php 
+		  <?php
+		  $i ++;
 		  }
 		  ?>
 		  
