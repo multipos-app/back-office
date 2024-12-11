@@ -69,6 +69,8 @@ class TicketsController extends PosAppController {
 								  ->join ($this->join)
         						  ->order (['Tickets.complete_time' => 'desc'])
 		  						  ->distinct (['Tickets.id']);
+
+		  $this->debug ($this->join);
 		  
 		  $t = $this->paginate ($q);
 		  
@@ -379,7 +381,9 @@ class TicketsController extends PosAppController {
 	 
     private function conditions ($args) {
 		  
-        $this->conditions = [];
+   	  $this->debug ($args);
+		  
+		  $this->conditions = [];
         $this->join = [];
 		  $session = $this->request->getSession ();
 
@@ -412,6 +416,7 @@ class TicketsController extends PosAppController {
 						  
 						  $args [] = 'end_date';
 						  $args [] = $startDate + ONE_DAY;
+						  
 						  break;
 
 					 case 'index':
@@ -462,6 +467,7 @@ class TicketsController extends PosAppController {
 
 					 case 'cash': 
 					 case 'credit':
+					 case 'account':
 						  
 						  $this->conditions [] = "tender_desc = " . "'" . $key . "'";
 						  break;
