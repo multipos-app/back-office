@@ -26,3 +26,14 @@ This project is the back office component of multipos-app/pos a cloud based back
 - Standard pricing, scanned, enter sku or tied to a button
 - Size, i.e. Fountain drinks, small, medium, large
 - Metric, pound, liter, kg
+
+## Install
+
+-Create a LAMP server
+-Install cakePHP, https://book.cakephp.org/4/en/installation.html
+-Lay down back office on top of that
+-Set up database in config/app.php
+-Set up routes in config/routes.php
+-create the merchant database (provides merchant logins)
+-create a database for each merchant m_<merchant id from merchant db>
+xs
