@@ -55,16 +55,13 @@ class PosController extends AppController {
             if ($merchantUser) {
                 
                 $dbname = 'm_' . $merchantUser ['merchant_id'];
-         
                 $this->dbconnect ($dbname);
-         
-                $response = ['status' => 0,
+					 
+                $response = ['register_status' => 0,
 									  'merchant_id' => $merchantUser ['merchant_id']];
 
 					 $query = TableRegistry::get ('BusinessUnits')->find ()->order ('business_type asc');
 					 foreach ($query as $bu) {
-
-						  $this->debug ($bu);
 						  
 						  if ($bu ['business_type'] == 1) {
 								
@@ -91,12 +88,13 @@ class PosController extends AppController {
 																	 'config_desc' => $posConfig ['config_desc']];
 					 }
 					 
-					 $response ['status'] = 0;
+					 $response ['register_status'] = 0;
 				}
             else {
 					 
-                $response = ['status' => 1,
-                             'status_text' => 'invalid_username_or_password'];
+                $response = ['register_status' => 1,
+                             'status_text' => 'invalid_username_or_password',
+									  'remote_ip' =>  $_SERVER ['HTTP_X_FORWARDED_FOR']];
             }
         }
 		  
@@ -375,7 +373,7 @@ class PosController extends AppController {
 
         if (!empty ($this->request->getData ())) {
 				
-				$this->dbconnect ($this->request->getData () ['dbname']);
+				$this->dbconnect ('m_' . $this->request->getData () ['merchant_id']);
 
 				$invItem = TableRegistry::get ('InvItems')
 												->find ()
@@ -413,7 +411,7 @@ class PosController extends AppController {
             $this->debug ("pos inventory update... ");
             $this->debug ($this->request->getData ());
 
-            $this->dbconnect ($this->request->getData () ['dbname']);
+            $this->dbconnect ('m_' . $this->request->getData () ['merchant_id']);
 
             foreach ($this->request->getData () ['updates'] as $update) {
 
