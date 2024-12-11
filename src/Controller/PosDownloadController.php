@@ -261,6 +261,8 @@ class PosDownloadController extends PosApiController {
 		  $response = ['count' => count ($updates),
 							'total' => $total,
 							'updates' => $updates];
+
+		  $this->debug ($response);
 		  
 		  $this->jsonResponse ($response);
 	 }
