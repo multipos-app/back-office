@@ -151,6 +151,23 @@ function controller (action, absolute) {
 	 
 	 $.ajax ({type: "GET",
 				 url: url,
+				 statusCode: {
+					  500: function () {
+							
+							$('#multipos_modal_overlay').hide ();
+							alert ("Internal error, please contact support");
+							
+							if (pages.length > 1) {
+		  
+								 pages.pop ();
+								 controller (pages.pop (), false);
+							}
+							else {
+								 
+								 controller ('/sales', true);
+							}
+					  }
+				 },
 				 success: function (data) {
 					  
 					  data = JSON.parse (data);
