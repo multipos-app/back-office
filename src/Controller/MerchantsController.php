@@ -139,7 +139,7 @@ class MerchantsController extends AppController {
 						  $response = ['status' => 1,
 											'status_text' => __ ('Bad password')];
 						  
-                    $this->debug ('merchant bad pass... ' . $this->request->getData () ['uname'], 'error');
+                    $this->debug ('merchant bad pass... ' . $this->request->getData () ['uname'] . ' '. $_SERVER ['HTTP_X_FORWARDED_FOR'], 'error');
                 }
             }
             else {
@@ -147,7 +147,7 @@ class MerchantsController extends AppController {
  					 $response = ['status' => 1,
 									  'status_text' => __ ('Bad user/email')];
 					 
-               $this->debug ('merchant not found... ' . $this->request->getData () ['uname']);
+               $this->debug ('merchant not found... ' . $this->request->getData () ['uname'] . ' '. $_SERVER ['HTTP_X_FORWARDED_FOR']);
             }
 				
  				/* $this->set ('response', $response);
@@ -508,7 +508,7 @@ class MerchantsController extends AppController {
 				$this->merchant ['bu_names'] [$businessUnit ['id']] = $businessUnit ['business_name'];
         }
         
-        $this->debug ('login... ' . $merchant ['uname'] . ' -> ' . $merchant ['merchant_id'] . ' -> ' . $merchant ['role'] . ' -> ' . $buIndex);
+        $this->debug ('login... ' . $merchant ['uname'] . ' -> ' . $merchant ['merchant_id'] . ' -> ' . $merchant ['role'] . ' -> ' . $buIndex . ' '. $_SERVER ['HTTP_X_FORWARDED_FOR']);
 		  
         // intitial setup, point to corp
                 
