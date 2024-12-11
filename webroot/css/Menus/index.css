@@ -140,6 +140,11 @@
 	 border: solid 1px #aaa;
 }
 
+.fa-center {
+
+	 margin-top: 15px !important;
+}
+
 .form-control {
 
 	 height: 36px !important;

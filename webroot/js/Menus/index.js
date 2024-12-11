@@ -41,7 +41,9 @@ function render (c) {
 	 if (posConfig.config ['pos_menus'] [container] ['horizontal_menus'].length > 0) {
 		  		  
 		  let buttons = menus [menu] ['buttons'];
-
+		  
+		  menus [menu] ['size'] = buttons.length;
+		  
 		  name = menus [menu] ['name'];
 		  width = menus [menu] ['width'];
 		  height = parseInt (menus [menu] ['buttons'].length / width);
@@ -61,28 +63,28 @@ function render (c) {
 				// handle legacy colors
 				
 				let backgroundStyle = '';
-				let backgroundClass = '" ';
 
-				if (b.color != null) {
-					 					 
-					 if (b.color.startsWith ('color')) {
-						  
-						  backgroundClass = ' ' + b.color + '"';
-					 }
-					 else {
-						  
-						  backgroundStyle = 'style="color:white;background: ' + b.color + ';"';
-					 }
+				if (b.class == 'Null') {
+					 
+					 html +=
+						  '<div id="' + container + '_' + menu + '_' + i + '" ' +
+						  'class="grid-cell grid-cell-center button" ' +
+						  'onclick="button (\'' + container + '\', ' + menu + ', ' + i + ')" ' +
+						  'style="color:white;background: #fff;">' +
+						  '<i class="fa fa-plus fa-large fa-center"></i>' +
+						  '</div>';
 				}
-				
-				html +=
-					 '<div id="' + container + '_' + menu + '_' + i + '" ' +
-					 'class="grid-cell grid-cell-left button' + backgroundClass +
-					 'onclick="button (\'' + container + '\', ' + menu + ', ' + i + ')" ' +
-					 backgroundStyle +
-					 '>' +
-					 text +
-					 '</div>';
+				else {
+					 
+					 html +=
+						  '<div id="' + container + '_' + menu + '_' + i + '" ' +
+						  'class="grid-cell grid-cell-left button" ' +
+						  'onclick="button (\'' + container + '\', ' + menu + ', ' + i + ')" ' +
+						  'style="color:white;background: ' + b.color + ';"' +
+						  '>' +
+						  text +
+						  '</div>';
+				}				
 		  }
 		  
 		  html += '</div>';
@@ -117,6 +119,7 @@ function render (c) {
 
 function actions (c) {
 
+
 	 switch ($('#' + c + '_action').val ()) {
 
 	 case 'add_before':
@@ -130,6 +133,40 @@ function actions (c) {
 		  posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['name'] = $('#' + c + '_name').val ().toUpperCase ();
 		  break;
 
+	 case 'resize':
+
+		  curSize = posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['size'];
+		  newSize = $('#' + c + '_rows').val () * $('#' + c + '_cols').val ();
+		  
+		  console.log ('resize... ' + curSize + " " + newSize);
+		  console.log (posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['buttons'] [0]);
+
+		  if (newSize < curSize) {
+
+				if (!confirm ('New size may remove some existing buttons.')) {
+					 
+					 return;
+				}
+		  }
+		  
+		  if (newSize < curSize) {
+				
+				posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['buttons'].length = newSize;
+		  }
+		  else {
+				
+	 			for (i = 0; i < (newSize - curSize); i ++) {
+					 
+					 let b = {"class": "Null", "color": "#fff", "text": ""};
+					 
+					 posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['buttons'].push (b);
+				}
+		  }
+		  
+		  render (c);
+		  
+		  break;
+		  
 	 case 'delete':
 
 		  if (confirm ('Are you sure you want to delete ' + posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['name'])) {
@@ -234,7 +271,8 @@ function button (c, m, p) {
 
 function updateName (container) {
 
-	 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['name'] = $('#' + container + '_name').val ();
+	 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['name'] = $('#' + container + '_name').val ().toUpperCase ();
+	 dirty (true);
 }
 
 /**
@@ -271,7 +309,7 @@ function buttonDesc (text) {
  
  function buttonClear () {
 	  
-	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null", "color": "#999"};
+	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null"};
 	  render (container);
 	  dirty (true);
  }

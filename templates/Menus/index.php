@@ -90,7 +90,7 @@ $actions = [null => __ ('Actions'),
 				<div class="menu-controls-grid float-top">
 					 
 					 <div class="add-menu-grid">
-						  
+
 						  <div class="form-cell form-desc-cell"><?= __('Menu name') ?></div>
 						  <div class="grid-cell grid-cell-center">
 
