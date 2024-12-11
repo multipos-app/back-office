@@ -34,46 +34,6 @@ $titles = ['total' => ['text' => 'gross', 'type' => 'currency', 'link' => 'perio
            'refunds' => ['text' => 'refunds', 'type' => 'currency', 'link' => 'ticket_type/refund_sales'],
            'return_items' => ['text' => 'return items', 'type' => 'currency', 'link' => 'ticket_type/return_items']];
 
-switch ($merchant ['subscription_level']) {
-
-		  case 'basic':
-		  
-		  $titles = ['total' => ['text' => 'gross', 'type' => 'currency'],
-						 'tax' => ['text' => 'tax',  'type' => 'currency'],
-						 'cash' => ['text' => 'cash',  'type' => 'currency'],
-						 'paid_out' => ['text' => 'paid out', 'type' => 'currency'],
-						 'credit' => ['text' => 'credit', 'type' => 'currency'],
-						 'card' => ['text' => 'card', 'type' => 'currency'],
-						 'debit' => ['text' => 'debit', 'type' => 'currency'],
-						 'wallet' => ['text' => 'wallet', 'type' => 'currency'],
-						 'buy_now_pay_later' => ['text' => 'buy now pay later', 'type' => 'currency'],
-						 'square_account' => ['text' => 'square account', 'type' => 'currency'],
-						 'external' => ['text' => 'external', 'type' => 'currency'],
-						 'ebt_foodstamp' => ['text' => 'ebt foodstamp', 'type' => 'currency'],
-						 'mobile' => ['text' => 'mobile', 'type' => 'currency'],
-						 'check' => ['text' => 'check', 'type' => 'currency'],
-						 'other' => ['text' => 'other', 'type' => 'currency'],
-						 'gift_cards' => ['text' => 'gift cards', 'type' => 'currency'],
-						 'gift_certificates' => ['text' => 'gift certificates', 'type' => 'currency'],
-						 'account' => ['text' => 'account', 'type' => 'currency', 'link' => 'account'],
-						 'taxable' => ['text' => 'tax sales', 'type' => 'currency'],
-						 'split' => ['text' => 'split', 'type' => 'currency', 'link' => 'tax'],
-						 'round' => ['text' => 'round', 'type' => 'currency', 'link' => 'tax'],
-						 'non_taxable' => ['text' => 'non tax sales', 'type' => 'currency'],
-						 'discounts' => ['text' => 'discounts', 'type' => 'currency'],
-						 'tips' => ['text' => 'tips', 'type' => 'currency'],
-						 'void_sales' => ['text' => 'void sales', 'type' => 'currency'],
-						 'avg_sale' => ['text' => 'avg net sales', 'type' => 'currency'],
-						 'customer_count' => ['text' => 'customer count', 'type' => 'int'],
-						 'return_sales' => ['text' => 'return sales', 'type' => 'currency'],
-						 'comp_sales' => ['text' => 'comp sales', 'type' => 'currency'],
-						 'no_sales' => ['text' => 'no sales', 'type' => 'int'],
-						 'void_items' => ['text' => 'void items', 'type' => 'currency'],
-						 'refunds' => ['text' => 'refunds', 'type' => 'currency'],
-						 'return_items' => ['text' => 'return items', 'type' => 'currency']];
-		  break;
-}
-
 ?>
 
 <style>
@@ -165,6 +125,8 @@ switch ($merchant ['subscription_level']) {
 					 $link = $titles [$key] ['link'];
 				}
 		  }
+
+		  $this->debug ("sales link... $link");
 		  
 		  echo '<div class="grid-row-wrapper">';
 		  echo '<div class="grid-cell grid-cell-left data-cell">' . __ ($title) . '</div>';
