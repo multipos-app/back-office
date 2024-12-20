@@ -32,11 +32,10 @@
 </div>
 
 <script>
-
  
  b = <?php echo json_encode ($button); ?>;
  controllers = <?= json_encode ($button ['controls']) ?>;
- 
+
  html =
      '<select id="select_control" name="select_control" class="custom-dropdown" onchange="control ();">' +
      '<option selected value="">Select a button action</option>';
@@ -46,8 +45,8 @@
 	  if (className.startsWith ('separator')) {
          html += '<option disabled class="select-separator">' + controllers [className] ['desc'] + '</option>';
 	  }
-	  else if (controllers [className] ['desc'].length > 0) {
-         html += '<option value="' + className + '">' + controllers [className] ['desc'] + '</option>';
+	  else if (controllers [className] ['text'].length > 0) {
+         html += '<option value="' + className + '">' + controllers [className] ['text'] + '</option>';
 	  }
  }
  
@@ -55,12 +54,14 @@
  
  function control () {
 	  
-     let control = controllers [$('#select_control').val ()];
+     control = controllers [$('#select_control').val ()];
 	  
+	  control ['new'] = true;
 	  control ['pos_config_id'] = $('#pos_config_id').val ();
 	  control ['container'] = $('#container').val ();
 	  control ['menu'] = $('#menu').val ();
 	  control ['pos'] = $('#pos').val ();
+	  
 	  $.ajax ({type: "POST",
 	  	  
 				  url: '/menus/button/',
@@ -70,7 +71,7 @@
 						data = JSON.parse (data);
 
 						if (data.status == 0) {
-							 
+							 							 
 							 $('#button_container').html (data.html);
 						}
 				  }

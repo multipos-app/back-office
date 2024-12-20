@@ -1,9 +1,29 @@
+/**
+ * Copyright (C) 2023 multiPos, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-container = '';
-menu = 0;
-pos = 0;
-isDirty = false;
-containers = [];
+var container = '';       // the screen menu areas
+var menu = 0;             // index of the menu in the container
+var pos = 0;              // index of the button in the menu
+var isDirty = false;      // something has changed
+var containers = [];      // list of menu areas
+var control = null;       // control associated with the current button
+var buttonColor = null;   // color of the button
+var buttonText = null;    // text of the button
+var buttonID = null;      // id of button
+var colorIndex = -1;      // selected color
 
 /**
  *
@@ -39,7 +59,7 @@ function render (c) {
 	 let width = 0;
 	 
 	 if (posConfig.config ['pos_menus'] [container] ['horizontal_menus'].length > 0) {
-		  		  
+		  
 		  let buttons = menus [menu] ['buttons'];
 		  
 		  menus [menu] ['size'] = buttons.length;
@@ -49,7 +69,7 @@ function render (c) {
 		  height = parseInt (menus [menu] ['buttons'].length / width);
 		  
 		  let html = '<div class="button-grid button-' + width + '-grid">';
-		  		  
+		  
 		  for (i = 0; i < buttons.length; i ++) {
 
 				b = buttons [i];
@@ -69,8 +89,8 @@ function render (c) {
 					 html +=
 						  '<div id="' + container + '_' + menu + '_' + i + '" ' +
 						  'class="grid-cell grid-cell-center button" ' +
-						  'onclick="button (\'' + container + '\', ' + menu + ', ' + i + ')" ' +
-						  'style="color:white;background: #fff;">' +
+						  'onclick="edit (\'' + container + '\', ' + menu + ', ' + i + ')" ' +
+						  'style="color:white;background: #eeeeee;">' +
 						  '<i class="fa fa-plus fa-large fa-center"></i>' +
 						  '</div>';
 				}
@@ -79,7 +99,7 @@ function render (c) {
 					 html +=
 						  '<div id="' + container + '_' + menu + '_' + i + '" ' +
 						  'class="grid-cell grid-cell-left button" ' +
-						  'onclick="button (\'' + container + '\', ' + menu + ', ' + i + ')" ' +
+						  'onclick="edit (\'' + container + '\', ' + menu + ', ' + i + ')" ' +
 						  'style="color:white;background: ' + b.color + ';"' +
 						  '>' +
 						  text +
@@ -138,9 +158,6 @@ function actions (c) {
 		  curSize = posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['size'];
 		  newSize = $('#' + c + '_rows').val () * $('#' + c + '_cols').val ();
 		  
-		  console.log ('resize... ' + curSize + " " + newSize);
-		  console.log (posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['buttons'] [0]);
-
 		  if (newSize < curSize) {
 
 				if (!confirm ('New size may remove some existing buttons.')) {
@@ -157,7 +174,7 @@ function actions (c) {
 				
 	 			for (i = 0; i < (newSize - curSize); i ++) {
 					 
-					 let b = {"class": "Null", "color": "#fff", "text": ""};
+					 let b = {"class": "Null", "color": "#eeeeee", "text": ""};
 					 
 					 posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['buttons'].push (b);
 				}
@@ -209,12 +226,13 @@ function addMenu (c, m, where) {
 	 buttons = Array ();
 	 for (i=0; i < (parseInt ($('#' + container + '_rows').val ()) * parseInt ($('#' + container + '_cols').val ())); i ++) {
 
-		  buttons.push ({"text": "", "class": "Null", "color": "#fff"});
+		  buttons.push ({"text": "", "class": "Null", "color": "#eeeeee"});
 	 }
 
 	 posConfig.config ['pos_menus'] [container] ['horizontal_menus'].splice (insert,
 																									 0,
 																									 {"type": "functions",
+																									  "color": "#eeeeee",
 																									  "name": $('#' + container + '_name').val ().toUpperCase (),
 																									  "width": parseInt ($('#' + container + '_cols').val ()),
 																									  "buttons": buttons});
@@ -229,7 +247,7 @@ function addMenu (c, m, where) {
  *
  */
 
-function button (c, m, p) {
+function edit (c, m, p) {
 	 
 	 let url = '/menus/button';
 
@@ -237,16 +255,24 @@ function button (c, m, p) {
 	 menu = m;
 	 pos = p;
 	 containers [c] = [m, p];
-	 
+	 buttonID = '#' + container + '_' + menu + '_' + pos;
+
 	 data = posConfig.config.pos_menus [c] ['horizontal_menus'] [m] ['buttons'] [p];
+	 
+	 if (data.class == 'Null') {
+		  
+		  $(buttonID).css ("background-color", '#999999');
+		  $(buttonID).html ('');
+	 }
+	 
 	 data ['pos_config_id'] = posConfig ['id'];
 	 data ['container'] = c;
 	 data ['menu'] = m;
 	 data ['pos'] = p;
 	 data ['exists'] = true;
-	 	 
+	 
 	 if (!$('#button_container').hasClass ('on')) {
-	  
+		  
 		  $('#button_container').toggleClass ('on');
 	 }
 
@@ -295,25 +321,26 @@ function buttonDesc (text) {
  *
  */
 
- function buttonClose () {
-	  
-	  $('#button_container').html ('');
-	  $('#button_container').toggleClass ('on');
- }
+function buttonClose () {
+	 
+	 $('#button_container').html ('');
+	 $('#button_container').toggleClass ('on');
+}
 
- /**
-  *
-  * clear button
-  *
-  */
- 
- function buttonClear () {
-	  
-	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null"};
-	  render (container);
-	  dirty (true);
- }
- 
+/**
+ *
+ * clear button
+ *
+ */
+
+function buttonClear () {
+	 
+	 posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = {"text": "", "class": "Null"};
+	 buttonClose ();
+	 render (container);
+	 dirty (true);
+}
+
 function changeStyle (c) {
 	 
 	 posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['style'] = $('#style').val ();

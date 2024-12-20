@@ -248,6 +248,11 @@
 	 vertical-align: middle !important;
 }
 
+.button-color-select {
+	 
+	 border: solid 5px #000;
+}
+
 .float-top {
 
     display: block;

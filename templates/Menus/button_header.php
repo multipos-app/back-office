@@ -1,4 +1,20 @@
-<?php 
+<?php
+
+/**
+ * Copyright (C) 2023 multiPos, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 $colors = ['#7B0100',
 			  '#CA3701',
@@ -48,7 +64,15 @@ $colors = ['#006482',
 			  '#512D55',
 			  '#679ACD',
 			  '#696969',
-			  '#8C0306'];
+			  '#8C0306',
+			  '#007002',
+			  '#21512D',
+			  '#42008A',
+			  '#B2005B',
+			  '#7F4F4F',
+			  '#6161CD',
+			  '#520100',
+			  '#8F2703'];
 
 ?>
 
@@ -114,74 +138,106 @@ $colors = ['#006482',
 
 <script>
  
- b = <?php echo json_encode ($button); ?>;
- 
- $('#' + b ['menu'] + '_' + b ['pos']).removeClass ('empty-button');
- posConfig.config.pos_menus [b.container].horizontal_menus [b.menu].buttons [b.pos] = b;
- 
+ button = <?php echo json_encode ($button); ?>;
+
 </script>
 
 <div class="form-section">
 	 <i class="fa fa-square-xmark fa-large" onclick="buttonClose ()"></i>
 </div>
 
-<div class="form-grid button-edit-grid">
+<form id="button_edit_form" name="button_edit_form"> <!-- start button edit form -->
 
-	 <div class="form-cell form-desc-cell"><?= __('Button text') ?></div>
-	 <?php
-
-	 $text = '';
-	 if (isset ($button ['text'])) {
-
-		  $text = $button ['text'];
-	 }
+	 <input type="hidden" id="color" name="color" value="<?= $button ['color'] ?>">
+	 <input type="hidden" name="fixed" value="1">
 	 
-	 echo $this->input ('fa-text-size',
-							  ['id' =>'button_desc',
-								'name' => 'button[button_desc]',
-								'value' => $text,
-								'class' =>'form-control button_control',
-								'placeholder' => __ ('Button text')]);
-	 ?>
-	 
-	 <div class="grid-cell grid-span-all">
+	 <div class="form-grid button-edit-grid">
+
+		  <div id="button_text_echo" class="form-cell form-desc-cell"><?= __('Button text') ?></div>
+		  <?php
+
+		  $text = '';
+		  if (isset ($button ['text'])) {
+
+				$text = $button ['text'];
+		  }
 		  
-		  <div class="color-grid">
-
-				<?php foreach ($colors as $color) { ?>
-
-					 <div class="grid-cell">
-						  
-						  <button type="button" class="btn btn-block button-edit-color" style="background: <?= $color ?>;" onclick="color ('<?= $color ?>')"></button>
-						  
-					 </div>
-					 
-				<?php } ?>
+		  echo $this->input ('fa-text-size',
+									['id' =>'text',
+									 'name' => 'text',
+									 'value' => $text,
+									 'class' =>'form-control button_control',
+									 'placeholder' => __ ('Button text')]);
+		  ?>
+		  
+		  <div class="grid-cell grid-span-all">
 				
+				<div class="color-grid">
+
+					 <?php
+					 
+					 $index = 0;
+					 foreach ($colors as $color) { ?>
+
+						  <div class="grid-cell">
+								
+								<button id="color_<?= $index ?>" type="button" class="btn btn-block button-edit-color" style="background: <?= $color ?>;" onclick="buttonColor (<?= $index?>, '<?= $color ?>')"></button>
+								
+						  </div>
+						  
+						  <?php
+						  
+						  $index ++;
+						  } ?>
+						  
+				</div>
 		  </div>
 	 </div>
-</div>
-
-<script>
- 
- function buttonClose () {
+	 
+	 <!-- end of form is in button_footer.php -->
+	 
+	 <script>
 	  
-	  $('#button_container').toggleClass ('on');
- }
-
- $('#button_desc').on ('keyup', function (e) {
-
-	  let text = $('#button_desc').val ().toUpperCase ();
-	  $('#button_text').html (text);
-	  $('#' + container + '_' + menu + '_' + pos).html (text);	  
- 	  posConfig.config.pos_menus [container].horizontal_menus [menu].buttons [pos].text = text;
- });
- 
- function color (color) {
+	  $('#text').val (button.text.toUpperCase ());
+	  $(buttonID).html (button.text.toUpperCase ());
 	  
-     $('#button_text').css ({'background-color': '"' + color + '"'});
-	  $('#' + container + '_' + menu + '_' + pos).css ({'background-color': '"' + color + '"'});	  
-	  posConfig.config.pos_menus [container].horizontal_menus [menu].buttons [pos].color = color;
- }
- 
-</script>
+	  function save () {
+			
+			let button = $('#button_edit_form').serializeJSON ();
+						
+			if (button.color.length == 0) {
+
+				 button.color = '#eeeeee';
+			}
+			
+			posConfig.config.pos_menus [container] ['horizontal_menus'] [menu] ['buttons'] [pos] = button;
+			buttonClose ();
+			render (container);
+	  }
+	  
+	  function buttonClose () {
+			
+			$('#button_container').toggleClass ('on');
+	  }
+
+	  $('#button_desc').on ('keyup', function (e) {
+
+			let text = $('#button_desc').val ().toUpperCase ();
+			$('#button_text').html (text);
+			$(buttonID).html (text);
+	  });
+	  
+	  function buttonColor (index, color) {
+
+			$('#color').val (color);
+			
+			if (colorIndex >= 0) {
+				 
+				 $('#color_' + colorIndex).removeClass ('button-color-select');
+			}
+
+			colorIndex = index;
+			$('#color_' + index).addClass ('button-color-select');
+			$(buttonID).css ("background-color", color);
+	  }
+	 </script>

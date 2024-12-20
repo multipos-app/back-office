@@ -43,19 +43,39 @@ class MenusController extends PosAppController {
                                  'index',
                                  compact ('posConfig')));
     }
+	 
+    public function all ($configID) {
+
+        $posConfigTable = TableRegistry::get ('PosConfigs');
+        $posConfig = $posConfigTable
+                   ->find ()
+                   ->where (['id' => $configID])
+                   ->first ();
+        
+        $posConfig = $posConfig->toArray ();
+        $posConfig ['config'] = json_decode ($posConfig ['config'], true);
+		  
+        $data = ['posConfig' => $posConfig];
+		  
+        return ($this->response (__ ('Menus'),
+                                 'Menus',
+                                 'all',
+                                 compact ('posConfig')));
+    }
 
     function button () {
 
 		  if (!empty ($this->request->getData ())) {
 
-				$button = $this->request->getData ();
-
-				$this->debug ($button);
-				
 				$template = 'empty';
 				$data = [];
 				$extras = [];
-				
+				$button = $this->request->getData ();
+				$new = isset ($button ['new']);
+
+				$this->debug ('menus button... ');
+				$this->debug ($button);
+
 				switch ($button ['class']) {
 						  
 					 case 'Item':
@@ -68,21 +88,18 @@ class MenusController extends PosAppController {
 						  else {
 								
 								$template = 'item';
-								if (!isset ($button ['text'])) {
-									 
-									 $button ["text"] = "";
-									 $button ["class"] = $button ['class'];
-									 $button ["color"] =  "#999999";
-									 $button ["params"] = ["sku" =>  ""];
-									 
-									 $extras ['pricingOptions'] = [null => __ ('Add Item'),
-																			 'existing' => 'Existing item',
-																			 'standard_pricing' => 'Standard pricing, one price per item',
-													 						 'variant_pricing' => 'Variant pricing (size, color...)',
-																			 'open_pricing' => 'Open/enter price, prompt for price',
-																			 'metric_pricing' => 'Price by volume/weight, prompt for value'];
-									 
-								}
+								
+								$button ["text"] = "";
+								$button ["class"] = $button ['class'];
+								$button ["color"] =  "#999999";
+								$button ["params"] = ["sku" =>  ""];
+								
+								$extras ['pricingOptions'] = [null => __ ('Add Item'),
+																		'existing' => 'Existing item',
+																		'standard_pricing' => 'Standard pricing, one price per item',
+													 					'variant_pricing' => 'Variant pricing (size, color...)',
+																		'open_pricing' => 'Open/enter price, prompt for price',
+																		'metric_pricing' => 'Price by volume/weight, prompt for value'];
 						  }	
 						  break;
 
@@ -94,11 +111,41 @@ class MenusController extends PosAppController {
 					 case 'Navigate':
 
 						  $template = 'navigate';
-						  $button ["text"] = "";
-						  $button ["class"] = "Navigate";
-						  $button ["color"] =  "#999999";
+
+						  if ($new) {
+								
+								$button ["text"] = "";
+								$button ["class"] = "Navigate";
+								$button ["color"] =  "#999999";
+						  }
 						  break;
 
+					 case 'ItemMarkdown':
+
+						  $template = 'item_markdown';
+
+						  if ($new) {
+								
+								$button ["text"] = "";
+								$button ["class"] = "ItemMarkdown";
+								$button ["color"] =  "#999999";
+								$button ["params"] = ["receipt_text" => ""];
+						  }
+						  break;
+						  
+					 case 'SaleDiscount':
+
+						  $template = 'sale_discount';
+						  $button ["class"] = "SaleDiscount";
+						  
+						  if ($new) {
+								
+								$button ["color"] =  "#999999";
+								$button ["params"] = ["receipt_text" => "",
+															 "percent" =>  "0"];
+						  }
+						  break;
+						  
 					 case 'Null':
 						  
 						  $query = TableRegistry::get ('PosControlCategories')
@@ -113,7 +160,7 @@ class MenusController extends PosAppController {
 								
 								foreach ($controlCategories ['pos_controls'] as $control) {
 									 
-									 $controls [$control ['class']] = ['desc' => $control ['description'],
+									 $controls [$control ['class']] = ['text' => $control ['description'],
 																				  'class' => $control ['class'],
 																				  'params' => json_decode ($control ['params'], true),
 																				  'help' => $control ['help_text']];
@@ -142,9 +189,9 @@ class MenusController extends PosAppController {
 						  $data [$key] = $value;
 					 }
 				}
-				
-				$this->debug ("button template... $template");
-				$this->debug ($data);
+
+				/* $this->debug ("menus button... $template");
+					$this->debug ($data);*/
 				
 				return ($this->response (__ ('Menus'),
 												 'Menus',

@@ -7,6 +7,18 @@
      grid-template-columns: 1fr 2fr;
  }
 
+ .item-controls-grid {
+
+     display: grid;
+     width: 100%;
+     grid-template-rows: 1fr;
+     grid-template-columns: 1fr 1fr 1fr;
+ 	  grid-column-gap: 15px;
+ 	  grid-row-gap: 25px;
+	  margin-top: 25px;
+	  margin-bottom: 50px;
+ }
+ 
 </style>
 
 <?php
@@ -30,10 +42,14 @@ include ('button_header.php');
 	 <div class="form-cell form-display-cell" id='item_desc'><?= $button ['text'] ?></div>
 </div>
 
-<div id="edit_item_controls" class="form-submit-grid grid-span-all">
+<div id="edit_item_controls" class="item-controls-grid">
 	 
 	 <div>
-		  <button type="button" class="btn btn-success" onclick="itemDisplay ()"><?= __ ('Edit Item') ?></button>
+		  <button type="button" class="btn btn-success" onclick="save ()"><?= __ ('Save') ?></button>
+	 </div>
+	 
+	 <div>
+		  <button type="button" class="btn btn-primary" onclick="itemDisplay ()"><?= __ ('Edit Item') ?></button>
 	 </div>
 	 
 	 <div>

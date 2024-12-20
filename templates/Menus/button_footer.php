@@ -1,13 +1,10 @@
-<?php
 
-$this->debug ('menu button footer...');
-
-?>
+</form> <!-- end button edit form -->
 
 <div class="form-submit-grid">
 	 
 	 <div>
-		  <button type="button" class="btn btn-success" onclick="buttonClose ()"><?= __ ('Save') ?></button>
+		  <button type="button" class="btn btn-success" onclick="save ()"><?= __ ('Save') ?></button>
 	 </div>
 	 
 	 <div>

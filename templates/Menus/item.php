@@ -13,6 +13,8 @@ $this->debug ('menus item...');
 
 ?>
 
+<input type="hidden" name="class" value="Item">
+
 <div class="form-grid">
 
 	 <div id="add_item_container" class="form-grid button-edit-grid">
@@ -34,7 +36,7 @@ $this->debug ('menus item...');
 <div class="form-submit-grid">
 	 
 	 <div>
-		  <button type="button" class="btn btn-success" onclick="itemUpdate ()"><?= __ ('Save') ?></button>
+		  <button type="button" class="btn btn-success" onclick="save ()"><?= __ ('Save') ?></button>
 	 </div>
 	 
 	 <div>

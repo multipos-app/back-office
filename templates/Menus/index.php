@@ -186,3 +186,4 @@ $actions = [null => __ ('Actions'),
 </div>
 
 <?= $this->Html->script (['Menus/index']); ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.serializeJSON/3.2.1/jquery.serializejson.min.js"></script>
