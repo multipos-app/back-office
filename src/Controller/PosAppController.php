@@ -442,7 +442,7 @@ class PosAppController extends AppController {
 
     public function notifyPOS () {
 		  
-		  $exec = 'mosquitto_pub -h localhost -t ' . $this->merchant ['mqtt_broker'] .
+		  $exec = 'mosquitto_pub -h localhost ' .
 					 ' -m \'{"method": "download"}\'' .
 					 ' -t \'multipos/' . $this->merchant ['merchant_id'] . '\'';
 

@@ -48,11 +48,7 @@ class PosApiController extends AppController {
         $this->RequestHandler->respondAs ('json');
     }
 
-    public function save ($table, $entity) {
-        
-        $table = TableRegistry::get ($table);
-		  
-        $res = $table->save ($entity);
+    public function batch ($table, $id) {
 
         $batchID = 0;
         $batchTable = TableRegistry::get ('Batches');
@@ -68,64 +64,56 @@ class PosApiController extends AppController {
         else {
             
             $batch = ['batch_desc' => __ ('Auto batch'),
-                      'batch_type' =>  0,
-                      'business_unit_id' => $this->buID];
+                      'batch_type' =>  0];
             
             $batch = $batchTable->save ($batchTable->newEntity ($batch));
             $batchID = $batch ['id'];
         }
         
         $batchEntry = ['business_unit_id' => 0,
-                       'batch_id' => $batchID,
-                       'update_table' => $table->getTable (),
-                       'update_id' => $res ['id'],
-                       'update_action' => 0,
-                       'execution_time' => time ()];
+							  'batch_id' => $batchID,
+							  'update_table' => $table,
+							  'update_id' => $id,
+							  'update_action' => 0,
+							  'execution_time' => time ()];
         
-        
-        $batchEntryTable = TableRegistry::get ('BatchEntries');
-        $batchEntry = $batchEntryTable->newEntity ($batchEntry);
-        $batchEntryTable->save ($batchEntry);
+        $batchEntriesTable = TableRegistry::get ('BatchEntries');
+        $batchEntry = $batchEntriesTable->newEntity ($batchEntry);
+        $batchEntriesTable->save ($batchEntry);
 
         $batch ['update_count'] += 1;
         $batchTable->save ($batch);
+	 }
+
+    /* protected function addBatch ($merchantID, $updateTable, $updateID) {
+
+		 $this->debug ("add batch... $merchantID, $updateTable, $updateID");
+		 
+	  *     $batchEntriesTable = TableRegistry::get ('BatchEntries');
+
+		 $batchEntry = $batchEntriesTable->newEntity (['business_unit_id' => 0,
+		 'update_table' => $updateTable,
+		 'update_id' => $updateID,
+		 'update_action' => 0,
+		 'execution_time' => time ()]);
+		 
+		 $batchEntry = $batchEntriesTable->save ($batchEntry);
+
+		 $this->debug ($batchEntry);
+		 }
+	  */
+	 protected function notifyPOS ($merchantID) {
 		  
-        return $res;
-    }
-
-    function tzOffset ($tz) {
-        
-        /* $originDateTimezone = new DateTimeZone ('UTC');
-			* $targetDateTimezone = new DateTimeZone ($tz);
-			* $originDateTime = new DateTime ("now", $originDateTimezone);
-			* $targetDateTime = new DateTime ("now", $targetDateTimezone);
-			* $offset = $originDateTimezone->getOffset ($originDateTime) - $targetDateTimezone->getOffset ($targetDateTime);
-
-			  $this->debug ("tzoffset... $tz " . $offset / 60 / 60);
-			  
-			* return intVal ($offset / 60 / 60);*/
-
-		  $timezones = ['America/New_York' => 5,
-							 'America/Chicago' => 6,
-							 'America/Denver' => 7,
-							 'America/Los_Angelas' => 8,
-							 'America/Anchorage' => 9];
-							 
-		  return $timezones [$tz];
-    }
-	 
-    private function notifyPOS () {
-		  
-		  $exec = 'mosquitto_pub -h localhost -t ' . $this->merchant ['mqtt_broker'] .
+		  $exec = 'mosquitto_pub -h localhost ' .
 					 ' -m \'{"method": "download"}\'' .
-					 ' -t \'multipos/' . $this->merchant ['merchant_id'] . '\'';
+					 ' -t \'multipos/' . $merchantID . '\'';
 
 		  $this->debug ($exec);
 		  
 		  shell_exec ($exec);
 	 }
 	 
-	 public function message ($merchantID) {
+	 protected function message ($merchantID) {
 
 		  $response = ['status' => 1];
 		  if (!empty ($this->request->getData ())) {
@@ -133,17 +121,17 @@ class PosApiController extends AppController {
 				$this->dbconnect ("m_$merchantID");
 		  
 				$posMessages = TableRegistry::get ('PosMessages');
-				$batchEntryTable = TableRegistry::get ('BatchEntries');
+				$batchEntriesTable = TableRegistry::get ('BatchEntries');
 
 				$posMessage = $posMessages->newEntity (["message" => json_encode ($this->request->getData ())]);
 				$posMessage = $posMessages->save ($posMessage);
 				
-				$batchEntry = $batchEntryTable->newEntity (['business_unit_id' => 1,
-																		  'update_table' => 'pos_messages',
-																		  'update_id' =>  $posMessage ['id'],
-																		  'update_action' => 0,
-																		  'execution_time' => time ()]);
-				$batchEntryTable->save ($batchEntry);
+				$batchEntry = $batchEntriesTable->newEntity (['business_unit_id' => 1,
+																			 'update_table' => 'pos_messages',
+																			 'update_id' =>  $posMessage ['id'],
+																			 'update_action' => 0,
+																			 'execution_time' => time ()]);
+				$batchEntriesTable->save ($batchEntry);
 
 
 				$exec = 'mosquitto_pub -h localhost -t ' . "multipos/$merchantID" . ' -m \'{"method": "download"}\'';
@@ -153,6 +141,30 @@ class PosApiController extends AppController {
 
 		  $this->jsonResponse ($response);
 	 }
+	 
+	 protected function guid () {
+    
+		  if (function_exists ('com_create_guid') === true) {
+				
+				return trim (com_create_guid (), '{}');
+		  }
+		  
+		  $data = openssl_random_pseudo_bytes (16);
+		  $data[6] = chr (ord ($data[6]) & 0x0f | 0x40); // set version to 0100
+		  $data[8] = chr (ord ($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+		  return vsprintf ('%s%s-%s-%s-%s-%s%s%s', str_split (bin2hex ($data), 4));
+	 }
+	 
+    protected function tzOffset ($tz) {
+        
+        $originDateTimezone = new DateTimeZone ('UTC');
+        $targetDateTimezone = new DateTimeZone ($tz);
+        $originDateTime = new DateTime ("now", $originDateTimezone);
+        $targetDateTime = new DateTime ("now", $targetDateTimezone);
+        $offset = $originDateTimezone->getOffset ($originDateTime) - $targetDateTimezone->getOffset ($targetDateTime);
+		  
+        return intVal ($offset / 60 / 60);
+    }
 }
 
 

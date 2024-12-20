@@ -25,7 +25,7 @@ use Cake\I18n\I18n;
 
 require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 
-class PosController extends AppController {
+class PosController extends PosApiController {
   
     public $bu = null;
     public $bus = null;
@@ -304,44 +304,6 @@ class PosController extends AppController {
 		  
         $this->RequestHandler->respondAs ('json');		  
 	 }
-
-    /**
-     *
-     * utility methods
-     *
-     */
-    
-    public function dbconnect ($dbname = null) {
-
-        if ($dbname == null) {
-            
-            ConnectionManager::drop ('default');
-            ConnectionManager::setConfig ('default', ['className' => 'Cake\Database\Connection',
-                                                      'driver' => 'Cake\Database\Driver\Mysql',
-                                                      'persistent' => false,
-                                                      'host' => 'localhost',
-                                                      'username' => 'vr',
-                                                      'database' =>  'merchants',
-                                                      'encoding' => 'utf8',
-                                                      'timezone' => 'UTC',
-                                                      'cacheMetadata' => true,
-            ]);
-        }
-        else {
-
-            ConnectionManager::drop ('default');
-            ConnectionManager::setConfig ('default', ['className' => 'Cake\Database\Connection',
-                                                      'driver' => 'Cake\Database\Driver\Mysql',
-                                                      'persistent' => false,
-                                                      'host' => 'localhost',
-                                                      'username' => 'vr',
-                                                      'database' => $dbname,
-                                                      'encoding' => 'utf8',
-                                                      'timezone' => 'UTC',
-                                                      'cacheMetadata' => true,
-            ]);
-        }
-    }
 	 
     /**
      *
@@ -349,11 +311,97 @@ class PosController extends AppController {
      *
      */
 	 
-    function posItemUpdate () {
+    function itemUpdate () {
 
-		  $this->debug ($this->request->getData ());
+		  $status = 1;
 		  
-		  $this->set ('response', ['status' => 0]);
+		  $this->debug ($this->request->getData ());
+
+		  if (isset ($this->request->getData () ['item'])) {
+
+				$status = 0;
+				$merchantID = $this->request->getData () ['merchant_id'];
+				$data = $this->request->getData () ['item'];
+				
+				$this->dbconnect ("m_$merchantID");
+
+				// get all the locations for pricing
+				
+				$query = TableRegistry::get ('BusinessUnits')
+											 ->find ()
+											 ->where (['business_type' => 2])
+											 ->select (['id'])
+											 ->all ();
+				
+				$pricing = json_encode (['class' => 'standard',
+												 'price' => $data ['price'],
+												 'cost' => $data ['price']]);
+			
+
+				// check for existing item
+				
+				$itemsTable = TableRegistry::get ('Items');
+				$item = $itemsTable->find ()
+										 ->where (['sku' => $data ['sku']])
+										 ->contain (['ItemPrices', 'ItemLinks'])
+										 ->first ();
+
+				if ($item) {
+					 
+					 $this->debug ('existing item... ');
+					 $this->debug ($item);
+
+					 $item ['item_desc'] = $data ['item_desc'];
+					 $item ['department_id'] = $data ['department_id'];
+					 $itemsTable->save ($item);
+
+					 TableRegistry::get ('ItemPrices')->updateAll (['tax_group_id' => $data ['tax_group_id'],
+																					'price' => $data ['price'],
+																					'cost' => $data ['cost'],
+																					'pricing' => $pricing],
+																				  ['item_id' => $item ['id']]);
+		
+					 $status = 0;
+				}
+				else {
+					 
+
+					 $this->debug ('new item... ');
+					 
+					 $itemPrices = [];
+					 foreach ($query as $bu) {
+
+						  $itemPrices [] = ['business_unit_id' => $bu ['id'],
+												  'tax_group_id' => $data ['tax_group_id'],
+												  'tax_inclusive' => 0,
+												  'pricing' => $pricing,
+												  'price' => $data ['price'],
+												  'cost' => $data ['cost'],
+												  'class' => 'standard',
+												  'supplier_id' => 0];
+					 }
+					 
+					 $item = ['item_desc' => $data ['item_desc'],
+								 'sku' => $data ['sku'],
+								 'department_id' => $data ['department_id'],
+								 'locked' => 0,
+								 'enabled' => 1,
+								 'supplier_id' => 0,
+								 'uuid' => '',
+								 'item_prices' => $itemPrices];
+					 
+					 $item = $itemsTable->newEntity ($item);
+					 $itemsTable->save ($item);
+					 $status = 0;
+		  		}
+				
+
+				$this->batch ('items', $item ['id']);
+				$this->debug ($item);
+				$this->notifyPOS ($merchantID);
+		  }
+		  
+		  $this->set ('response', ['status' => $status]);
         $this->viewBuilder ()->setLayout ('ajax');
         $this->RequestHandler->respondAs ('json');
 	 }
@@ -485,25 +533,6 @@ class PosController extends AppController {
         $this->jsonResponse (['status' => 0]);
 	 }
 
-	 private function jsonResponse ($response) {
-    
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', $response);
-        $this->RequestHandler->respondAs ('json');
-    }
-
-	 private function guid () {
-    
-		  if (function_exists ('com_create_guid') === true) {
-				
-				return trim (com_create_guid (), '{}');
-		  }
-		  
-		  $data = openssl_random_pseudo_bytes (16);
-		  $data[6] = chr (ord ($data[6]) & 0x0f | 0x40); // set version to 0100
-		  $data[8] = chr (ord ($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
-		  return vsprintf ('%s%s-%s-%s-%s-%s%s%s', str_split (bin2hex ($data), 4));
-	 }
 }
 
 ?>
