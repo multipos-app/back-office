@@ -60,7 +60,11 @@
 	 foreach ($configs as $config) {
 	 ?>
 
-		  <div class="grid-cell grid-cell-left grid-cell-fa"><?= $config ['config_desc'] ?></div>
+		  <div class="grid-cell grid-cell-left grid-cell-fa">
+
+				<a onclick="controller ('menus/all/<?= $config ['id']?>', false)"> <?= $config ['config_desc'] ?></a>
+
+		  </div>
 		  
 		  <div class="grid-cell grid-cell-center">
 				
