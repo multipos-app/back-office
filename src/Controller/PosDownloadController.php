@@ -53,7 +53,6 @@ class PosDownloadController extends PosApiController {
 
 		  $post = $this->request->getData ();
 		  $post ['remote'] = $_SERVER ['HTTP_X_FORWARDED_FOR'];
-        $this->debug ($post);
 		  
 		  $buID = $this->request->getData () ['business_unit_id'];
         
@@ -261,8 +260,6 @@ class PosDownloadController extends PosApiController {
 		  $response = ['count' => count ($updates),
 							'total' => $total,
 							'updates' => $updates];
-
-		  $this->debug ($response);
 		  
 		  $this->jsonResponse ($response);
 	 }
