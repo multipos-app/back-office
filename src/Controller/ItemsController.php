@@ -149,8 +149,6 @@ class ItemsController extends PosAppController {
      */
     
     public function edit ($id, $template = 'standard_pricing', $controls = true) {
-
-		  $this->debug ("item edit... $id, $template, $controls");
 		  
         $item = null;
         $where = false;
@@ -405,9 +403,6 @@ class ItemsController extends PosAppController {
         $itemsTable->save ($i);
         $itemID = $i ['id'];
 
-		  $this->debug ('add item...');
-		  $this->debug ($item);
-
 		  foreach ($this->merchant ['business_units'] as $bu) {
 
 				if ($bu ['business_type'] ==  BU_LOCATION) {
@@ -508,8 +503,13 @@ class ItemsController extends PosAppController {
     
     public function update ($item) {
 
+		  $this->debug ('update item...');
+		  $this->debug ($item);
+		  
 		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
         $status = -1;
+
+		  $id = $item ['item'] ['id'];
 
         $itemsTable = TableRegistry::get ('Items');
         $itemPricesTable = TableRegistry::get ('ItemPrices');
@@ -704,7 +704,6 @@ class ItemsController extends PosAppController {
     
     public function menuItem ($sku) {
 
-		  $this->debug ("menu item... $sku");
         $itemsTable = TableRegistry::get ('Items');
 		  $item = TableRegistry::get ('Items')
 									  ->find ()
@@ -942,10 +941,6 @@ class ItemsController extends PosAppController {
 						  }
 					 }
 				}
-
-				/* $this->debug ('-------------------------------------------------------------------------------------------');
-					$this->debug ($itemPrices);
-					$this->debug ('-------------------------------------------------------------------------------------------');*/
 				
 				$itemPricesTable->deleteAll (['item_id' => $item ['id']]);
 

@@ -10,6 +10,8 @@ echo $this->input ('fa-barcode',
 						  'placeholder' => __ ('Enter Item Description or SKU')]);
 ?>
 
+<span id="item_params"></span>
+
 <script>
  
  $('#sku').typeahead ({
@@ -24,21 +26,27 @@ echo $this->input ('fa-barcode',
 					  data = JSON.parse (data);
 					  
 					  result ($.map (data, function (item) {
-							
+
+							console.log (item);
 							return item
                  }));
              }
 			});
      },
 	  updater: function (item) {		  
-			
- 			$('#button_desc').val (item.item.item_desc);
- 			$('#button_text').html ($('#button_desc').val ().toUpperCase ());
- 			$('#' + container + '_' + menu + '_' + pos).html ($('#button_desc').val ().toUpperCase ());	  
 
-  			posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].class = 'DefaultItem';
-  			posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].text = item.item.item_desc.toUpperCase ();
- 			posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {sku: item.item.sku};
+			console.log (item);
+			
+ 			$('#text').val (item.item.item_desc);
+ 			$('#' + container + '_' + menu + '_' + pos).html (item.item.item_desc);	  
+ 			$('#item_params').html ('<input type="hidden" name=params[sku] value="' + item.item.sku + '">');	  
+
+  			/* 
+				posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].class = 'DefaultItem';
+  				posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].text = item.item.item_desc.toUpperCase ();
+ 				posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {sku: item.item.sku};
+			 */
+
 			existingItem = true;
 	  }
  });
