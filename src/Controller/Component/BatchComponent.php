@@ -51,6 +51,7 @@ class BatchComponent extends Component {
                 
 					 $models = [['model' => 'BusinessUnits'],
 									['model' => 'Employees'],
+									['model' => 'Customers'],
 									['model' => 'Profiles',
 									 'contain'=> ['ProfilePermissions']]];
  					 break;
@@ -71,7 +72,11 @@ class BatchComponent extends Component {
 									['model' => 'Currencies',
 									 'contain' => ['CurrencyDenoms']],
 					 				['model' => 'PosConfigs']];
-
+					 break;
+						  
+				case 5:
+						  
+					 $models = [['model' => 'Customers']];
 					 break;
         }
 

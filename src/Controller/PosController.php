@@ -223,18 +223,18 @@ class PosController extends PosApiController {
                 
             default:
                 
-                $t = $pendingTicketTable
-                   ->find ()
-                   ->where (['uuid' => $this->request->getData () ['ticket'] ['uuid']])
-                   ->first ();
-                            
-                if ($t) {
-                                
-                    $this->error ('pos controller duplicate ticket... ' . $this->request->getData () ['ticket'] ['pos_no'] . ' ' . $ticketNo, 'debug');
-                    $this->jsonResponse (['status' => 0,
-                                          'status_text' => 'duplicate ticket']);
-                    return;
-                }
+						  /* $t = $pendingTicketTable
+							*    ->find ()
+							*    ->where (['uuid' => $this->request->getData () ['ticket'] ['uuid']])
+							*    ->first ();
+							*             
+							* if ($t) {
+							*                 
+							*     $this->error ('pos controller duplicate ticket... ' . $this->request->getData () ['ticket'] ['pos_no'] . ' ' . $ticketNo, 'debug');
+							*     $this->jsonResponse (['status' => 0,
+							*                           'status_text' => 'duplicate ticket']);
+							*     return;
+							* }*/
             }
 
             $pt = ['business_unit_id' => $this->request->getData () ['ticket'] ['business_unit_id'],

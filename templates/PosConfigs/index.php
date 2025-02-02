@@ -15,7 +15,7 @@
      display: grid;
      width: 100%;
      grid-template-rows: auto;
-     grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+     grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
 	  grid-row-gap: 0px;
 	  grid-column-gap: 0px;
 	  margin-top: 25px;
@@ -52,6 +52,7 @@
 	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Settings') ?></div>
 	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Download') ?></div>
 	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Upload') ?></div>
+	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Clone') ?></div>
 	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Delete') ?></div>
 
 	 <?php
@@ -88,6 +89,14 @@
 				
 				<div class="grid-cell grid-cell-center">
 					 <a onclick="upload (<?= $config ['id'] ?>)"><i class="far fa-cloud-upload fa-large action_icons"></i></a>
+				</div>
+				
+		  </div>
+
+		  <div class="grid-cell grid-cell-center">
+				
+				<div class="grid-cell grid-cell-center">
+					 <a onclick="clone (<?= $config ['id'] ?>)"><i class="far fa-clone fa-large action_icons"></i></a>
 				</div>
 				
 		  </div>

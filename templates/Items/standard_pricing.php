@@ -1,3 +1,4 @@
+
 <?= $this->Html->css ("Items/standard_pricing") ?>
 <script>
 
@@ -11,11 +12,15 @@
  }
  
  var addLinkID = 0;
+
+ console.log ('standard pricing php');
+ console.log (itemLinks);
+
 </script>
 
 <?php
 
-$this->debug ('controls... ' . $controls);
+$this->debug ('standard pricing php...');
 
 if ($controls) {
 	 
@@ -239,4 +244,5 @@ if ($controls) {
 <?php 
 }
 ?>
+<?= $this->Html->script ("Items/standard_pricing"); ?>
 <?= $this->Html->script ("Items/edit"); ?>

@@ -396,8 +396,9 @@ class BusinessUnitsController extends PosAppController {
                        1 => __ ('Full, all store data'),
                        2 => __ ('Employees'),
                        3 => __ ('Menus and configuration'),
-                       4 => __ ('Pending, schedule for future')];
-        
+                       4 => __ ('Pending, schedule for future'),
+                       5 => __ ('Customers')];
+
         return ($this->response (__ ('POS Batches'),
                                  'BusinessUnits',
                                  'batches',

@@ -51,7 +51,8 @@ class TicketsController extends PosAppController {
 
         $timestamp = function ($t) {
             
-            return date ('m/d g:i a', strtotime ($this->utcToLocal ($t->i18nFormat ('yyyy-MM-dd H:mm:ss'), $this->merchant ['business_units'] [$this->merchant ['bu_index']] ['timezone'])));
+            return date ('m/d g:i a', strtotime ($this->utcToLocal ($t->i18nFormat ('yyyy-MM-dd H:mm:ss'),
+																						  $this->merchant ['business_units'] [$this->merchant ['bu_index']] ['timezone'])));
         };
 
 		  // check to see if we are only looking at one store

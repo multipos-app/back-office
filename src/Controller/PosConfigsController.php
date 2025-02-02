@@ -526,6 +526,16 @@ class PosConfigsController extends PosAppController {
 	  *
 	  */
 
+    public function clone ($id) {
+
+		  return $this->index ();
+	 }
+	 
+ 	 /**
+	  *
+	  *
+	  */
+
     public function deleteConfig ($id) {
 
 		  $this->debug ("delete config... $id");

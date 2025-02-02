@@ -33,7 +33,7 @@ class SearchController extends PosAppController {
         
     }
 
-    public function items ($fields, $search) {
+    public function items ($fields, $search = 'sku_and_desc') {
         
         $this->viewBuilder ()->setLayout ('ajax');
         $response = [];

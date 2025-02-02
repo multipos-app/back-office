@@ -2,9 +2,7 @@
 var itemLink = null;
 
 function renderLinks () {
-
-	 console.log ('render links... ');
-
+	 
 	 $('#item_link_grid').html ('');
 	 if (itemLinks.length == 0) {
 
@@ -12,13 +10,13 @@ function renderLinks () {
 	 }
 	 
 	 var html = '<div class="form-grid item-link-grid">';
-	 
+	 	 
 	 $.each (itemLinks, function (i, link) {
 
 		  options = '';
-
+		  
 		  $.each (linkTypes, function (key, value) {
-
+				
 				var selected = '';
 				if (link.link_type == key) {
 
@@ -28,11 +26,20 @@ function renderLinks () {
 				options += 
 					 '<option value=' + key + selected + '>' + value + '</option>';
 		  });
+		  
+		  console.log ('link...');
+		  console.log (link);
 
+		  let id = link.id;
+		  if ("item_link_id" in link) {
+
+				id = link.item_link_id;
+		  }
+		  
 		  html +=
-				'<input type="hidden" name="item[item_links][' + i + '][item_link_id]" value="' + link.id + '"/>' +
+				'<input type="hidden" name="item[item_links][' + i + '][item_link_id]" value="' + id + '"/>' +
 				'<div class="form-cell form-desc-cell">' +
-				link ['item_desc'] +
+				link.item_desc +
 				'</div>' +
 				
 				'<div class="select">' +
@@ -54,13 +61,16 @@ function renderLinks () {
 
 function addLink () {
 
-	 console.log ('add link... ');
-
+	 let url = '/items/add-link/' + item.id + '/' + addLinkID + '/' + $('#link_type').val ();
+	 
 	 $.ajax ({type: "GET",
-				 url: '/items/add-link/' + item.id + '/' + addLinkID + '/' + $('#link_type').val (),
+				 url: url,
 				 success: function (data) {
 
 					  data = JSON.parse (data);
+
+					  console.log (data)
+					  
 					  itemLinks.push (data.link);
 					  
  					  $('#link_desc').val ('');
@@ -82,13 +92,13 @@ $('#link_desc').typeahead ({
 	 source: function (query, result) {
 		  
 		  $.ajax ({
-				url: "/search/items/sku_and_desc/" + query,
+				url: "/search/items/sku_and_desc/" + query + "/sku_and_desc",
 				type: "GET",
 				success: function (data) {
 					 
 					 data = JSON.parse (data);
-					 console.log (data);
 					 result ($.map (data, function (item) {
+
 						  return item;
 					 }));
 				}
@@ -98,10 +108,12 @@ $('#link_desc').typeahead ({
 		  
 		  if (item.id == linkItem.id) {
 				
-				alert ('Not Allowed');
+				alert ('Linking an item to itself is not Allowed');
+				return;
 		  }
-
+		  
 		  addLinkID = linkItem.id;
+
 		  return linkItem.name;
 	 }
 });

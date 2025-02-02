@@ -125,8 +125,6 @@ $titles = ['total' => ['text' => 'gross', 'type' => 'currency', 'link' => 'perio
 					 $link = $titles [$key] ['link'];
 				}
 		  }
-
-		  $this->debug ("sales link... $link");
 		  
 		  echo '<div class="grid-row-wrapper">';
 		  echo '<div class="grid-cell grid-cell-left data-cell">' . __ ($title) . '</div>';

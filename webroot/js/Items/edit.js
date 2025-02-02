@@ -1,4 +1,6 @@
 
+console.log ('edit.js...');
+
 $('#item_update').on ('click', function (e) {
 
     e.preventDefault ();
@@ -12,6 +14,8 @@ $('#item_update').on ('click', function (e) {
 	 
 	 let url = '/items/item/' + item.id;
 
+	 console.log ($('#item_edit').serializeArray ());
+	 
 	 $.ajax ({type: "POST",
 				 url: url,
 				 data: $('#item_edit').serialize (),

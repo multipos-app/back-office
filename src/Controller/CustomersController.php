@@ -361,6 +361,32 @@ class CustomersController extends PosAppController {
         }
         return '';
     }
+
+	 function randPhone () {
+
+		  $customers = TableRegistry::get ('Customers')
+											 ->find ()
+											 ->all ();
+
+		  foreach ($customers as $customer) {
+
+				
+ 				/* $customer ['name'] = strtoupper ($customer ['name']);*/
+ 				$customer ['fname'] = strtoupper ($customer ['fname']);
+ 				$customer ['lname'] = strtoupper ($customer ['lname']);
+
+				/* 
+				 * 				$customer ['addr_1'] = strtoupper ($customer ['addr_1']);
+				 *  				$customer ['addr_2'] = strtoupper ($customer ['addr_2']);
+				 *  				$customer ['city'] = strtoupper ($customer ['city']);
+				 * 				*/
+				
+				$customer ['phone'] = strval (rand (10,99)) . strval (rand (10,99)) . strval (rand (10,99)) . strval (rand (10,99)) . strval (rand (10,99));
+				$customer ['loyalty_points'] = rand (0,99);
+
+				TableRegistry::get ('Customers')->save ($customer);
+		  }
+	 }
 }
 
 ?>

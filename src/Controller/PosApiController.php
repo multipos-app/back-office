@@ -85,24 +85,7 @@ class PosApiController extends AppController {
         $batchTable->save ($batch);
 	 }
 
-    /* protected function addBatch ($merchantID, $updateTable, $updateID) {
-
-		 $this->debug ("add batch... $merchantID, $updateTable, $updateID");
-		 
-	  *     $batchEntriesTable = TableRegistry::get ('BatchEntries');
-
-		 $batchEntry = $batchEntriesTable->newEntity (['business_unit_id' => 0,
-		 'update_table' => $updateTable,
-		 'update_id' => $updateID,
-		 'update_action' => 0,
-		 'execution_time' => time ()]);
-		 
-		 $batchEntry = $batchEntriesTable->save ($batchEntry);
-
-		 $this->debug ($batchEntry);
-		 }
-	  */
-	 protected function notifyPOS ($merchantID) {
+ 	 protected function notifyPOS ($merchantID) {
 		  
 		  $exec = 'mosquitto_pub -h localhost ' .
 					 ' -m \'{"method": "download"}\'' .

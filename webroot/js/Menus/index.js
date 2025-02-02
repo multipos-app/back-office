@@ -194,8 +194,8 @@ function actions (c) {
 		  break;
 	 }
 
-	 render (c);
 	 dirty (true);
+	 render (c);
 	 $('#' + c + '_action').val (null);
 }
 

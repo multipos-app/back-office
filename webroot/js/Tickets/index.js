@@ -158,4 +158,3 @@ $('.end-date').datepicker ({
 	 maxDate: 0});
 
 $(".currency-format").mask ("<?= __ ('currency_format') ?>", {reverse: true});
-

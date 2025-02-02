@@ -98,6 +98,8 @@ class PosTicketsController extends PosApiController {
             $postProcessing = [];  // additional processing for this ticket
             
             $ticket = json_decode ($pending ['json'], true);
+
+				$this->debug ($ticket);
             
             if (isset ($ticket ['ticket'])) {
 
@@ -112,13 +114,10 @@ class PosTicketsController extends PosApiController {
                 unset ($ticket ['id']);  // get a new id...
 
                 $customer = null;
+
                 if (isset ($ticket ['customer'])) {
-						  
-                    if (isset ($ticket ['customer'] ['action'])) {  // add/update customer
-								
-                        $customer = $ticket ['customer'];
-                    }
-						  
+						  								
+                    $customer = $ticket ['customer'];
                     unset ($ticket ['customer']);  // so it isn't created in cascade save
                 }
                 
@@ -267,7 +266,12 @@ class PosTicketsController extends PosApiController {
             $pending ['consumed'] = 1;
             $pendingTicketsTable->save ($pending);
         }
-        
+		  
+        if (isset ($ticket ['updates'])) {
+
+				$this->handleUpdates ($ticket ['updates'], $dbname);	
+		  }
+		  
         $this->jsonResponse (['status' => 0]);
     }
 
@@ -310,13 +314,6 @@ class PosTicketsController extends PosApiController {
                     $this->log ('inv update failed... ', 'error');
                     $this->log ($ti, 'error');
                 }
-            }
-
-            // cashier added an item
-				
-            if (isset ($ti ['add_item'])) {
-
-                $this->addItem ($ti ['add_item']);
             }
 
             // sum for each business unit (store, corp...)
@@ -884,48 +881,48 @@ class PosTicketsController extends PosApiController {
     }
 
     private function customer_update ($params) {
-
+		  
         $customer = $params ['customer'];
+
+		  $this->debug ($customer);
+		  
         $cid = 0;
-        $table = TableRegistry::get ('Customers');
+        $customersTable = TableRegistry::get ('Customers');
         
-        switch ($customer ['action']) {
+        if ($customer ['id'] > 0) {
 
-				case 'add':
+				$cid = $customer ['id'];
+				$cust = $customersTable->find ()
+										  ->where (['id' => $cid])
+										  ->first ();
                 
-					 $customer = $table->newEntity ($customer);
-					 $customer = $table->save ($customer);
-					 $cid = $customer ['id'];
+				if ($cust) {
+
+						  $cust ['fname'] = $customer ['fname'];
+						  $cust ['lname'] = $customer ['lname'];
+						  $cust ['email'] = $customer ['email'];
+						  $cust ['phone'] = $customer ['phone'];
+						  $cust ['city'] = $customer ['city'];
+ 						  $cust ['state'] = $customer ['state'];
+						  $cust ['postal_code'] = $customer ['postal_code'];
+                   
+					 $customersTable->save ($cust);
 					 
-                $table->save ($customer);
-
-					 // update the ticket with the customer ID
+				}
+		  }
+		  else {
+                
+				$customer = $customersTable->newEntity ($customer);
+				$customer = $customersTable->save ($customer);
+				$cid = $customer ['id'];
 					 
-					 $params ['ticket'] ["customer_id"] = $cid;
-					 $table = TableRegistry::get ('Tickets')->save ($params ['ticket']);
-					 break;
+            $table->save ($customer);
 
-				case 'update':
-
-					 $c = $table
-               ->find ()
-               ->where (['phone' => $customer ['phone']])
-               ->first ();
-                
-					 if ($c) {
-
-						  $c ['fname'] = $customer ['fname'];
-						  $c ['lname'] = $customer ['lname'];
-						  $c ['contact'] = $customer ['contact'];
-						  $c ['email'] = $customer ['email'];
-						  $c ['phone'] = $customer ['phone'];
-						  $cid = $c ['id'];
-                    
-						  $table->save ($c);
-					 }
-                
-					 break;
-        }
+				// update the ticket with the customer ID
+					 
+				$params ['ticket'] ["customer_id"] = $cid;
+				$table = TableRegistry::get ('Tickets')->save ($params ['ticket']);
+		  }
 
         if ($cid > 0) {
             
@@ -946,49 +943,149 @@ class PosTicketsController extends PosApiController {
         $csv = "type; sub_type; total; quantity\n";
         foreach ($this->totals ['totals'] as $total) {
 
-            $csv .= strtoupper (str_replace ('.', ',', sprintf ("%s;%s;%.2f;%d\n", $total ['total_type'], $total ['total_sub_type'], $total ['amount'], $total ['quantity'])));
+            $csv .= strtoupper (str_replace ('.', ',', sprintf ("%s;%s;%.2f;%d\n",
+																					 $total ['total_type'],
+																					 $total ['total_sub_type'],
+																					 $total ['amount'],
+																					 $total ['quantity'])));
         }
         
-        file_put_contents (sprintf ('/home/%s/download/termial_%d_%s.csv', $params ['params'] ['user'], $this->totals ['pos_no'], date ('YmdHi')), $csv);
+        file_put_contents (sprintf ('/home/%s/download/termial_%d_%s.csv',
+												$params ['params'] ['user'],
+												$this->totals ['pos_no'], date ('YmdHi')),
+									$csv);
     }
     
+    private function handleUpdates ($updates, $dbname) {
 
-    private function addItem ($item) {
-        
-        $items = TableRegistry::get ('Items');
-        
-        $prices = TableRegistry::get ('ItemPrices');
+		  foreach ($updates as $update) {
 
-        $tmp = $items->newEntity (['sku'=> $item ['sku'],
-                                   'item_desc' => strtoupper ($item ['item_desc']),
-                                   'department_id'=> $item ['department_id']]);
-        
-        $tmp = $this->save ('Items', $tmp);
+				$this->debug ($update);
 
-        $itemPrice = $prices->newEntity (['item_id'=> $tmp ['id'],
-                                          'business_unit_id' => $this->bu,
-                                          'tax_group_id' => $item ['tax_group_id'],
-                                          'tax_inclusive' => 0,
-                                          'tax_exempt' => ($item ['tax_group_id'] > 0) ? 1 : 0,
-                                          'price' => floatVal ($item ['price']),
-                                          'cost' => 0,
-                                          'pricing' => json_encode (['class' => 'standard',
-                                                                     'amount' => floatVal ($item ['price']),
-                                                                     'price' => floatVal ($item ['price']),
-                                                                     'cost' => 0])]);
+				$id = 0;
+				switch ($update ['type']) {
 
-        $this->save ('ItemPrices', $itemPrice);
+					 case 'items':
 
-        if ($item ['deposit_id'] > 0) {
+						  $itemsTable = TableRegistry::get ('Items');
 
-            $links = TableRegistry::get ('ItemPrices');
-            
-            $itemLink = $links->newEntity (['item_id' => $tmp ['id'],
-                                            'item_link_id' => $item ['deposit_id'],
-                                            'link_type' => 0]);
-            
-            $this->save ('ItemLinks', $itemLink);
-				
+						  $item = $itemsTable->find ()
+											 ->where (['sku' => $update ['sku']])
+											 ->contain (['ItemPrices'])
+											 ->first ();
+						  
+
+						  
+						  if ($item) {
+
+								$id = $item ['id'];
+								
+								$item ['sku'] = $update ['sku'];
+								$item ['item_desc'] = $update ['item_desc'];
+								$item ['department_id'] = $update ['department_id'];
+								$item ['locked'] = $update ['locked'];
+								$item ['enabled'] = $update ['enabled'];
+
+								$itemPricessTable = TableRegistry::get ('ItemPrices');
+								for ($i = 0; $i < count ($item ['item_prices']); $i ++) {
+
+									 $item ['item_prices'] [$i] ['price'] = $update ['item_price'] ['price'];
+									 $item ['item_prices'] [$i] ['cost'] = $update ['item_price'] ['cost'];
+									 $item ['item_prices'] [$i] ['tax_exempt'] = $update ['item_price'] ['tax_exempt'];
+									 $item ['item_prices'] [$i] ['tax_group_id'] = $update ['item_price'] ['tax_group_id'];
+									 $item ['item_prices'] [$i] ['tax_inclusive'] = $update ['item_price'] ['tax_inclusive'];
+									 $item ['item_prices'] [$i] ['class'] = $update ['item_price'] ['class'];
+									 $item ['item_prices'] [$i] ['pricing'] = json_encode ($update ['item_price'] ['pricing']);
+
+									 $itemPricessTable->save ($item ['item_prices'] [$i]);
+								}
+								
+								$result = $itemsTable->save ($item);
+								
+						  }
+						  else {
+								
+						  		$bus = TableRegistry::get ('BusinessUnits')
+														  ->find ()
+														  ->where (['business_type' => BU_LOCATION])
+														  ->select (['id'])
+														  ->all ();
+								
+								$itemPrice = $update ['item_price'];
+								unset ($itemPrice ['id']);
+								unset ($itemPrice ['item_id']);
+								unset ($update ['id']);
+								unset ($update ['item_price']);
+								
+								$itemPrices = [];
+								$pricing = json_encode ($itemPrice ['pricing']);
+								
+								foreach ($bus as $bu) {
+
+									 $itemPrice ['business_unit_id'] = $bu ['id'];
+									 $itemPrice ['pricing'] = $pricing;
+									 $itemPrices [] = $itemPrice;
+								}
+
+								$update ['item_prices'] = $itemPrices;
+								$item = $itemsTable->save ($itemsTable->newEntity ($update));
+								
+								$this->debug ('save item... ');
+								$this->debug ($item);
+
+								$id = $item ['id'];
+
+						  }
+
+						  if (isset ($update ['deposit_item_id'])) {  // add a deposit
+								
+								$itemLinksTable = TableRegistry::get ('ItemLinks');
+
+								$itemLinksTable->deleteAll (['item_id' => $id]);
+								$itemLink = $itemLinksTable->newEntity (['item_id' => $id,
+																					  'item_link_id' => $update ['deposit_item_id']]);
+								$itemLink = $itemLinksTable->save ($itemLink);
+
+								$this->debug ('save item link... ');
+								$this->debug ($itemLink);
+								
+								$this->batch ('item_links', $itemLink ['id']);
+					  }
+
+						  break;
+						  
+					 case "customers":
+
+						  $this->debug ("update customer...");
+						  $this->debug ($update);
+						  
+						  $customersTable = TableRegistry::get ('Customers');
+
+						  $customer = $customersTable->find ()
+															  ->where (['email' => $update ['email']])
+															  ->first ();
+
+						  if ($customer) {
+								
+						  }
+						  else {
+
+								$customer = $customersTable->newEntity ($update);
+								$customer = $customersTable->save ($customer);
+
+								$this->debug ($customer);
+						  }
+						  
+						  $id = $customer ['id'];
+
+						  break;
+				}
+
+				if ($id > 0) {
+					 
+					 $this->batch ($update ['type'], $id);
+					 $this->notifyPOS (intval (substr ($dbname, 2)));  // extract the merchant id from the database name
+				}
         }
     }
 }

@@ -163,12 +163,12 @@ class ItemsController extends PosAppController {
         if ($where) {
 				
             $title = __ ('Edit item');
-            $item = TableRegistry::get ('Items')
-											->find ()
-											->where ($where)
-											->contain (['ItemPrices', 'ItemLinks', 'InvItems'])
-											->first ();
-
+				$itemsTable = TableRegistry::get ('Items');
+				
+            $item = $itemsTable->find ()
+										 ->where ($where)
+										 ->contain (['ItemPrices', 'ItemLinks', 'InvItems'])
+										 ->first ();
             if ($item) {
 
 					 $buIndex = 0;
@@ -195,8 +195,30 @@ class ItemsController extends PosAppController {
 														'on_hand_req' => 0];
 					 }
 					 
+					 if (count ($item ['item_links']) > 0) {
+						  
+						  $this->debug ($item ['item_links']);
+						  
+						  $link ['items'] = [];
+
+						  foreach ($item ['item_links'] as &$link) {
+
+								$itemLink = $itemsTable->find ()
+															  ->where (['id' => $link ['item_link_id']])
+															  ->first ();
+								if ($itemLink) {
+									 
+									 $link ['item_desc'] = $itemLink ['item_desc'];
+								}
+								else {
+
+									 $link ['item_desc'] = __ ("N/A");
+ 									 $this->error ("deposit linked to unknown item...");
+								}
+						  }
+					 }
+
 					 unset ($item ['item_prices']);
-					 unset ($item ['item_links']);
 					 unset ($item ['inv_items']);
             }
             else {
@@ -617,16 +639,22 @@ class ItemsController extends PosAppController {
 				}
 		  }
         
+        $itemLinksTable = TableRegistry::get ('ItemLinks');
+        $itemLinksTable->deleteAll (['item_id' => $id]);
+		  
         if (isset ($item ['item'] ['item_links']) && (count ($item ['item'] ['item_links'])) > 0) {
             
-            $itemLinksTable = TableRegistry::get ('ItemLinks');
-            $itemLinksTable->deleteAll (['item_id' => $id]);
             
             foreach ($item ['item'] ['item_links'] as $itemLink) {
-                
-                $link = $itemLinksTable->newEntity (['item_id' => $id,
-                                                     'item_link_id' => $itemLink ['item_link_id'],
-                                                     'link_type' =>$itemLink ['link_type']]);
+
+                $il = ['item_id' => $id,
+                       'item_link_id' => $itemLink ['item_link_id'],
+                       'link_type' =>$itemLink ['link_type']];
+
+					 $this->debug ('save link... ');
+					 $this->debug ($il);
+			 
+                $link = $itemLinksTable->newEntity ($il);
                 $itemLinksTable->save ($link);
             }
         }
@@ -795,13 +823,18 @@ class ItemsController extends PosAppController {
      **/
 
     function addLink ($itemID, $linkID, $linkType) {
-        
+
+		  $this->debug ("add link... $itemID $linkID $linkType");
+		  
         $link = TableRegistry::get ('Items')
 									  ->find ()
 									  ->where (['id' => $linkID])
 									  ->first ();
 
         $link ['link_type'] = $linkType;
+		  
+ 		  $this->debug ($link);
+		  
         $this->set (['response' => ['status' => 0,
                                     'link' => $link]]);
         
