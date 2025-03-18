@@ -42,8 +42,8 @@ class SearchController extends PosAppController {
           
             $query = TableRegistry::get ('Items')
 											 ->find ()
-											 ->where (['or' => ["sku like '" . $search."%'",
-																	  "item_desc like '" . $search."%'"]])
+											 ->where (['or' => ["sku like '$search%'",
+																	  "item_desc like '$search%'"]])
                                   ->contain (['ItemPrices'])
 											 ->limit (10);
             
@@ -56,7 +56,7 @@ class SearchController extends PosAppController {
                     
                 case 'sku_and_desc':
                     
-                    $name = $item ['sku'] . ' - ' .$item ['item_desc'];
+                    $name = $item ['item_desc'];
                     break;
                     
                 case 'item_desc':
@@ -202,29 +202,45 @@ class SearchController extends PosAppController {
         if (strlen ($search) > 0) {
           
             $query = TableRegistry::get ('Customers')
-                   ->find ()
-                   ->where ([$field . " like '" . $search . "%'"])
-                   ->limit (10);
+											 ->find ()
+											 ->where (['or' => ["email like '$search%'",
+																	  "fname like '$search%'",
+																	  "lname like '$search%'",
+																	  "phone like '%$search%'"]])
+											 ->select (["id", "fname", "lname", "phone", "email", ])
+											 ->limit (10);
 
+				$this->debug ($query);
+				
             $response = [];
         
             foreach ($query as $customer) {
 
-                $name = $customer [$field];
-                
-                switch ($field) {
+					 $this->debug ($customer);
+					 $res = '';
+					 $sep = '';
+					 
+					 foreach (['fname', 'lname', 'phone', 'email'] as $f) {
 
-                case 'phone':
-                    
-                    $name = $this->phoneFormat ($customer [$field]);
-                    break;
+						  if (strlen ($customer [$f])) {
 
-                default:
-                    break;
-                }
+								if ($f == 'phone') {
+									 
+									 $res .= $sep . $this->phoneFormat ($customer [$f]);
+								}
+								else {
+									 $res .= $sep . $customer [$f];
+								}
+								$sep = ', ';
+						  }
+						  else {
+
+								$sep = ' ';
+						  }
+					 }
                 
                 $response [] = ['id' => $customer ['id'],
-                                'name' => $name];
+                                'name' => $res];
             }
         }
         

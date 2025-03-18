@@ -33,6 +33,11 @@ class EmployeesController extends PosAppController {
 
     function index (...$params) {
         
+  		  if (!$this->session) {
+
+				return $this->redirect ('/');
+		  }
+
         $q = null;
         $employees = TableRegistry::get ('Employees');
         
@@ -75,11 +80,9 @@ class EmployeesController extends PosAppController {
 		  }
 		  
         $employees = $q->find ('all');
-		  
-        return ($this->response (__ ('Employees'),
-                                 'Employees',
-                                 'index',
-                                 compact ('employees', 'profiles')));
+
+		  $this->set (['employees' => $employees,
+							'profiles' => $profiles]);
     }
 
     function edit ($id = 0) {
@@ -111,12 +114,20 @@ class EmployeesController extends PosAppController {
             $profiles [$p ['id']] = $p ['profile_desc'];
         }
 
-		  $this->debug ($profiles);
-        
-        return ($this->response ($employee ['fname'] . ' ' . $employee ['lname'],
-                                 'Employees',
-                                 'edit',
-                                 compact ('employee', 'profiles')));
+        $this->set (['employee' => $employee,
+							'profiles' => $profiles]);
+		  
+ 		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('Employees')
+								->setTemplate ('edit');
+
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
     }
 
     public function update ($id) {

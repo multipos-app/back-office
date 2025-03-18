@@ -85,6 +85,27 @@ class AppController extends Controller
      *
      */
 
+    public function ajax ($data) {
+
+		  $this->set ($data);
+        
+        $builder = $this->viewBuilder ()
+                        ->setTemplatePath ('layout')
+                        ->disableAutoLayout ()
+								->setLayout ('ajax');
+        
+        $this->set ('response', $data);
+        $this->RequestHandler->respondAs ('json');
+        $this->render ('ajax');        
+        return $this->response;
+	 }
+
+	 /**
+     *
+     * ajax response method
+     *
+     */
+
     public function response ($title, $controller, $template, $data, $strip = true, $ajaxTemplate = 'ajax', $paginate = false) {
         
         $this->set ($data);

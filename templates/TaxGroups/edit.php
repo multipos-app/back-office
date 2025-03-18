@@ -1,55 +1,151 @@
-<?= $this->Html->css ("TaxGroups/edit") ?>
+<?php
 
+$this->debug ($taxGroup);
+
+?>
 <script>
 
- var taxGroup = <?php echo json_encode ($taxGroup, true); ?>;
- var taxTypes = <?php echo json_encode ($taxTypes, true); ?>;
-
- console.log (taxGroup);
+ var taxRows = <?= count ($taxGroup ['taxes']) ?>;
  
 </script>
 
-<form id="tax_edit" name ="tax_edit">
-
-	 <?= $this->Form->hidden ('id') ?>
-	 	 
-	 <div class="form-section">
-		  <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $taxGroup ['short_desc']?>
-	 </div>
-
-	 <div class="form-grid tax-edit-grid">
-
-		  <input type="hidden" name="id" value="<?= $taxGroup ['id'] ?>">
-
+<form id="taxGroup_edit" name="taxGroup_edit" method="post" action="/tax-groups/edit/<?= $taxGroup ['id'] ?>">
 		  
-		  <div class="form-cell form-desc-cell"><?= __('Description') ?></div>
+	 <div class="row g-1 m-3">
+		  <label for="tax_group_desc" class="col-sm-4 form-label"><?= __('Description') ?></label>
+		  <div class="col-sm-8">
 		  
-		  <div class="form-cell form-control-cell">
-				<?= $this->Form->control ('short_desc', ['class' => 'form-control', 'label' => false, 'placeholder' => __ ('Description'), 'value' => $taxGroup ['short_desc'], 'required' => true]) ?>
+				<?= $this->Form->control ('short_desc',
+												  ['class' => 'form-control',
+													'label' => false,
+													'placeholder' => __ ('Description'),
+													'value' => $taxGroup ['short_desc'],
+													'required' => true]) ?>
+
 		  </div>
-	 </div>
 
-	 <div class="form-grid rate-grid grid-cell-separator">
-		  
-		  <div class="grid-cell"><?= __ ('Name') ?></div>
-		  <div class="id-cell"><?= __ ('Rate') ?></div>
-		  <div class="id-cell"><?= __ ('Alternat Rate') ?></div>
-		  <div class="id-cell"><?= __ ('Type') ?></div>
-		  <div class="id-cell"></div>
-		  		  
-	 </div>
-	 
+		  <table id="tax_table" class="table g-1 m-3">
+				<thead align="right">
+					 <tr>
+						  <th align="left" style="text-align: left"><?= __ ('Name') ?></th>
+						  <th><?= __ ('Rate') ?></th>
+						  <th><?= __ ('Alternat rate') ?></th>
+						  <th><?= __ ('Fixed amount') ?></th>
+						  <th><?= __ ('Type') ?></th>
+					 </tr>
+				</thead>
 
-	 <div id="taxes"></div>
+				<tbody>
+					 <?php
+					 $row = 0;
+					 foreach ($taxGroup ['taxes'] as $tax) { ?>
 
-	 <div class="form-submit-grid">
+						  <input type="hidden" name="taxes[<?= $row ?>][id]" value="<?= $tax ['id']?>">
 						  
-		  <div>
-				<button type="submit" id="tax_update" class="btn btn-success btn-block control-button"><?= __ ('Save') ?></button>
+						  <tr>
+								<td align="left">
+									 <?=
+									 $this->Form->input ("taxes[$row][short_desc]",
+																['id' => 'short_desc', 
+																 'value' => $tax ['short_desc'], 
+																 'class' => 'form-control', 
+																 'label' => false, 
+																 'required' => 'required'])
+									 ?>
+								</td>
+
+								<td align="right"> 
+									 <?=
+									 $this->Form->input ("taxes[$row][rate]", 
+																['id' => 'rate', 
+																 'value' => $tax ['rate'], 
+																 'class' => 'form-control', 
+																 'label' => false, 
+																 'required' => 'required',
+																 'dir' => 'rtl'])
+									 ?>
+								</td>
+
+								<td align="right">
+									 <?=
+									 $this->Form->input ("taxes[$row][alt_rate]", 
+																['id' => 'alt_rate', 
+																 'value' => $tax ['alt_rate'], 
+																 'class' => 'form-control', 
+																 'label' => false, 
+																 'required' => 'required',
+																 'dir' => 'rtl'])
+									 ?>
+								</td>
+
+								<td align="right">
+									 <?=
+									 $this->Form->input ("taxes[$row][fixed_amount]", 
+																['id' => 'fixed_amount', 
+																 'value' => $tax ['fixed_amount'], 
+																 'class' => 'form-control', 
+																 'label' => false, 
+																 'required' => 'required',
+																 'dir' => 'rtl'])
+									 ?>
+								</td>
+
+								<td align="right">
+
+									 <?= 
+									 $this->Form->select ("taxes[$row][tax_type]",
+																 $taxTypes,
+																 ['name' => 'tax_type', 
+																  'id' => 'tax_type',
+																  'class' => 'form-select',
+																  'selected' => 0, 
+																  'value' => $tax ['tax_type'], 
+																  'label' => false])
+									 ?>
+								</td>
+								
+
+								<td>
+									 <i class="bx bxs-minus-circle icon-lg"></i>
+								</td>
+						  </tr>
+						 
+					 <?php
+					 }
+					 ?>
+					 <tr>
+						 
+						  <td colspan="6" align="right">
+								<i class="bx bxs-plus-circle icon-lg" onclick="addTax ()"></i>
+						  </td>
+					 </tr>
+				</tbody>
+		  </table>
+		  
+		  <div class="text-center">
+				<button type="submit" class="btn btn-success">Save</button>
 		  </div>
-		  		  
-	 </div>
 
 </form>
 
-<?= $this->Html->script ("TaxGroups/edit") ?>
+<script>
+
+function addTax () {
+
+	  console.log ('add tax... ' + taxRows);
+	  
+	  $.ajax ({
+			url: "/tax-groups/add-tax/" + taxRows,
+			type: "GET",
+			success: function (data) {
+
+				 taxRows ++;
+				 data = JSON.parse (data);
+				 
+				 $('#tax_table tr:last').remove ();
+				 $("#tax_table tbody").append (data.html);
+			}
+	  });
+ }
+
+</script>

@@ -1,125 +1,144 @@
-<?= $this->Html->css ("Customers/edit") ?>
 
-<script>
-	 
- var customer = <?php echo json_encode ($customer, true); ?>;
 
-</script>
+<form id="customer_edit" name="customer_edit" method="post" action="/customers/edit/<?= $customer ['id'] ?>">
 
-<div class="form-section">
-	 <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $customer ['email']?>
-</div>
-
-<form id="customer_edit" name ="customer_edit">
-	 
-	 <input type="hidden" name="id" value="<?= $customer ['id'] ?>"/>
-	 
-	 <div class="form-grid customer-edit-grid">
-
-		  <div class="form-cell form-desc-cell"><?= __('First name') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('fname', ['class' => 'form-control',
-																		'label' => false,
-																		'required' => true,
-																		'placeholder' => __ ('First name'),
-																		'value' => $customer ['fname'], 
-																		'onclick' => "this.select ()"]); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('Last name') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('lname', ['class' => 'form-control',
-																		'label' => false,
-																		'required' => true,
-																		'placeholder' => __ ('Last name'),
-																		'value' => $customer ['lname'], 
-																		'onclick' => "this.select ()"]); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('Email') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('email', ['class' => 'form-control',
-																		 'label' => false,
-																		 'required' => true,
-																		 'placeholder' => __ ('user@email.com'),
-																		 'value' => $customer ['email'], 
-																		 'onclick' => "this.select ()"]); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('Phone') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('phone', ['id' => 'phone',
-																		 'class' => 'form-control phone-format',
-																		 'label' => false,
-																		 'required' => true,
-																		 'value' => $customer ['phone'], 
-																		 'onclick' => "this.select ()"]); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('Address 1') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('addr_1', ['class' => 'form-control',
-																		  'label' => false,
-																		  'placeholder' => __ (''),
-																		  'value' => $customer ['addr_1'], 
-																		  'onclick' => "this.select ()"]); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('Address 2') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('addr_2', ['class' => 'form-control',
-																		  'label' => false,
-																		  'placeholder' => __ (''),
-																		  'value' => $customer ['addr_2'], 
-																		  'onclick' => "this.select ()"]); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('City') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('city', ['class' => 'form-control',
-																		'label' => false,
-																		'placeholder' => __ (''),
-																		'value' => $customer ['city'], 
-																		'onclick' => "this.select ()"]); ?>
-		  </div>
-		 
-		  <div class="form-cell form-desc-cell"><?= __('State') ?></div>
-		  <div class="select">
-				<?php echo $this->Form->select ('state', $states, ['label' => false,
-																					'value' => $customer ['state'],
-																					'class' => 'custom-dropdown',
-																					'onclick' => "this.select ()"]); ?>
-		  </div>
-
-		  <div class="form-cell form-desc-cell"><?= __('Postal Code') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('postal_code', ['class' => 'form-control postal-code-format',
-																				 'label' => false,
-																				 'placeholder' => __ ('######-###'),
-																				 'value' => $customer ['postal_code'], 
-																				 'onclick' => "this.select ()"]); ?>
+	 <div class="row g-1 m-3">
+		  <label for="fname" class="col-sm-4 form-label"><?= __('First name') ?></label>
+		  <div class="col-sm-8">
+				
+				<?= 
+				$this->Form->input ('fname', 
+										  ['id' => 'fname', 
+											'value' => $customer ['fname'], 
+											'class' => 'form-control', 
+											'label' => false, 
+											'required' => 'required']) ?>
 		  </div>
 	 </div>
 	 
-	 <div class="form-submit-grid">
-		  
-		  <div>
-				<button type="submit" id="customer_update" class="btn btn-success btn-block control-button"><?= __ ('Save') ?></button>
+	 <div class="row g-1 m-3">
+		  <label for="lname" class="col-sm-4 form-label"><?= __('Last name') ?></label>
+		  <div class="col-sm-8">
+				
+				<?= 
+				$this->Form->input ('lname', 
+										  ['id' => 'lname', 
+											'value' => $customer ['lname'], 
+											'class' => 'form-control', 
+											'label' => false, 
+											'required' => 'required']) ?>
 		  </div>
-		  
-		  <div>
-				<div class="btn btn-warning btn-block control-button" onclick="javascript:window.close ()"><?= __ ('Cancel') ?></div>
+	 </div>
+
+	 <div class="row g-1 m-3">
+		  <label for="email" class="col-sm-4 form-label"><?= __('Email') ?></label>
+		  <div class="col-sm-8">
+				
+				<?= 
+				$this->Form->input ('email', 
+										  ['id' => 'email', 
+											'value' => $customer ['email'], 
+											'class' => 'form-control', 
+											'label' => false, 
+											'required' => 'required']) ?>
 		  </div>
+	 </div>
+
+
+	 <div class="row g-1 m-3">
+		  <label for="phone" class="col-sm-4 form-label"><?= __('Phone') ?></label>
+		  <div class="col-sm-8">
+				
+				<?= 
+				$this->Form->input ('phone', 
+										  ['id' => 'phone', 
+											'value' => $customer ['phone'], 
+											'class' => 'form-control', 
+											'label' => false, 
+											'required' => 'required']) ?>
+		  </div>
+	 </div>
+	 
+	 <div class="row g-1 m-3">
+		  <label for="addr_1" class="col-sm-4 form-label"><?= __('Address') ?></label>
 		  
+		  <div class="col-sm-8">
+				<?= 
+				$this->Form->input ('addr_1', 
+										  ['id' => 'addr_1', 
+											'value' => $customer ['addr_1'], 
+											'class' => 'form-control phone-format', 
+											'label' => false,
+											'required' => 'required']) ?>
+		  </div>
+	 </div>
+
+	 <div class="row g-1 m-3">
+		  <label for="addr_2" class="col-sm-4 form-label"><?= __('Address 2') ?></label>
+		  
+		  <div class="col-sm-8">
+				<?= 
+				$this->Form->input ('addr_2', 
+										  ['id' => 'addr_2', 
+											'value' => $customer ['addr_2'], 
+											'class' => 'form-control', 
+											'label' => false]) ?>
+		  </div>
+	 </div>
+
+	 <div class="row g-1 m-3">
+		  <label for="city" class="col-sm-4 form-label"><?= __('City') ?></label>
+		  
+		  <div class="col-sm-8">
+				<?= 
+				$this->Form->input ('city', 
+										  ['id' => 'city', 
+											'value' => $customer ['city'], 
+											'class' => 'form-control', 
+											'label' => false, 
+											'required' => 'required']) ?>
+		  </div>
+	 </div>
+
+	 <div class="row g-1 m-3">
+		  <label for="state" class="col-sm-4 form-label"><?= __('State') ?></label>
+		  
+		  <div class="col-sm-8">
+				<?=
+				$this->Form->select ('state',
+											$states,
+											['name' => 'state', 
+											 'id' => 'state',  
+											 'class' => 'form-select',
+											 'value' => $customer ['state'], 
+											 'label' => false])
+				?>
+		  </div>
+	 </div>
+
+	 <div class="row g-1 m-3">
+		  <label for="postal_code" class="col-sm-4 form-label"><?= __('Zip/postal code') ?></label>
+		  
+		  <div class="col-sm-8">
+				<?= 
+				$this->Form->input ('postal_code', 
+										  ['id' => 'postal_code', 
+											'value' => $customer ['postal_code'], 
+											'class' => 'form-control postal-code-format', 
+											'label' => false, 
+											'required' => 'required']) ?>
+		  </div>
+	 </div>
+	 
+	 <div class="text-center g-1 mt-3">
+		  <button type="submit" class="btn btn-success">Save</button>
 	 </div>
 
 </form>
 
-<?= $this->Html->script ("Customers/edit") ?>
-
 <script>
  
  $(".phone-format").mask ("<?= __ ('phone_format') ?>", {});
- $(".postal-code-format").mask ("<?= __ ('postal code format') ?>", {});
+ $(".postal-code-format").mask ("<?= __ ('postal_code_format') ?>", {});
  
 </script>

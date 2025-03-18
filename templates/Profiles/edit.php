@@ -1,40 +1,48 @@
-<?= $this->Html->css ("Profiles/edit") ?>
+<style>
 
-<script>
+ .category-grid {
+	  
+     display: grid;
+     width: 100%;
+     grid-template-rows: auto;
+     grid-template-columns: repeat(4, 1fr);
+	  grid-column-gap: 0px;
+	  margin-top: 25px;
+ }
  
- var profile = <?php echo json_encode ($profile, true); ?>;
- var permissions = <?php echo json_encode ($permissions, true); ?>;
- 
- console.log (profile);
- console.log (permissions);
+</style>
 
-</script>
+<form id="profile_edit" name="profile_edit" method="post" action="/profiles/edit/<?= $profile ['id'] ?>">
 
-<div class="form-section">
-	 <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= __ ('Employee profile edit') ?>
-</div>
+	 <div class="row g-1 m-3">
+		  <label for="profile_desc" class="col-sm-1 form-label"><?= __('Profile') ?></label>
+		  <div class="col-sm-2">
 
-<form id="profile_edit" name ="profile_edit">
-
-	 <div class="form-grid profile-name-grid">
-		  
-		  <div class="form-cell form-desc-cell"><?= __ ('Profile name')?></div>
-		  <div class="form-cell form-control-cell">
-				<input type="text" id="profile_desc" name="profile_desc" value="<?= $profile ['profile_desc'] ?>" class="form-control" placeholder="<?= __ ('Profile description') ?>"/>
+				<?= 
+				$this->Form->input ('profile_desc', 
+										  ['id' => 'profile_desc', 
+											'value' => $profile ['profile_desc'], 
+											'class' => 'form-control', 
+											'label' => false, 
+											'required' => 'required']) ?>
 		  </div>
 	 </div>
-	 
+
 	 <div class="category-grid">
 		  
 		  <?php
 		  foreach ($categories as $id => $category) {
-		  ?>
+
+				$this->debug ("category... " . $category ['name'] . ' ' . count ($category ['pos_controls']));
 				
-				<div class="grid-cell grid-cell-left grid-cell-separator grid-span-all"><?= $category ['name'] ?></div>
+				if (count ($category ['pos_controls']) == 0) continue;
+				
+		  ?>
+				<div class="grid-span-all text-center mt-3"><h5><?= $category ['name'] ?></h5></div>
 				
 				<?php
 				foreach ($category ['pos_controls'] as $control) {
-
+					 
 					 if ($control ['approval'] == 1) {
 						  
 						  $checked = ' checked';
@@ -45,33 +53,22 @@
 					 }
 				?>
 				
-				<div class="grid-cell grid-cell-left">
+				<div class="form-check form-switch">
 					 
-					 <div class="checkbox checkbox-primary">
-						  <input type="checkbox" class="styled" id="<?= $control ['class'] ?>" name="<?= $control ['class'] ?>" type="checkbox"<?= $checked ?>>
-						  <label class="grid-label" for="<?= $control ['class'] ?>"><?= $control ['description'] ?></label>
-					 </div>
+					 <input type="checkbox" class="form-check-input" id="<?= $control ['class'] ?>" name="<?= $control ['class'] ?>"<?= $checked ?>>
+					 <label class="grid-label" for="<?= $control ['class'] ?>"><?= $control ['description'] ?></label>
+					 
 				</div>
 				
 		  <?php
 		  }
 		  }
 		  ?>
-	 </div>
-</div>
 
-<div class="form-submit-grid">
-	 
-	 <div>
-		  <button type="submit" id="profile_update" class="btn btn-success btn-block control-button"><?= __ ('Save') ?></button>
+		  <div class="text-center grid-span-all mt-3">
+				<button type="submit" class="btn btn-success">Save</button>
+		  </div>
 	 </div>
 	 
-	 <div>
-		  <button type="button" class="btn btn-warning" onclick="del ('profiles', <?= $profile ['id']?>, '<?= __ ('Delete') ?> <?= $profile ['profile_desc'] ?>')"><?= __ ('Delete') ?></button>
-	 </div>
-	 
-</div>
 
 </form>
-<?= $this->Html->script ("Profiles/edit") ?>
-

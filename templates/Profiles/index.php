@@ -1,49 +1,41 @@
-<?= $this->Html->css ("Profiles/index") ?>
 
-<div class="controls-grid">
-	 
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
+<div class="row g-1 mt-3 mb-3">
+	 <div class="col-10"></div>
+	 <div class="col-2 d-grid text-center">
+		  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#profile_modal" onclick="edit (0)"><?= __ ('Add profile') ?></button>
 	 </div>
-
-	 <div></div>
-	 
-	 <div class="form-cell form-right">
-		  <a onclick="javascript:add ()" class="btn btn-secondary"><?= __ ('Add profile'); ?></a>
-	 </div>
-	 
 </div>
 
-<div class="profile-grid">
-
-	 <div class="grid-cell grid-cell-left grid-cell-separator"></div>	 
-	 <div class="grid-cell grid-cell-left grid-cell-separator"><?= __ ('Description') ?></div>
-	 <div class="grid-cell grid-cell-left grid-cell-separator "><?= __ ('Employees') ?></div>
+<table class="table table-hover">
+	 <thead>
+		  <tr>
+				<th><?= __ ('Description') ?></th>
+				<th><?= __ ('Employees') ?></th>
+		  </tr>
+	 </thead>
+	 
+	 <tbody>
 
 	 <?php 
 	 foreach ($profiles as $profile) {
 		  
-		  $action = 'onclick="openForm (' . $profile ['id'] . ',\'/profiles/edit/' . $profile ['id'] . '\')"';
-
 	 ?>
-		  
-		  <div class="grid-row-wrapper" <?= $action ?>>
-
-				<div id="tag_<?= $profile ['id'] ?>" class="grid-cell grid-cell-left"></div>
-				<div class="grid-cell grid-cell-left"><?= $profile ['profile_desc'] ?></div>
-				<div class="grid-cell grid-cell-center"><i class="far fa-magnifying-glass fa-med text-left"></i></div>
-				
-		  </div>
+		  <tr role="button" onclick="edit (<?= $profile ['id'] ?>)">
+				<td><?= $profile ['profile_desc'] ?></td>
+				<td></td>
+		  </tr>
 		  
 	 <?php
 	 }
 	 ?>
+	 </tbody>
+</table>
 
-</div>
+<script>
+ 
+ function edit (id) {
+	  
+	  window.location = "/profiles/edit/" + id;
+ }
 
-<div id="pages" class="grid-cell grid-cell-center grid-span-all"></div>
-<div id="action_form"></div>
-
-<?= $this->Html->script ("Profiles/index") ?>
+</script>

@@ -34,19 +34,27 @@ class PosTicketsController extends PosApiController {
                             'ticket_item_addons' => 'TicketItemAddons',
                             'ticket_taxes' => 'TicketTaxes',
                             'ticket_tenders' => 'TicketTenders'];
-    
+
     public $bu = null;
     public $bus = null;
     public $posNo = null;
     public $totalTimes = null;
 
+	 private $dbname = null;
     private $finance = null;
     private $params = null;
     private $totals = null;
     private $totalTypes = ['totals', 'exceptions', 'departments', 'cards'];
 
+	 /**
+	  *
+	  * process any pending tickets
+	  *
+	  **/
+	 
     public function handleTickets ($dbname, $ticketID = 0) {
-        
+
+		  $this->dbname = $dbname;
         $count = 0;
         $this->dbconnect ($dbname);
         
@@ -116,7 +124,7 @@ class PosTicketsController extends PosApiController {
                 $customer = null;
 
                 if (isset ($ticket ['customer'])) {
-						  								
+						  
                     $customer = $ticket ['customer'];
                     unset ($ticket ['customer']);  // so it isn't created in cascade save
                 }
@@ -162,17 +170,6 @@ class PosTicketsController extends PosApiController {
                                 }
                             }
                         }
-                    }
-
-                    // add/upldate to post processing/finance
-
-                    if ($customer != null) {
-                        
-                        $customer ['business_unit_id'] = $ticket ['business_unit_id'];
-                        
-                        $postProcessing [] = ['method' => 'customer_update',
-                                              'params' => ['customer' => $customer,
-                                                           'ticket' => $t]];
                     }
                 }
                 else {
@@ -275,6 +272,12 @@ class PosTicketsController extends PosApiController {
         $this->jsonResponse (['status' => 0]);
     }
 
+	 /**
+	  *
+	  * handle items
+	  *
+	  */
+	 
     private function ticket_items ($reverse) {
         
         $invItems = TableRegistry::get ('InvItems');
@@ -543,7 +546,13 @@ class PosTicketsController extends PosApiController {
         }
     }
 
-    private function ticket_taxes ($reverse) {
+	 /**
+	  *
+	  * handle taxes
+	  *
+	  */
+	 
+     private function ticket_taxes ($reverse) {
         
         if (!isset ($this->ticket ['ticket_taxes'])) return;
 		  
@@ -554,7 +563,7 @@ class PosTicketsController extends PosApiController {
                 $bu = $businessUnit ['id'];
                 $summaryType = 0;
 				    foreach ($businessUnit ['total_times'] as $totalTime) {
-		  
+						  
                     $total = false;
                     $query = TableRegistry::get ('SalesTaxTotals')->find ()->where (['business_unit_id' => $bu,
                                                                                      'summary_type' => $summaryType,
@@ -589,7 +598,13 @@ class PosTicketsController extends PosApiController {
         }
     }
 
-    private function ticket_tenders ($reverse) {
+	 /**
+	  *
+	  * handle tenders
+	  *
+	  */
+	 
+     private function ticket_tenders ($reverse) {
         
         if (!isset ($this->ticket ['ticket_tenders'])) return;
 		  
@@ -619,7 +634,7 @@ class PosTicketsController extends PosApiController {
                     $total = null;
 
 						  
-                    $amount = ($tt ['tendered_amount'] - $tt ['returned_amount']);
+                    $amount = ($tt ['tendered_amount'] + $tt ['returned_amount']);
                     $quantity = 1;
                     
                     if ($total = $query->first ()) {
@@ -646,7 +661,7 @@ class PosTicketsController extends PosApiController {
                                                      'sales_desc' => $tt ['tender_type'],
                                                      'summary_type' => $summaryType]);
                     }
-						  
+						  						  
                     $table->save ($total);
                     $summaryType ++;
                 }
@@ -654,7 +669,13 @@ class PosTicketsController extends PosApiController {
         }
     }
 
-    private function saleException ($ticket) {
+	 /**
+	  *
+	  * look for exceptions
+	  *
+	  */
+	 
+     private function saleException ($ticket) {
 
         $saleException = '';
         
@@ -707,7 +728,48 @@ class PosTicketsController extends PosApiController {
         }
     }
 
- 	 function initTotals () {
+	 /**
+	  *
+	  * process any updates sent from the POS, items, customers
+	  *
+	  **/
+	 
+    private function handleUpdates ($updates, $dbname) {
+
+		  foreach ($updates as $update) {
+
+				$id = 0;
+				switch ($update ['type']) {
+
+					 case 'items':
+						  
+						  $this->loadComponent ('Item');
+						  $id = $this->Item->update ($update, $this);
+						  
+						  break;
+						  
+					 case "customers":
+
+						  $this->loadComponent ('Customer');
+						  $id = $this->Customer->update ($update, $this->ticket, $this);
+						  break;
+				}
+				
+				if ($id > 0) {
+					 
+					 $this->batch ($update ['type'], $id);
+					 $this->notifyPOS (intval (substr ($dbname, 2)));  // extract the merchant id from the database name
+				}
+        }
+    }
+
+	 /**
+	  *
+	  * create structures for various totals
+	  *
+	  */
+	 
+  	 function initTotals () {
 		  
         $getSummaryDate = function ($t, $tz) {
 				
@@ -752,71 +814,13 @@ class PosTicketsController extends PosApiController {
             $this->bus [] = $bu->toArray ();
         }
     }
-    
-    private function initTotalsSave () {
-        
-        $this->bu = $this->ticket ['business_unit_id'];
-        $this->posNo = $this->ticket ['pos_no'];
-
-        $ticketBu = null;
-        $this->bus = [];
-		  
-        $query = TableRegistry::get ('BusinessUnits')
-										->find ()
-										->where (['id' => $this->bu]);
-		  
-        $bu = $query->first ();
-        $this->bus [] = $bu->toArray ();
-        $timezone = $bu ['timezone'];
-
-        while ($bu ['business_unit_id'] != 0) {
-				
-            $query = TableRegistry::get ('BusinessUnits')
-											 ->find ()
-											 ->where (['id' => $bu ['business_unit_id']]);
-            $bu = $query
-                ->first ();
-				
-            $this->bus [] = $bu->toArray ();
-        }
-		  
-        /**
-         *
-         * Day and Month need to take into account if midnight has been crossed (or will be)
-         * for the daily and monthly summaries
-         *
-         */
-		  
-        $t = $this->ticket ['start_time'];
-        $tz = $bu ['timezone'];
-		  
-        $utcOffsets = ['America/New_York' => 5,
-                       'America/Chicago' => 6,
-                       'America/Denver' => 7,
-                       'America/Los_Angeles' => 8,
-                       'America/Anchorage' => 9,
-                       'HST' => 10,
-                       'Europe/London' => 0,
-                       'Europe/Copenhagen' => 23];
-        
-        $getSummaryDate = function ($t, $tz) {
-            
-            $date = new DateTime ($t, new DateTimeZone ('UTC'));
-            $date->setTimezone (new DateTimeZone ($tz));
-            return $date->format ('Y-m-d');
-        };
-        
-        $utc = $getSummaryDate ($t, $tz);
-        
-        $this->totalTimes = [date ('Y-m-d H:00:00', strtotime ($t)),
-                             $utc . sprintf (' %02d:00:00', $utcOffsets [$tz]), 
-                             substr ($utc, 0, 8) . "01" . sprintf (' %02d:00:00', $utcOffsets [$tz])];
-
-    }
-
+   
     /**
+	  *
      * save the session
+	  *
      */
+
     private function session ($ticket, $dataCapture) {
         
         $status = -1;
@@ -878,214 +882,5 @@ class PosTicketsController extends PosApiController {
             }
         }
 		  
-    }
-
-    private function customer_update ($params) {
-		  
-        $customer = $params ['customer'];
-
-		  $this->debug ($customer);
-		  
-        $cid = 0;
-        $customersTable = TableRegistry::get ('Customers');
-        
-        if ($customer ['id'] > 0) {
-
-				$cid = $customer ['id'];
-				$cust = $customersTable->find ()
-										  ->where (['id' => $cid])
-										  ->first ();
-                
-				if ($cust) {
-
-						  $cust ['fname'] = $customer ['fname'];
-						  $cust ['lname'] = $customer ['lname'];
-						  $cust ['email'] = $customer ['email'];
-						  $cust ['phone'] = $customer ['phone'];
-						  $cust ['city'] = $customer ['city'];
- 						  $cust ['state'] = $customer ['state'];
-						  $cust ['postal_code'] = $customer ['postal_code'];
-                   
-					 $customersTable->save ($cust);
-					 
-				}
-		  }
-		  else {
-                
-				$customer = $customersTable->newEntity ($customer);
-				$customer = $customersTable->save ($customer);
-				$cid = $customer ['id'];
-					 
-            $table->save ($customer);
-
-				// update the ticket with the customer ID
-					 
-				$params ['ticket'] ["customer_id"] = $cid;
-				$table = TableRegistry::get ('Tickets')->save ($params ['ticket']);
-		  }
-
-        if ($cid > 0) {
-            
-            $batchEntry = ['business_unit_id' => $customer ['business_unit_id'],
-									'update_table' => 'customers',
-									'update_id' => $cid,
-									'update_action' => 0,
-									'execution_time' => time ()];
-            
-            $batchEntriesTable = TableRegistry::get ('BatchEntries');
-            $batchEntry = $batchEntriesTable->newEntity ($batchEntry);
-            $batchEntriesTable->save ($batchEntry);
-        }
-    }
-
-    private function z_to_csv ($params) {
-
-        $csv = "type; sub_type; total; quantity\n";
-        foreach ($this->totals ['totals'] as $total) {
-
-            $csv .= strtoupper (str_replace ('.', ',', sprintf ("%s;%s;%.2f;%d\n",
-																					 $total ['total_type'],
-																					 $total ['total_sub_type'],
-																					 $total ['amount'],
-																					 $total ['quantity'])));
-        }
-        
-        file_put_contents (sprintf ('/home/%s/download/termial_%d_%s.csv',
-												$params ['params'] ['user'],
-												$this->totals ['pos_no'], date ('YmdHi')),
-									$csv);
-    }
-    
-    private function handleUpdates ($updates, $dbname) {
-
-		  foreach ($updates as $update) {
-
-				$this->debug ($update);
-
-				$id = 0;
-				switch ($update ['type']) {
-
-					 case 'items':
-
-						  $itemsTable = TableRegistry::get ('Items');
-
-						  $item = $itemsTable->find ()
-											 ->where (['sku' => $update ['sku']])
-											 ->contain (['ItemPrices'])
-											 ->first ();
-						  
-
-						  
-						  if ($item) {
-
-								$id = $item ['id'];
-								
-								$item ['sku'] = $update ['sku'];
-								$item ['item_desc'] = $update ['item_desc'];
-								$item ['department_id'] = $update ['department_id'];
-								$item ['locked'] = $update ['locked'];
-								$item ['enabled'] = $update ['enabled'];
-
-								$itemPricessTable = TableRegistry::get ('ItemPrices');
-								for ($i = 0; $i < count ($item ['item_prices']); $i ++) {
-
-									 $item ['item_prices'] [$i] ['price'] = $update ['item_price'] ['price'];
-									 $item ['item_prices'] [$i] ['cost'] = $update ['item_price'] ['cost'];
-									 $item ['item_prices'] [$i] ['tax_exempt'] = $update ['item_price'] ['tax_exempt'];
-									 $item ['item_prices'] [$i] ['tax_group_id'] = $update ['item_price'] ['tax_group_id'];
-									 $item ['item_prices'] [$i] ['tax_inclusive'] = $update ['item_price'] ['tax_inclusive'];
-									 $item ['item_prices'] [$i] ['class'] = $update ['item_price'] ['class'];
-									 $item ['item_prices'] [$i] ['pricing'] = json_encode ($update ['item_price'] ['pricing']);
-
-									 $itemPricessTable->save ($item ['item_prices'] [$i]);
-								}
-								
-								$result = $itemsTable->save ($item);
-								
-						  }
-						  else {
-								
-						  		$bus = TableRegistry::get ('BusinessUnits')
-														  ->find ()
-														  ->where (['business_type' => BU_LOCATION])
-														  ->select (['id'])
-														  ->all ();
-								
-								$itemPrice = $update ['item_price'];
-								unset ($itemPrice ['id']);
-								unset ($itemPrice ['item_id']);
-								unset ($update ['id']);
-								unset ($update ['item_price']);
-								
-								$itemPrices = [];
-								$pricing = json_encode ($itemPrice ['pricing']);
-								
-								foreach ($bus as $bu) {
-
-									 $itemPrice ['business_unit_id'] = $bu ['id'];
-									 $itemPrice ['pricing'] = $pricing;
-									 $itemPrices [] = $itemPrice;
-								}
-
-								$update ['item_prices'] = $itemPrices;
-								$item = $itemsTable->save ($itemsTable->newEntity ($update));
-								
-								$this->debug ('save item... ');
-								$this->debug ($item);
-
-								$id = $item ['id'];
-
-						  }
-
-						  if (isset ($update ['deposit_item_id'])) {  // add a deposit
-								
-								$itemLinksTable = TableRegistry::get ('ItemLinks');
-
-								$itemLinksTable->deleteAll (['item_id' => $id]);
-								$itemLink = $itemLinksTable->newEntity (['item_id' => $id,
-																					  'item_link_id' => $update ['deposit_item_id']]);
-								$itemLink = $itemLinksTable->save ($itemLink);
-
-								$this->debug ('save item link... ');
-								$this->debug ($itemLink);
-								
-								$this->batch ('item_links', $itemLink ['id']);
-					  }
-
-						  break;
-						  
-					 case "customers":
-
-						  $this->debug ("update customer...");
-						  $this->debug ($update);
-						  
-						  $customersTable = TableRegistry::get ('Customers');
-
-						  $customer = $customersTable->find ()
-															  ->where (['email' => $update ['email']])
-															  ->first ();
-
-						  if ($customer) {
-								
-						  }
-						  else {
-
-								$customer = $customersTable->newEntity ($update);
-								$customer = $customersTable->save ($customer);
-
-								$this->debug ($customer);
-						  }
-						  
-						  $id = $customer ['id'];
-
-						  break;
-				}
-
-				if ($id > 0) {
-					 
-					 $this->batch ($update ['type'], $id);
-					 $this->notifyPOS (intval (substr ($dbname, 2)));  // extract the merchant id from the database name
-				}
-        }
     }
 }

@@ -25,83 +25,81 @@ use Cake\Datasource\ConnectionManager;
 
 class ItemsController extends PosAppController {
 
-    public $paginate = ['limit' => 25,
-                        'order' => ['Items.sku asc']];
+    public $paginate = ['limit' => 25];
 
     public function initialize (): void {
 		  
         parent::initialize ();
-        
-        // if ($this->merchant ['role'] == 'reports') {
-        
-        //     return $this->redirect (['controller' => 'sales', 'action' => 'index']);
-        // }
     }
-
-    /**
-     *
-     *
-     *
-     */
     
-    public function index (...$params) {
+    public function index (...$args) {
 		  
-        $where = [];
+		  $where = [];
+		  $join = [];
         $q = false;
         $itemsTable = TableRegistry::get ('Items');
-        
-        if (count ($params) > 0) {
+
+		  $where []  =['enabled' => '1'];
+		  
+        /* if ($this->merchant ['bu_index'] > 0) {
+			  
+			  $join [] = ['table' => 'item_prices',
+			  'type' => 'right',
+			  'conditions' => ['item_prices.business_unit_id' => $this->merchant ['bu_id'],
+			  'Items.id = item_prices.item_id']];
+			  }*/
+		  
+        if (count ($args) > 0) {
             
-            switch ($params [0]) {
+            switch ($args [0]) {
                     
 					 case 'id':
-                    
-						  $q = TableRegistry::get ('Items')->find ()
-                                      ->where (['id' => $params [1]])
-                                      ->contain (['ItemPrices', 'InvItems']);
+
+						  $where [] = ['id' => $args [1]];
 						  break;
 						  
 					 case 'item_desc':
 
-						  $q = TableRegistry::get ('Items')->find ()
-                                      ->where (["item_desc like '" .  $params [1] . "%'"])
-                                      ->contain (['ItemPrices', 'InvItems']);						  
+						  $search = $args [1];
+                    $where [] = ["item_desc like '%$search%' or sku like '%$search%'"];
 						  break;
 						  
 					 case 'department_id':
 						  
-						  $q = TableRegistry::get ('Items')->find ()
-                                      ->where (["Items.department_id = '".$params [1]."'"])
-                                      ->contain (['ItemPrices', 'InvItems']);
-						  break;
-                    
-					 case 'pricing_id':
-                    
-						  $q = TableRegistry::get ('Items')->find ()
-                                      ->where (['item_prices.pricing_id' => $params [1]])
-                                      ->contain (['ItemPrices', 'InvItems'])
-                                      ->join (['table' => 'item_prices',
-                                               'type' => 'left',
-                                               'conditions' => 'Items.id = item_prices.item_id']);
+                    $where [] = ["Items.department_id = '".$args [1]."'"];
 						  break;
 
-					 case 'supplier_id':
-                    
-						  $q = TableRegistry::get ('Items')->find ()
-                                      ->where (["Items.supplier_id = '".$params [1]."'"])
-                                      ->contain (['ItemPrices', 'InvItems']);
+					 case 'pricing':
+
+						  /* $join ['conditions'] [] = ['item_prices.class' => $args [1]];
+							*/
+						  
+						  $join [] = ['table' => 'item_prices',
+										  'type' => 'right',
+										  'conditions' => ['item_prices.class' => $args [1],
+																 'Items.id = item_prices.item_id']];
 						  break;
             }
-        }
+				
+				$q = $itemsTable->find ()
+									 ->distinct ()
+                            ->where ($where)
+ 									 ->join ($join)
+                            ->contain (['ItemPrices', 'InvItems']);
+		  }
         else {
 
             $q = $itemsTable
                ->find ()
+					->where ($where)
+					->join ($join)
                ->contain (['ItemPrices', 'InvItems']);
         }
 		  
+		  $this->debug ($join);
+		  
         $items = $this->paginate ($q);
-        
+		  
         $departments = [null => __ ('Department')];
         $query = TableRegistry::get ('Departments')
 										->find ()
@@ -122,24 +120,16 @@ class ItemsController extends PosAppController {
             $suppliers [$d ['id']] = $d ['supplier_name'];
         }
         
-        $pricingOptions = [null => __ ('Add Item'),
-									'standard_pricing' => 'Standard pricing, one price per item',
-									'variant_pricing' => 'Variant pricing (size, color...)',
-									'open_pricing' => 'Open/enter price, prompt for price',
-									'metric_pricing' => 'Price by volume/weight, prompt for value'];
+        $pricingOptions = ['none' => __ ('Add Item'),
+									'standard' => 'Standard pricing, one price per item',
+									'variant' => 'Variant pricing (size, color...)',
+									'open' => 'Open/enter price, prompt for price',
+									'metric' => 'Price by volume/weight, prompt for value'];
 
-		  $data = ['departments' => $departments,
-					  'suppliers' => $suppliers,
-					  'pricingOptions' => $pricingOptions,
-					  'items' => $items];
-		  
-        return ($this->response (__ ('Items'),
-                                 'Items',
-                                 'index',
-                                 $data,
-                                 true,
-                                 'ajax',
-                                 'items'));
+		  $this->set (['departments' => $departments,
+							'suppliers' => $suppliers,
+							'pricingOptions' => $pricingOptions,
+							'items' => $items]);
     }
 	 
     /**
@@ -148,157 +138,55 @@ class ItemsController extends PosAppController {
      *
      */
     
-    public function edit ($id, $template = 'standard_pricing', $controls = true) {
+    public function edit ($id, $pricing = 'standard') {
+
+		  $item = null;
 		  
-        $item = null;
-        $where = false;
-        $title = __ ('Edit item');
-        
-        $id = intVal ($id);
-        if ($id > 0) {
-            
-            $where = ['id' => $id];
-        }
-        
-        if ($where) {
-				
-            $title = __ ('Edit item');
+		  if (!empty ($this->request->getData ())) {
+
+				$update = $this->update ($id, $this->request->getData ());
+
+				$this->ajax (['status' => 0,
+								  'item' => $update]);
+				return;
+		  }
+
+		  if ($id == 0) {
+
+				$item = $this->$pricing ();
+		  }
+		  else {
+
 				$itemsTable = TableRegistry::get ('Items');
 				
             $item = $itemsTable->find ()
-										 ->where ($where)
+										 ->where (['id' => $id])
 										 ->contain (['ItemPrices', 'ItemLinks', 'InvItems'])
 										 ->first ();
-            if ($item) {
-
-					 $buIndex = 0;
-					 if ($this->merchant ['bu_index'] > 0) {
-
-						  $buIndex = $this->merchant ['bu_index'] - 1;
-					 }
+            if (!$item) {
 					 
-					 $item ['item_price'] = $item ['item_prices'] [$buIndex];
-					 $item ['item_price'] ['pricing'] = json_decode ($item ['item_price'] ['pricing'], true);
+                $this->log ('invalid item in edit... ' . $id, 'error');
+                return $this->redirect ('/items');
+            }
 
-					 $template = $item ['item_price'] ['class'] . '_pricing';
-					 
-					 $item ['inv_item'] = ['supplier_id' => null,
-												  'package_quantity' => 0,
-												  'on_hand_count' => 0,
-												  'on_hand_req' => 0];
-					 
-					 if (count ($item ['inv_items']) > 0) {
+				if (count ($item ['item_links']) > 0) {
 
-						  $item ['inv_item'] = ['supplier_id' => 0,
-														'package_quantity' => 0,
-														'on_hand_count' => 0,
-														'on_hand_req' => 0];
-					 }
-					 
-					 if (count ($item ['item_links']) > 0) {
-						  
-						  $this->debug ($item ['item_links']);
-						  
-						  $link ['items'] = [];
+					 foreach ($item ['item_links'] as &$link) {
 
-						  foreach ($item ['item_links'] as &$link) {
+						  $itemLink = $itemsTable->find ()
+														 ->where (['id' => $link ['item_link_id']])
+														 ->first ();
 
-								$itemLink = $itemsTable->find ()
-															  ->where (['id' => $link ['item_link_id']])
-															  ->first ();
-								if ($itemLink) {
-									 
-									 $link ['item_desc'] = $itemLink ['item_desc'];
-								}
-								else {
-
-									 $link ['item_desc'] = __ ("N/A");
- 									 $this->error ("deposit linked to unknown item...");
-								}
+						  if ($itemLink) {
+								
+								$link ['name'] = $itemLink ['sku'] . ' - ' . $itemLink ['item_desc'];
 						  }
 					 }
-
-					 unset ($item ['item_prices']);
-					 unset ($item ['inv_items']);
-            }
-            else {
-
-                $this->log ('invalid item in edit... ' . $id, 'error');
-                return $this->redirect (['action' => 'index']);
-            }
-        }
-        else {
-            
-            $title = __ ('Add item');
-				
-				$item = ['id' => 0,
-							'sku' => '',
-							'item_desc' => '',
-							'department_id' => 0,
-							'tax_group_id' => 0,
-							'tax_inclusive' => 0,
-							'enabled' => 1,
-							'locked' => 0,
-							'item_links' => []];
-				
-				switch ($template) {
-
-					 case 'standard_pricing':
-						  
-						  $item ['item_price'] = ['id' => 0,
-														  'tax_group_id' => 0,
-														  'tax_inclusive' => 0,
-														  'tax_exempt' => 0,
-														  'class' => 'standard',
-														  'price' => 0,
-														  'cost' => 0,
-														  'pricing' => [],
-														  'supplier_id' => 0];
-						  break;
-						  
-					 case 'variant_pricing':
-						  
-						  $item ['item_price'] = ['id' => 0,
-														  'tax_group_id' => 0,
-														  'tax_inclusive' => 0,
-														  'tax_exempt' => 0,
-														  'class' => 'variant',
-														  'price' => 0,
-														  'cost' => 0,
-														  'pricing' => ['description' => '',
-																			 'variants' => []]];
-						  break;
-						  
-					 case 'open_pricing':
-						  
-						  $item ['item_price'] = ['id' => 0,
-														  'tax_group_id' => 0,
-														  'tax_inclusive' => 0,
-														  'tax_exempt' => 0,
-														  'class' => 'open',
-														  'pricing' => []];
-						  break;
-
-					 case 'metric_pricing':
-
-						  $item ['item_price'] = ['id' => 0,
-														  'tax_group_id' => 0,
-														  'tax_inclusive' => 0,
-														  'tax_exempt' => 0,
-														  'class' => 'metric',
-														  'price' => 0,
-														  'cost' => 0,
-														  'pricing' => ['metric' => null,
-																			 'decimal_places' => 1]];
-						  break;
-
 				}
 				
- 				$item ['inv_item'] = ['id' => 0,
-											 'package_quantity' => 0,
-											 'on_hand_req' => 0,
-											 'on_hand_count' => 0,
-											 'supplier_id' => 0];
+				$pricing = $item ['item_prices'] [$this->merchant ['bu_index']] ['class'];
+
+				$item = $this->$pricing ($item);
         }
         
         // setup for view
@@ -306,7 +194,7 @@ class ItemsController extends PosAppController {
 		  $buID = $this->merchant ['business_units'] [$this->merchant ['bu_index']];
 		  $buIndex = $this->merchant ['bu_index'];
         $query = TableRegistry::get ('TaxGroups')->find ()->contain (['Taxes']);
-        $taxGroups = ['' => '',
+        $taxGroups = [null => 'TAX',
                       0 => __ ('Tax Exempt')];
 		  
         foreach ($query as $taxGroup) {
@@ -343,324 +231,252 @@ class ItemsController extends PosAppController {
 							'gram' => 'Price per gram'];
 		  
         $decimalPlaces = [null => __ ('Decimal places'),
+								  '0' => __ ('None'),
 								  '1' => __ ('1'),
  								  '2' => __ ('2'),
 								  '3' => __ ('3')];
-		  
-        return ($this->response ($item ['item_desc'],
-                                 'Items',
-                                 $template,
-                                 compact ('item',
-                                          'title',
-														'buIndex',
-                                          'departments',
-                                          'suppliers',
-                                          'taxGroups',
-                                          'linkTypes',
-                                          'measures',
-														'decimalPlaces',
-														'controls')));
 
-    }
-    
-    /**
-     *
-     * add/update item
-     *
-     */
-    
-    public function item ($id) {
-		  
-		  $response = ['status' => -1];
-		  
-        if (!empty ($this->request->getData ())) {
-				
-            if ($id == 0) {
-					 
-                $status = $this->add ($this->request->getData ());
-					 if (isset ($this->request->getData () ['button'])) {
-						  
-						  $item = $this->request->getData () ['item'];
-						  $button = $this->request->getData () ['button'];
-						  
-						  $button ['text'] = strtoupper ($item ['item_desc']);
-						  $button ['params'] ['sku'] = strtoupper ($item ['sku']);
+ 		  $this->set (['item' => $item,
+							'departments' => $departments,
+							'taxGroups' => $taxGroups,
+							'linkTypes' => $linkTypes,
+							'suppliers' => $suppliers,
+							'measures' => $measures,
+							'decimalPlaces' => $decimalPlaces]);
 
-						  $response = ['status' => $status,
-											'button' => $button];
-						  
-					 }
-				}
-            else {
-					 
-                $status = $this->update ($this->request->getData ());
-					 $response = ['status' => $status];
-				}
-		  }
+		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('Items')
+								->setTemplate ($item ['template']);
 
-		  $this->set ('response', $response);
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->RequestHandler->respondAs ('json');
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
 	 }
-
- 	 /**
-     *
-     * add item
-     *
-     */
     
-    private function add ($item) {
-		  
- 		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
-        
-        $itemsTable = TableRegistry::get ('Items');
-        $itemPricesTable = TableRegistry::get ('ItemPrices');
-        $invItemsTable = TableRegistry::get ('InvItems');
-        
-        $i = $itemsTable->newEntity (['sku' => $item ['item'] ['sku'],
-                                      'item_desc' => strtoupper (str_replace ('"', "`", str_replace ("'", "`", $item ['item'] ['item_desc']))),
-                                      'department_id' => intVal ($item ['item'] ['department_id']),
-                                      'locked' => 0,
-                                      'enabled' => 1]);
-        $itemsTable->save ($i);
-        $itemID = $i ['id'];
-
-		  foreach ($this->merchant ['business_units'] as $bu) {
-
-				if ($bu ['business_type'] ==  BU_LOCATION) {
-					 
-					 switch ($item ['item'] ['item_price'] ['class']) {
-
-						  case 'standard':
-								
-								$ip = ['item_id' => $itemID,
-										 'business_unit_id' => $bu ['id'],
-										 'price' => floatVal ($item ['item'] ['item_price'] ['price']),
-										 'cost' => floatVal ($item ['item'] ['item_price'] ['cost']),
-										 'class' => 'standard',
-										 'pricing' => '{}',
-										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
-										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
-										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-								
-								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
-								
-								$ii = $invItemsTable->newEntity (['item_id' => $itemID,
-																			 'business_unit_id' => $bu ['id'],
-																			 'package_quantity' => intVal ($item ['item'] ['inv_item'] ['package_quantity']),
-																			 'on_hand_req' => intVal ($item ['item'] ['inv_item'] ['on_hand_req']),
-																			 'supplier_id' => intVal ($item ['item'] ['inv_item'] ['supplier_id'])]);
-								$invItemsTable->save ($ii);
-								break;
-
-						  case 'variant':
-
-								$pricing = json_encode ($item ['item'] ['item_price'] ['pricing']);
-								
-								$ip = ['item_id' => $itemID,
-										 'business_unit_id' => $bu ['id'],
-										 'class' => 'variant',
-										 'pricing' => $pricing,
-										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
-										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
-										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-								
-								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
-								break;
-								
-						  case 'open':
-								
-								$ip = ['item_id' => $itemID,
-										 'business_unit_id' => $bu ['id'],
-										 'class' => 'open',
-										 'pricing' => '{}',
-										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
-										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
-										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-								
-								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
-								break;
-								
-						  case 'metric':
-								
-								$ip = ['item_id' => $itemID,
-										 'business_unit_id' => $bu ['id'],
-										 'class' => 'metric',
-										 'price' => floatVal ($item ['item'] ['item_price'] ['price']),
-										 'cost' => floatVal ($item ['item'] ['item_price'] ['cost']),
-										 'pricing' => json_encode ($item ['item'] ['item_price'] ['pricing']),
-										 'tax_group_id' => intVal ($item ['item'] ['item_price'] ['tax_group_id']),
-										 'tax_exempt' => isset ($item ['item'] ['item_price'] ['tax_exempt']) ? 1 : 0,
-										 'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-								
-								$itemPricesTable->save ($itemPricesTable->newEntity ($ip));
-								break;
-					 }
-				}
-		  }
-        
-        if (isset ($item ['item'] ['item_links']) && (count ($item ['item'] ['item_links']) > 0)) {
-
-            $itemLinksTable = TableRegistry::get ('ItemLinks');
-            $itemLinksTable->deleteAll (['item_id' => $id]);
-
-            foreach ($item ['item'] ['item_links'] as $itemLink) {
-
-                $link = $itemLinksTable->newEntity (['item_id' => $itemID,
-                                                     'item_link_id' => $itemLink ['item_link_id'],
-                                                     'link_type' =>$itemLink ['link_type']]);
-                $itemLinksTable->save ($link);
-            }
-        }
-        
-        $this->batch ($itemID);
-        return 0;
-    }
-
 	 /**
      *
      * update item
      *
      */
     
-    public function update ($item) {
+    public function update ($id, $item) {
 
-		  $this->debug ('update item...');
+		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
+		  
+		  $itemsTable = TableRegistry::get ('Items');
+		  $itemPricesTable = TableRegistry::get ('ItemPrices');
+		  $invItemsTable = TableRegistry::get ('InvItems');
+		  $status = 1;
+
 		  $this->debug ($item);
 		  
-		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
-        $status = -1;
-
-		  $id = $item ['item'] ['id'];
-
-        $itemsTable = TableRegistry::get ('Items');
-        $itemPricesTable = TableRegistry::get ('ItemPrices');
-        $invItemsTable = TableRegistry::get ('InvItems');
-		  
-        $itemsTable->updateAll (['sku' => $item ['item'] ['sku'],
-                                 'item_desc' => strtoupper (str_replace ('"', "`", str_replace ("'", "`", $item ['item'] ['item_desc']))),
-                                 'department_id' => $item ['item'] ['department_id'],
-                                 'locked' => 0,
-                                 'enabled' => 1],
-                                ['id' => $item ['item'] ['id']]);
-		  
-		  // update pricing
-		  
-		  $ip = [];
-		  
-		  switch ($item ['item'] ['item_price'] ['class']) {
-
-				case 'standard':
-
-					 $ip = ['class' => $item ['item'] ['item_price'] ['class'],
-							  'price' => $item ['item'] ['item_price'] ['price'],
-							  'cost' => $item ['item'] ['item_price'] ['cost'],
-							  'pricing' => '{}',
-							  'tax_group_id' => $item ['item'] ['item_price'] ['tax_group_id'],
-							  'tax_exempt' => $item ['item'] ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
-							  'tax_inclusive' => isset ($item ['item'] ['tax_inclusive']) ? 1 : 0];
-					 break;
-
-				case 'variant':
-					 
-					 $ip = ['class' => $item ['item'] ['item_price'] ['class'],
-							  'pricing' => json_encode ($item ['item'] ['item_price'] ['pricing']),
-							  'tax_group_id' => $item ['item'] ['item_price'] ['tax_group_id'],
-							  'tax_exempt' => $item ['item'] ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
-							  'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-					 break;
-					 
-				case 'metric':
-
-					 $ip = ['class' => $item ['item'] ['item_price'] ['class'],
-							  'price' => $item ['item'] ['item_price'] ['price'],
-							  'cost' => $item ['item'] ['item_price'] ['cost'],
-							  'pricing' => json_encode ($item ['item'] ['item_price'] ['pricing']),
-							  'tax_group_id' => $item ['item'] ['item_price'] ['tax_group_id'],
-							  'tax_exempt' => $item ['item'] ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
-							  'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-					 break;
-					 
-				case 'open':
-					 
-					 $ip = ['class' => $item ['item'] ['item_price'] ['class'],
-							  'price' => 0,
-							  'cost' => 0,
-							  'pricing' => '{}',
-							  'tax_group_id' => $item ['item'] ['item_price'] ['tax_group_id'],
-							  'tax_exempt' => $item ['item'] ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
-							  'tax_inclusive' => isset ($item ['item'] ['item_price'] ['tax_inclusive']) ? 1 : 0];
-					 break;
-
-		  }
-        
-		  $where = ['item_id' => $item ['item'] ['id']];  // update all locations
-
-		  if ($this->merchant ['business_units'] [$this->merchant ['bu_index']] ['business_type'] == BU_LOCATION) {  // update location only
-
-				$where ['business_unit_id'] = $this->merchant ['business_units'] [$this->merchant ['bu_index']] ['id'];
-		  }
-
-        $itemPricesTable->updateAll ($ip, $where);
-		  
-		  // update inventory
-
-		  if (isset ($item ['item'] ['inv_items'])) {
-
-				$invItem = $invItemsTable->find ()
-												 ->where (["item_id = $id"])
-												 ->first ();
+		  if ($id == 0) {
 				
-				if ($invItem) {
-					 
-					 $invItemsTable->updateAll (['package_quantity' => $item ['item'] ['inv_items'] ['package_quantity'],
-														  'on_hand_req' => $item ['item'] ['inv_items'] ['on_hand_req'],
-														  'on_hand_count' => $item ['item'] ['inv_items'] ['on_hand_count'],
-														  'supplier_id' => $item ['item'] ['inv_items'] ['supplier_id']],
-														 ['item_id' => $id]);
+				$itemPrice = $item ['item_price'];
+				$invItem =  $item ['inv_item'];
+				unset ($item ['item_price']);
+				unset ($item ['inv_item']);
+				
+				$newItem = $itemsTable->newEmptyEntity ();
+				$newItem ['sku'] = $item ['sku'];
+				$newItem ['item_desc'] = strtoupper ($item ['item_desc']);
+				$newItem ['department_id'] = $item ['department_id'];
+				
+				if ($itemsTable->save ($newItem)) {
+
+					 $status = 0;
 				}
-				else {
-					 
-					 foreach ($this->merchant ['business_units'] as $bu) {
+
+				$id = $newItem ['id'];
+
+				$pricing = [];
+				switch ($itemPrice ['class']) {
+
+					 case 'standard':
+					 case 'open':
+
+						  // no pricing parameters
+						  break;
 						  
-						  if ($bu ['business_type'] == 2) {
+					 case 'metric':
+
+						  $pricing = ['price' => $itemPrice ['price'],
+										  'cost' => $itemPrice ['cost'],
+										  'metric' => $itemPrice ['metric'],
+										  'decimal_places' => $itemPrice ['decimal_places']];
+						  break;
+						  
+					 case 'variant':
+
+						  $pricing = $itemPrice ['pricing'];
+						  break;
+				}
+				
+				foreach ($this->merchant ['business_units'] as $bu) {
+					 
+					 if ($bu ['business_type'] == BU_LOCATION) {
+						  
+						  $itemPrice = ['item_id' => $id,
+											 'business_unit_id' => $bu ['id'],
+											 'class' => $itemPrice ['class'],
+											 'pricing' => json_encode ($pricing),
+											 'price' => isset ($itemPrice ['price']) ? $itemPrice ['price'] : 0,
+											 'cost' => isset ($itemPrice ['cost']) ? $itemPrice ['cost'] : 0,
+											 'tax_group_id' => $itemPrice ['tax_group_id']];
+						  
+						  $itemPrice = $itemPricesTable->newEntity ($itemPrice);
+						  $itemPricesTable->save ($itemPrice);
+
+						  $invItem = ['item_id' => $id,
+										  'business_unit_id' => $bu ['id'],
+										  'package_quantity' => $invItem ['package_quantity'],
+										  'on_hand_req' => $invItem ['on_hand_req'],
+										  'on_hand_count' => $invItem ['on_hand_count'],
+										  'supplier_id' => $invItem ['supplier_id']];
+						  
+						  $invItem = $invItemsTable->newEntity ($invItem);
+						  $invItemsTable->save ($invItem);
+					 }
+				}
+
+				$this->batch ($newItem ['id']);
+
+				return $newItem;
+		  }
+		  else {
+				
+				$itemsTable->updateAll (['sku' => $item ['sku'],
+												 'item_desc' => strtoupper ($item ['item_desc']),
+												 'department_id' => $item ['department_id'],
+												 'locked' => 0,
+												 'enabled' => isset ($item ['enabled']) ? 1 : 0],
+												['id' => $id]);
+		  		
+				$ip = [];
+				
+				switch ($item ['item_price'] ['class']) {
+
+					 case 'standard':
+
+						  $ip = ['class' => $item ['item_price'] ['class'],
+									'price' => $item ['item_price'] ['price'],
+									'cost' => $item ['item_price'] ['cost'],
+									'pricing' => '{}',
+									'tax_group_id' => $item ['item_price'] ['tax_group_id'],
+									'tax_exempt' => $item ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
+									'tax_inclusive' => isset ($item ['tax_inclusive']) ? 1 : 0];
+						  break;
+
+					 case 'variant':
+
+						  foreach ($item ['item_price'] ['pricing'] ['variants'] as &$variant) {
+
+								$variant ['desc'] = strtoupper ($variant ['desc']);
+						  }
+						  
+						  $ip = ['class' => $item ['item_price'] ['class'],
+									'pricing' => json_encode ($item ['item_price'] ['pricing']),
+									'tax_group_id' => $item ['item_price'] ['tax_group_id'],
+									'tax_exempt' => $item ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
+									'tax_inclusive' => isset ($item ['item_price'] ['tax_inclusive']) ? 1 : 0];
+						  break;
+						  
+					 case 'metric':
+
+						  $ip = ['class' => $item ['item_price'] ['class'],
+									'price' => $item ['item_price'] ['price'],
+									'cost' => $item ['item_price'] ['cost'],
+									'pricing' => json_encode ($item ['item_price']),
+									'tax_group_id' => $item ['item_price'] ['tax_group_id'],
+									'tax_exempt' => $item ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
+									'tax_inclusive' => isset ($item ['item_price'] ['tax_inclusive']) ? 1 : 0];
+						  break;
+						  
+					 case 'open':
+						  
+						  $ip = ['class' => $item ['item_price'] ['class'],
+									'price' => 0,
+									'cost' => 0,
+									'pricing' => '{}',
+									'tax_group_id' => $item ['item_price'] ['tax_group_id'],
+									'tax_exempt' => $item ['item_price'] ['tax_group_id'] == 0 ? 1 : 0,
+									'tax_inclusive' => isset ($item ['item_price'] ['tax_inclusive']) ? 1 : 0];
+						  break;
+
+				}
+				
+				$where = ['item_id' => $item ['id']];  // update all locations
+
+				if ($this->merchant ['bu_index'] > 0) {  // update location only
+
+					 $where ['business_unit_id'] = $this->merchant ['bu_id'];
+				}
+
+				
+				$itemPricesTable->updateAll ($ip, $where);
+				
+				// update inventory only if a specific location is selected
+
+				if ($this->merchant ['bu_index'] > 0) {
+
+					 $invItem = $invItemsTable->find ()
+													  ->where (["item_id = $id"])
+													  ->first ();
+					 
+					 if ($invItem) {
+						  
+						  $invItemsTable->updateAll (['package_quantity' => $item ['inv_item'] ['package_quantity'],
+																'on_hand_req' => $item ['inv_item'] ['on_hand_req'],
+																'on_hand_count' => $item ['inv_item'] ['on_hand_count'],
+																'supplier_id' => $item ['inv_item'] ['supplier_id']],
+															  [$where]);
+					 }
+					 else {
+
+						  // create the inventory items
+						  
+						  foreach ($this->merchant ['business_units'] as $bu) {
 								
-								$invItem = ['item_id' => $id,
-												'business_unit_id' => $bu ['id'],
-												'package_quantity' => $item ['item'] ['inv_items'] ['package_quantity'],
-												'on_hand_req' => $item ['item'] ['inv_items'] ['on_hand_req'],
-												'on_hand_count' => $item ['item'] ['inv_items'] ['on_hand_count'],
-												'supplier_id' => $item ['item'] ['inv_items'] ['supplier_id']];
-								
-								$invItem = $invItemsTable->newEntity ($invItem);
-								$invItemsTable->save ($invItem);
+								if ($bu ['business_type'] == BU_LOCATION) {
+									 
+									 $invItem = ['item_id' => $id,
+													 'business_unit_id' => $bu ['id'],
+													 'package_quantity' => $item ['inv_item'] ['package_quantity'],
+													 'on_hand_req' => $item ['inv_item'] ['on_hand_req'],
+													 'on_hand_count' => $item ['inv_item'] ['on_hand_count'],
+													 'supplier_id' => $item ['inv_item'] ['supplier_id']];
+									 
+									 $invItem = $invItemsTable->newEntity ($invItem);
+									 $invItemsTable->save ($invItem);
+								}
 						  }
 					 }
 				}
-		  }
-        
-        $itemLinksTable = TableRegistry::get ('ItemLinks');
-        $itemLinksTable->deleteAll (['item_id' => $id]);
-		  
-        if (isset ($item ['item'] ['item_links']) && (count ($item ['item'] ['item_links'])) > 0) {
-            
-            
-            foreach ($item ['item'] ['item_links'] as $itemLink) {
+				
+				$itemLinksTable = TableRegistry::get ('ItemLinks');
+				$itemLinksTable->deleteAll (['item_id' => $id]);
+				
+				if (isset ($item ['item_links']) && (count ($item ['item_links'])) > 0) {
+					 
+					 
+					 foreach ($item ['item_links'] as $itemLink) {
 
-                $il = ['item_id' => $id,
-                       'item_link_id' => $itemLink ['item_link_id'],
-                       'link_type' =>$itemLink ['link_type']];
+						  $il = ['item_id' => $id,
+									'item_link_id' => $itemLink ['item_link_id'],
+									'link_type' =>$itemLink ['link_type']];
+						  
+						  $link = $itemLinksTable->newEntity ($il);
+						  $itemLinksTable->save ($link);
+					 }
+				}
 
-					 $this->debug ('save link... ');
-					 $this->debug ($il);
-			 
-                $link = $itemLinksTable->newEntity ($il);
-                $itemLinksTable->save ($link);
-            }
+				$this->batch ($item ['id']);
+				return $item;
         }
-        
-        $this->batch ($item ['item'] ['id']);
-        return 0;
     }
     
     /**
@@ -669,59 +485,21 @@ class ItemsController extends PosAppController {
      *
      */
     
-    public function delete ($id) {
+    public function disable ($id) {
         
-        $status = -1;
-        
-        if ($id > 0) {
-            
-            $item = TableRegistry::get ('Items')
-											->find ()
-											->where (['id' => $id])
-											->contain (['ItemPrices', 'ItemLinks', 'InvItems'])
-											->first ();
-				
-            if ($item) {
-					 
-                $itemID = $item ['id'];
-                $batchEntryTable = TableRegistry::get ('BatchEntries');
-					 
-                $batchEntry = $batchEntryTable->newEntity (['business_unit_id' => $this->merchant ['bu_id'],
-																				'update_table' => 'items',
-																				'update_id' => $item ['id'],
-																				'update_action' => 1,
-																				'execution_time' => time ()]);
-                $batchEntryTable->save ($batchEntry);
-                
-                foreach (['item_links', 'item_prices'] as $assoc) {
-                    
-                    if (isset ($item [$assoc])) {
-                        
-                        foreach ($item [$assoc] as $tmp) {
-                            
-                            $batchEntry = $batchEntryTable->newEntity (['business_unit_id' => $this->merchant ['bu_id'],
-																								'update_table' => $assoc,
-																								'update_id' => $tmp ['id'],
-																								'update_action' => 1,
-																								'execution_time' => time ()]);
-                            
-                            $batchEntryTable->save ($batchEntry);
-                        }
-                    }
-                }
-
-                TableRegistry::get ('Items')->deleteAll (['id' => $itemID]);
-                TableRegistry::get ('ItemPrices')->deleteAll (['item_id' => $itemID]);
-                TableRegistry::get ('InvItems')->deleteAll (['item_id' => $itemID]);
-                TableRegistry::get ('ItemLinks')->deleteAll (['item_id' => $itemID]);
-            }
-            
-            $status = 0;
-        }
+        $status = 1;
 		  
-		  $this->set ('response', ['status' => $status]);
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->RequestHandler->respondAs ('json');
+  		  $this->debug ("disable... $id");
+      
+        if ($id > 0) {
+		
+            TableRegistry::get ('Items')->updateAll (['enabled' => 0],
+																	  ['id' => $id]);
+				$this->batch ($id);
+				$status = 0;
+		  }
+		  
+		  $this->ajax (['status' => $status]);
 	 }
 	 
     /**
@@ -823,8 +601,6 @@ class ItemsController extends PosAppController {
      **/
 
     function addLink ($itemID, $linkID, $linkType) {
-
-		  $this->debug ("add link... $itemID $linkID $linkType");
 		  
         $link = TableRegistry::get ('Items')
 									  ->find ()
@@ -832,8 +608,6 @@ class ItemsController extends PosAppController {
 									  ->first ();
 
         $link ['link_type'] = $linkType;
-		  
- 		  $this->debug ($link);
 		  
         $this->set (['response' => ['status' => 0,
                                     'link' => $link]]);
@@ -887,119 +661,24 @@ class ItemsController extends PosAppController {
         $this->set (['response' => $response]);
     }
     
-    /**
+	 /**
      *
-     * 
+     * create unique 5 digit sku
      *
      **/
-
-    public function searchItems ($desc) {
-        
-        $this->viewBuilder ()->setLayout ('ajax');
-        $response = [];
-
-        if (strlen ($desc) > 0) {
-				
-            $query = TableRegistry::get ('Items')
-											 ->find ()
-											 ->where (['or' => ["item_desc like '".$desc."%'",
-																	  "sku like '".$desc."%'"]])
-											 ->limit (5);
-
-            $response = [];
-            foreach ($query as $item) {
-                $response [] = ['id' => $item ['id'],
-                                'name' => $item ['item_desc']];
-            }
-        }
-		  
-        $this->set (['response' => $response]);
-    }
-    
-    /**
-     *
-     * utility function, create inventory for all items
-     *
-     */
-
-    function createInvItems ($buID) {
-
-        $itemsTable = TableRegistry::get ('Items');
-        $invItemTable = TableRegistry::get ('InvItems');
-
-        $query = $itemsTable->find ('all');
-        foreach ($query as $item) {
-
-            $invItem = $invItemTable->newEntity (['item_id' => $item ['id'],
-																  'business_unit_id' => $buID]);
-            $invItemTable->save ($invItem);
-        }
-		  
-        $this->set (['response' => 0]);
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->RequestHandler->respondAs ('json');
-    }
 	 
-    /**
-     *
-     * utility function, create item prices for all items
-     *
-     */
-
-    function createItemPrices () {
+    public function autoSku ($len) {
 
         $itemsTable = TableRegistry::get ('Items');
-        $itemPricesTable = TableRegistry::get ('ItemPrices');
 		  
-        $query = $itemsTable
-					  ->find ('all')
-                 ->contain (['ItemPrices']);
-
-        foreach ($query as $item) {
-				
-				$itemPrices = [];
-				foreach ($this->merchant ['business_units'] as $bu) {
-
-					 if ($bu ['business_type'] == 2) {
-						  
-						  $present = false;
-						  foreach ($item ['item_prices'] as $ip) {
-								
-								if ($ip ['business_unit_id'] != $bu ['id']) {
-
-									 unset ($ip ['id']);
-									 $ip ['business_unit_id'] = $bu ['id'];
-									 $itemPrices [$bu ['id']] = $ip->toArray ();
-								}
-						  }
-					 }
-				}
-				
-				$itemPricesTable->deleteAll (['item_id' => $item ['id']]);
-
-				foreach ($itemPrices as $bu => $ip) {
-
-					 $ip = $itemPricesTable->newEntity ($ip);
-					 $itemPricesTable->save ($ip);
-				}
-		  }
-		  
-        $this->set (['response' => 0]);
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->RequestHandler->respondAs ('json');
-    }
-	 
-    function autoSku () {
-
-        $itemsTable = TableRegistry::get ('Items');
-		  $sku = '00000';
+		  $sku = str_pad ('', $len, '0');
 		  
         $item = $itemsTable
-									->find ()
-									->where (['length(sku) = 5'])
-									->order ('id desc')
-									->limit (1)
-									->first ();
+			  ->find ()
+			  ->where (["length(sku) = $len"])
+			  ->order ('id desc')
+			  ->limit (1)
+			  ->first ();
 
 		  if ($item) {
 
@@ -1009,40 +688,7 @@ class ItemsController extends PosAppController {
         $this->set (['response' => ['status' => 0,
 												'sku' => $sku]]);
     }
-	 
-    /**
-     *
-     * utility function, remove inventory and pricing not associated with an item
-     *
-     */
 
-    function cleanup () {
-
-        $itemsTable = TableRegistry::get ('Items');
-        $itemPricesTable = TableRegistry::get ('ItemPrices');
-        $invItemTable = TableRegistry::get ('InvItems');
-
-		  foreach ([$itemPricesTable, $invItemTable] as $table) {
-
-				$query = $table->find ('all');
-				foreach ($query as $it) {
-					 
-					 $item = $itemsTable
-				->find ()
-				->where (['id' => $it ['item_id']])
-				->first ();
-					 
-					 if (!$item) {
-						  
-						  $table->deleteAll (['id' => $it ['id']]);
-					 }
-				}
-		  }
-		  
-		  $this->set ('response', ['status' => 0]);
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->RequestHandler->respondAs ('json');
-    }
 
 	 /**
      *
@@ -1051,33 +697,31 @@ class ItemsController extends PosAppController {
      **/
 
     private function batch ($id) {
-        
-        $item = TableRegistry::get ('Items')
-									  ->find ()
-									  ->where (['id' => $id])
-									  ->contain (['ItemPrices', 'ItemLinks'])
-									  ->first ();
-
-		  if ($item) {
-				
-				$batchEntrysTable = TableRegistry::get ('BatchEntries');
-				
-				$this->addBatch ('items', $item ['id']);
-				
-				/* foreach ($item ['item_prices'] as $ip) {
-					
-					$this->addBatch ('item_prices', $ip ['id']);
-					}
-					
-					foreach ($item ['item_links'] as $il) {
-					
-					$this->addBatch ('item_links', $il ['id']);
-					}*/
-		  }
-
+        				
+		  $this->addBatch ('items', $id);
 		  $this->notifyPos ();
     }
-
+	 
+	 /**
+	  *
+	  * format a new variant row and send it back to the item variant edit dialog
+	  *
+	  **/
+	 
+    public function addVariant () {
+		  
+		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('Items')
+								->setTemplate ('add_variant');
+		  
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
+	 }
     /**
      *
      * Save an update record for the POS
@@ -1094,5 +738,176 @@ class ItemsController extends PosAppController {
                                                       'execution_time' => time ()]);
         $batchEntriesTable->save ($batchEntry);
     }
+	 
+	 private function standard ($item = false) {
+
+		  if (!$item) {
+				
+				$item = ['id' => 0,
+							'sku' => '',
+							'item_desc' => '',
+							'department_id' => 0,
+							'locked' => false,
+							'enabled' => true,
+							'item_price' => ['class' => 'standard',
+												  'tax_group_id' => 0,
+												  'price' => '',
+												  'cost' => '',
+												  'pricing' => '{"price":"0.00","cost":"0.00"}'],
+							'item_links' => [],
+							'inv_item' => ['supplier_id' => 0,
+												'package_quantity' => 0,
+												'on_hand_req' => 0,
+												'on_hand_count' => 0]];
+		  }
+		  else {
+				
+				$item ['item_price'] = $item ['item_prices'] [0];
+ 				$item ['inv_item'] = $item ['inv_items'] [0];
+				unset ($item ['item_prices']);
+				unset ($item ['inv_items']);
+		  }
+		  
+		  $item ['template'] = 'standard_pricing';
+		  return $item;
+	 }
+	 
+	 private function metric ($item = false) {
+		  
+		  if (!$item) {
+				
+				$item = ['id' => 0,
+							'sku' => '',
+							'item_desc' => '',
+							'department_id' => 0,
+							'locked' => false,
+							'enabled' => true,
+							'item_price' => ['class' => 'metric',
+												  'tax_group_id' => 0,
+												  'price' => '',
+												  'cost' => '',
+												  'pricing' => ['metric' => '',
+																	 'decimal_places' => '']],
+							'item_links' => [],
+							'inv_item' => ['supplier_id' => 0,
+												'package_quantity' => 0,
+												'on_hand_req' => 0,
+												'on_hand_count' => 0]];
+		  }
+		  else {
+				$item ['item_price'] = $item ['item_prices'] [0];
+				$item ['item_price'] ['pricing'] = json_decode ($item ['item_price'] ['pricing'], true);
+				
+				if (count ($item ['inv_items'])) {
+					 
+ 					 $item ['inv_item'] = $item ['inv_items'] [0];
+				}
+				else {
+					 
+ 					 $item ['inv_item'] = ['package_quantity' => 0,
+												  'on_hand_req' => 0,
+												  'on_hand_count' => 0,
+												  'supplier_id' => 0];
+				}
+				
+				unset ($item ['item_prices']);
+				unset ($item ['inv_items']);
+		  }
+
+		  $item ['template'] = 'metric_pricing';
+		  return $item;
+	 }
+
+	 private function open ($item = null) {
+
+
+		  if (!$item) {
+				
+				$item = ['id' => 0,
+							'sku' => '',
+							'item_desc' => '',
+							'department_id' => 0,
+							'locked' => false,
+							'enabled' => true,
+							'item_price' => ['class' => 'open',
+												  'tax_group_id' => 0,
+												  'price' => 0,
+												  'cost' => 0,
+												  'pricing' => '{}'],
+							'item_links' => [],
+							'inv_item' => ['supplier_id' => 0,
+												'package_quantity' => 0,
+												'on_hand_req' => 0,
+												'on_hand_count' => 0]];
+		  }
+		  else {
+				$item ['item_price'] = $item ['item_prices'] [0];
+				$item ['item_price'] ['pricing'] = json_decode ($item ['item_price'] ['pricing'], true);
+				
+				if (count ($item ['inv_items'])) {
+					 
+ 					 $item ['inv_item'] = $item ['inv_items'] [0];
+				}
+				else {
+					 
+ 					 $item ['inv_item'] = ['package_quantity' => 0,
+												  'on_hand_req' => 0,
+												  'on_hand_count' => 0,
+												  'supplier_id' => 0];
+				}
+				
+				unset ($item ['item_prices']);
+				unset ($item ['inv_items']);
+		  }
+
+		  $item ['template'] = 'open_pricing';
+		  return $item;
+	 }
+	 
+	 private function variant ($item = null) {
+		  
+		  if (!$item) {
+				
+				$item = ['id' => 0,
+							'sku' => '',
+							'item_desc' => '',
+							'department_id' => 0,
+							'locked' => false,
+							'enabled' => true,
+							'item_price' => ['class' => 'variant',
+												  'tax_group_id' => 0,
+												  'price' => 0,
+												  'cost' => 0,
+												  'pricing' => ['variants' => []]],
+							'item_links' => [],
+							'inv_item' => ['supplier_id' => 0,
+												'package_quantity' => 0,
+												'on_hand_req' => 0,
+												'on_hand_count' => 0]];
+		  }
+		  else {
+				
+				$item ['item_price'] = $item ['item_prices'] [0];
+				$item ['item_price'] ['pricing'] = json_decode ($item ['item_price'] ['pricing'], true);
+				
+				if (count ($item ['inv_items'])) {
+					 
+ 					 $item ['inv_item'] = $item ['inv_items'] [0];
+				}
+				else {
+					 
+ 					 $item ['inv_item'] = ['package_quantity' => 0,
+												  'on_hand_req' => 0,
+												  'on_hand_count' => 0,
+												  'supplier_id' => 0];
+				}
+				
+				unset ($item ['item_prices']);
+				unset ($item ['inv_items']);
+		  }
+
+		  $item ['template'] = 'variant_pricing';
+		  return $item;
+	 }	 
 }
 ?>

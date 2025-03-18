@@ -23,18 +23,11 @@ require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 
 class TicketsController extends PosAppController {
     
-    public $paginate = ['limit' => 50];
-
     public function initialize (): void {
 		  
         parent::initialize ();
-    }
+	 }
     
-    public function beforeFilter (EventInterface $event) {
-
-        parent::beforeFilter ($event);
-    }
-
 	 /**
 	  *
 	  *
@@ -42,13 +35,26 @@ class TicketsController extends PosAppController {
 	  */
 	 
     function index (...$args) {
-
-		  $this->debug ($args);
 		  
+		  if (!empty ($this->request->getData ())) {
+				
+				$this->debug ($this->request->getData ());
+				
+				$tmp = [];
+				foreach ($this->request->getData () as $key => $val) {
+
+					 if (strlen ($val) > 0) {
+						  
+						  $tmp [] = $key;
+						  $tmp [] = $val;
+					 }
+				}
+				
+				$args = $tmp;
+		  }
+
 		  $this->conditions ($args);
 		  
-		  $this->debug ($this->conditions);
-
         $timestamp = function ($t) {
             
             return date ('m/d g:i a', strtotime ($this->utcToLocal ($t->i18nFormat ('yyyy-MM-dd H:mm:ss'),
@@ -63,15 +69,13 @@ class TicketsController extends PosAppController {
 		  }
 		  
 		  $this->paginate = ['conditions' => $this->conditions,
-									'limit' => 50];
+									'limit' => 25];
 		  
 		  $q = TableRegistry::get ('Tickets')
 								  ->find ()
 								  ->join ($this->join)
         						  ->order (['Tickets.complete_time' => 'desc'])
 		  						  ->distinct (['Tickets.id']);
-
-		  $this->debug ($this->join);
 		  
 		  $t = $this->paginate ($q);
 		  
@@ -84,17 +88,9 @@ class TicketsController extends PosAppController {
             $tickets [] = $t;
         }
         
-        $data = ['ticketTypes' => $this->ticketTypes,
-                 'ticketSearch' => $this->tenderSearch,
-                 'tickets' => $tickets];
-        
-        return ($this->response (__ ('Transactions'),
-                                 'Tickets',
-                                 'index',
-                                 $data,
-                                 true,
-                                 'ajax',
-                                 'tickets'));
+        $this->set (['ticketTypes' => $this->ticketTypes,
+							'tenderTypes' => $this->tenderSearch,
+							'tickets' => $tickets]);
     }
 	 
 	 /**
@@ -142,7 +138,7 @@ class TicketsController extends PosAppController {
                 $i ++;
             }
         }
-		  		  
+		  
         $ticketTime = strtotime ($ticket ['start_time']);
 
         $ticket ['start_time'] = $this->timestamp ($ticket ['start_time']);
@@ -172,7 +168,7 @@ class TicketsController extends PosAppController {
         if ($t) { $next = $t ['id']; }
 
         $ticket ['details'] = [['desc' => __ ('TRANSACTION NUMBER'),
-                                'value' => $ticket ['ticket_no']],
+                                'value' => $ticket ['id'] . ' - ' . $ticket ['ticket_no']],
                                ['desc' => __ ('START TIME'),
                                 'value' => $ticket ['start_time']],
                                ['desc' => __ ('TRANSACTION TYPE'),
@@ -242,22 +238,24 @@ class TicketsController extends PosAppController {
 					  'employee_theft' => __ ('Employee theft'),
 					  'customer_theft' => __ ('Customer theft')];
 		  
- 		  $data = ['ticket' => $ticket,
-					  'videoID' => $videoID,
-					  'hasVideo' => $hasVideo,
-					  'clip' => $clip,
-					  'offset' => $offset,
-					  'flag' => $flag];
+		  $this->set (['ticket' => $ticket,
+							'videoID' => $videoID,
+							'hasVideo' => $hasVideo,
+							'clip' => $clip,
+							'offset' => $offset,
+							'flag' => $flag]);
+
+		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('Tickets')
+								->setTemplate ('detail');
 		  
-		  $this->set ($data);
-        
-        return ($this->response (__ ('Ticket #') . $ticket ['ticket_no'],
-                                 'Tickets',
-                                 'detail',
-                                 $data,
-                                 false,
-                                 'ajax',
-                                 false));
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
     }
 	 
 	 /**
@@ -289,7 +287,7 @@ class TicketsController extends PosAppController {
 	  */
 	 
     function video ($videoID, $dir) {
-        		  
+        
         $order = '';
         switch ($dir) {
 
@@ -347,7 +345,7 @@ class TicketsController extends PosAppController {
 		  $data = [];
 
 		  $this->set (['tender' => [null => 'Tender type',
-										  'cash' => 'Cash',
+											 'cash' => 'Cash',
 											 'credit' => 'Credit'],
 							'type' => [null => 'Ticket type',
 										  0 => 'Sale',
@@ -381,8 +379,6 @@ class TicketsController extends PosAppController {
 	  */
 	 
     private function conditions ($args) {
-		  
-   	  $this->debug ($args);
 		  
 		  $this->conditions = [];
         $this->join = [];
@@ -498,7 +494,7 @@ class TicketsController extends PosAppController {
 									 
 									 $this->conditions [] = "return_items > 0";
 									 break;
-						  
+									 
 								case 'discounts':
 									 
 									 $this->conditions [] = "discounts > 0";
@@ -522,10 +518,10 @@ class TicketsController extends PosAppController {
 						  break;
 						  
 					 case 'ticket_type':
-                
+						  
 						  $this->conditions [] = "$key = $val";
 						  break;
-				
+						  
 						  switch ($val) {
 									 
 								case 'return_items':

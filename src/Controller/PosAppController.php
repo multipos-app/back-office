@@ -51,10 +51,11 @@ class PosAppController extends AppController {
     public $updateCount;
     public $locale = 'en_US';
     public $session = false;
+    public $controller = null;
 
     public $ticketTypes;
     public $ticketTypeMap;
-    public $ticketSearch;
+    public $tenderTypes;
     public $tenderSearch;
     public $ticketStatus;
     public $limit = 25;
@@ -68,7 +69,8 @@ class PosAppController extends AppController {
     public function initialize (): void {
 
         parent::initialize ();
-        $this->ticketTypes = [null => __ ('ticket'),
+		  
+        $this->ticketTypes = [null => __ ('Ticket type'),
                               SALE => __ ('SALE'),
                               VOID => __ ('VOID'),
                               NO_SALE => __ ('NO SALE'),
@@ -99,7 +101,7 @@ class PosAppController extends AppController {
                                 'open_amount' => OPEN_AMOUNT,
                                 'refund_sales' => REFUND];
 
-        $this->ticketSearch = [null => __ ('ticket type'),
+        $this->tenderTypes = [null => __ ('ticket type'),
                                'void_sales' => __ ('VOID'),
                                'no_sales' => __ ('NO SALE'),
                                'comp_sales' => __ ('COMP SALE'),
@@ -114,7 +116,7 @@ class PosAppController extends AppController {
                                'return_items' => __ ('RETURN ITEMS'),
                                'void_items' => __ ('VOID ITEMS')];
 		  
-        $this->tenderSearch = [null => __ ('tender type'),
+        $this->tenderSearch = [null => __ ('Tender type'),
                                'cash' => __ ('CASH'),
                                'credit' => __ ('CREDIT'),
                                'account' => __ ('ACCOUNT'),
@@ -124,7 +126,8 @@ class PosAppController extends AppController {
                                'split' => __ ('SPLIT'),
                                'mobile' => __ ('MOBILE')];
 		  
-        $this->ticketStates = [__ ('OPEN'),
+        $this->ticketStates = [null => __ ('Ticket state'),
+                               __ ('OPEN'),
                                __ ('COMPLETE'),
                                __ ('ERROR'),
                                __ ('SUSPEND'),
@@ -152,7 +155,7 @@ class PosAppController extends AppController {
      */
     
     public function beforeFilter (EventInterface $event) {
-        
+		  
         parent::beforeFilter ($event);
 		  
         $this->session = $this->request->getSession ();
@@ -228,9 +231,11 @@ class PosAppController extends AppController {
         }
         else {
 
-				$this->debug ('session closed... ');
-            $this->session->destroy ();
-				exit ();
+				// redir to login
+
+				$this->debug ('session timeout...');
+				$this->session = false;
+				$this->redirect ('/');
 		  }
     }
     
@@ -263,6 +268,18 @@ class PosAppController extends AppController {
         }
     }
 	 
+	 function buSelect ($index = 0) {
+		  
+		  // change bu_id in the merchant session and save it
+		  
+		  $this->merchant ['bu_index'] = $index;
+		  $this->merchant ['bu_id'] = $this->merchant ['business_units'] [$index] ['id'];
+		  
+		  $this->request->getSession ()->write ('merchant', $this->merchant);
+		  
+        $this->ajax (['status' => 0]);
+	 }
+	 
     function tz () {
 		  
 		  if ($this->merchant ['bu_index'] > 0) {
@@ -275,8 +292,8 @@ class PosAppController extends AppController {
 		  }
     }
 	 
-    function tzOffset ($tz) {
-        
+    protected function tzOffset ($tz) {
+		  
         $originDateTimezone = new DateTimeZone ('UTC');
         $targetDateTimezone = new DateTimeZone ($tz);
         $originDateTime = new DateTime ("now", $originDateTimezone);
@@ -286,7 +303,7 @@ class PosAppController extends AppController {
         return intVal ($offset / 60 / 60);
     }
 	 
-    function dow ($t = null) {
+    public function dow ($t = null) {
 
 		  if (gettype ($t) == 'string') {
 
@@ -305,7 +322,7 @@ class PosAppController extends AppController {
     
     public function toUtc ($str = null) {
 
-        date_default_timezone_set ($this->merchant ['timezone']);
+        date_default_timezone_set ('America/New_York'); // $this->merchant ['timezone']);
 
         $time = time ();
         
@@ -320,7 +337,7 @@ class PosAppController extends AppController {
         return $d;
     }
 
-    function utcToLocal ($t, $timezone, $format = null) {
+    protected function utcToLocal ($t, $timezone, $format = null) {
 
         $t = str_replace ('.', ':', $t);  // where is this . coming from?
         
@@ -336,7 +353,7 @@ class PosAppController extends AppController {
 		  
     }
 
-    function localToUTC ($t, $timezone) {
+    protected function localToUTC ($t, $timezone) {
 		  
         $t = str_replace ('.', ':', $t);  // where is this . coming from?
 
@@ -369,7 +386,7 @@ class PosAppController extends AppController {
         return '';
     }
     
-    public function isDST () {
+    protected function isDST () {
         
         return intVal (date ('I')) == 1;
     }
@@ -460,9 +477,6 @@ class PosAppController extends AppController {
 	 public function bu ($index) {
 
 		  // change bu_id in the merchant session and save it
-
-		  $this->debug ("bu... $index");
-		  $this->debug ($this->merchant ['business_units'] [$index]);
 		  
 		  $this->merchant ['bu_index'] = $index;
 		  $this->merchant ['bu_id'] = $this->merchant ['business_units'] [$index] ['id'];
@@ -482,6 +496,11 @@ class PosAppController extends AppController {
 	 
     public function phoneFormat ($p) {
 
+		  if ($p == null) {
+				
+				return '----------';
+		  }
+		  
         switch ($this->merchant ['locale']) {
 
             case 'da_DK':
@@ -506,5 +525,18 @@ class PosAppController extends AppController {
 	 public function clearPhone ($input) {
 		  
 		  return preg_replace ('/\(|\)|\s+|\-/', '', $input);
+	 }
+
+	 public function uuid () {
+    
+		  if (function_exists ('com_create_guid') === true) {
+        
+				return trim (com_create_guid (), '{}');
+		  }
+    
+		  $data = openssl_random_pseudo_bytes (16);
+		  $data[6] = chr (ord ($data[6]) & 0x0f | 0x40); // set version to 0100
+		  $data[8] = chr (ord ($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+		  return vsprintf ('%s%s-%s-%s-%s-%s%s%s', str_split (bin2hex ($data), 4));
 	 }
 }

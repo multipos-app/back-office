@@ -1,136 +1,137 @@
-<?= $this->Html->css ("Items/variant_pricing") ?>
-<?php
 
 
-?>
+<form class="row g-1" id="<?= $item ['template']?>_edit">
+ 
+	 <input type="hidden" name="id" value="<?= $item ['id'] ?>">
+	 <input type="hidden" name="item_price[class]" value="variant">
+	 <input type="hidden" name="item_price[price]" value="0">
+	 <input type="hidden" name="item_price[cost]" value="0">
+	 <input type="hidden" name="inv_item[supplier_id]" value="0">
+	 <input type="hidden" name="inv_item[package_quantity]" value="0">
+	 <input type="hidden" name="inv_item[on_hand_req]" value="0">
+	 <input type="hidden" name="inv_item[on_hand_count]" value="0">
+
+	 <?php include ('item_header.php')  ?>
+
+	 <div class="row g-1">
+ 		  <div class="col-sm-12">
+				<?=
+				$this->Form->select ('item_price[tax_group_id]',
+											$taxGroups,
+											['value' => $item ['item_price'] ['tax_group_id'],
+											 'class' => 'form-select',
+											 'label' => false,
+											 'required' => 'required'])
+				?>
+		  </div>
+	 </div>
+
+	 <div class="row g-1" id="variants_table"></div>
+	 
+	 <div class="row g-1">
+		  <div class="col-sm-3 d-grid g-1 text-center">
+				<button onclick="addVariant ()" class="btn btn-primary btn-block"><?= __ ('Add variant') ?></button>
+		  </div>
+	 </div>
+	 
+	 <?php include ('item_footer.php'); ?>
+	 
+</form>
 
 <script>
  
- var item = <?php echo json_encode ($item, true); ?>;
+ $(".currency-format").mask ("#####0.00", {reverse: true});
+ $(".integer-format").mask ("#######0");
 
- console.log (item);
+ variants = <?= json_encode ($item ['item_price'] ['pricing'] ['variants']) ?>;
+ drawVariants ();
+ 
+ function drawVariants () {
+	  
+	  let html = '<table class="table">' +
+					 '<thead align="right">' +
+					 '<th style="text-align:left;"><?= __ ('Description') ?></th>' +
+					 '<th align="right"><?= __ ('Price') ?></th>' +
+					 '<th align="right"><?= __ ('Cost') ?></th>' +
+					 '<th align="right"></th>' +
+					 '</thead>';
+	  
+	  $(variants).each (function (i, variant) {
+
+			let desc = `item_price[pricing][variants][${i}][desc]`;
+			let price = `item_price[pricing][variants][${i}][price]`;
+			let cost = `item_price[pricing][variants][${i}][cost]`;
+			
+			html += `<tbody>` +
+					  `<tr>` +
+					  `<td align="left">` +
+					  `<input type="input" id="desc_${i}" name="${desc}" class="form-control" required="required" value="${variant.desc}"/></td>` +
+					  `<td align="right">` +
+					  `<input type="input" id="price_${i}" name="${price}" id="rate" class="form-control currency-format" required="required" dir="rtl" value="${variant.price}"/></td>` +
+					  `<td align="right">` +
+					  `<input type="input" id="cost_${i}" name="${cost}" id="alt_rate" class="form-control currency-format" required="required" dir="rtl" value="${variant.cost}"/></td>`;
+
+			if (variant.new_variant) {
+				 
+				 html += `<td>` +
+							`<i onclick="updateVariant (${i})" class="bx bxs-plus-circle icon-lg"></i>` +
+							`</td>` +
+							`</tr>`;
+			}
+			else {
+				 
+				 html += `<td>` +
+							`<i onclick="delVariant (${i})" class="bx bxs-minus-circle icon-lg"></i>` +
+							`</td>` +
+							`</tr>`;
+			}
+	  });
+
+	  html += '</tbody>' +
+				 '</table>';
+	  
+	  $('#variants_table').html (html);
+	  
+	  $(".currency-format").mask ("#####0.00", {reverse: true});
+	  $(".integer-format").mask ("#######0");
+ }
+ 
+ function addVariant () {
+	  
+	  $(variants).each (function (i, variant) {
+
+			variant.new_variant = false;
+	  });
+	  
+	  variants.push ({desc: "", price: "", cost: "", new_variant: true});
+	  drawVariants ();
+ }
+ 
+ function updateVariant (i) {
+
+	  let desc = $(`#desc_${i}`).val ().toUpperCase ();
+	  
+	  variants [i] = {desc: desc,
+							price: $(`#price_${i}`).val (),
+							cost: $(`#cost_${i}`).val (),
+							new_variant: false};
+
+	  drawVariants ();
+ }
+
+ function delVariant (index) {
+	  
+	  variants.splice (index, 1);
+ 	  drawVariants ()
+ }
+ 
+ /* setup for save */
+ 
+ pricing = 'variant_pricing_edit';
+ itemID = <?= $item ['id'] ?>;
 
 </script>
 
-<?php
+<!-- save -->
 
-$this->debug ('variant controls... ' . $controls);
-
-if ($controls) {
-	 
-	 include ('item_header.php');
-}
-
-?>
-
-<!-- <div class="form-section">
-	  <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $item ['item_desc']?>
-	  </div>
-	-->
-<form id="item_edit" name="item_edit" class="grid-span-all">
-	 
-	 <?= $this->Form->hidden ('item[id]', ['value' => $item ['id']]) ?>
-	 
-	 <?= $this->Form->hidden ('item[bu_index]', ['value' => $buIndex]) ?>
-	 <?= $this->Form->hidden ('item[item_price][id]', ['value' => $item ['item_price'] ['id']]) ?>
-	 <?= $this->Form->hidden ('item[item_price][class]', ['value' => 'variant']) ?>
-	 <?= $this->Form->hidden ('item[item_price][pricing]', ['value' => []]) ?>
-
-	 <div class="form-grid item-edit-grid">
-		  
-		  <div class="form-cell form-desc-cell"><?= __('SKU/UPC') ?></div>
-		  <?=	$this->element ('sku', ['item' => $item])?>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('Description') ?></div>
-		  <?php
-		  echo $this->input ('fa-text-variant',
-									['id' => 'item_desc',
-									 'name' =>'item[item_desc]',
-									 'value' => $item ['item_desc'],
-									 'class' => 'form-control']);
-		  ?>
-		  <div class="form-cell form-desc-cell"><?= __('Department') ?></div>
-		  <div class="select">
-				<?php echo $this->Form->select ('item[department_id]',
-														  $departments, ['value' => $item ['department_id'],
-																			  'label' => false,
-																			  'class' => 'custom-dropdown',
-																			  'required' => 'required']); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('Tax') ?></div>
-		  <div class="select">
-				<?php echo $this->Form->select ('item[item_price][tax_group_id]',
-														  $taxGroups, ['value' => $item ['item_price'] ['tax_group_id'],
-																			'label' => false,
-																			'class' => 'custom-dropdown',
-																			'required' => 'required']); ?>
-		  </div>
-		  
-		  <?php
-
-		  $taxInc = [0 => __ ('no'), 1 => __ ('yes')];
-		  switch ($merchant ['locale']) {
-
-				case 'en_US':
-					 
-					 break;
-					 
-				default:
-					 
-					 echo '<div class="form-cell form-desc-cell">' . __('Tax Included') . '</div>' +
-							'<div class="select">' .
-							$this->Form->select ('item[tax_inclusive]"',
-														$taxInc,
-														['name' => 'item[tax_inclusive]', 
-														 'id' => 'item[tax_inclusive]', 
-														 'selected' => 0, 
-														 'value' => 0, 
-														 'class' => 'custom-dropdown',
-														 'label' => false]) . 
-							'</div>';
-
-		  }
-		  ?>
-		  
-	 </div>
-
-	 <div class="variant-pricing-variants-grid grid-cell-separator">
-		  
-		  <div class="grid-cell grid-cell-left grid-cell-separator "><?= __ ('Variant Description') ?></div>
-		  <div class="grid-cell grid-cell-right grid-cell-separator "><?= __ ('Price') ?></div>
-		  <div class="grid-cell grid-cell-right grid-cell-separator "><?= __ ('Cost') ?></div>
-		  <div class="form-cell">&nbsp;</div>
-		  
-	 </div>
-
-	 <div id="variants"></div>
-
-</form>
-
-<?php 
-if ($controls) {
-?>
-
-	 <div class="form-submit-grid">
-		  
-		  <div class="item-input">
-				<button type="submit" id="item_update" class="btn btn-success"><?= __ ('Save') ?></button>
-		  </div>
-		  
-		  <div>
-				<button type="button" class="btn btn-warning" onclick="del ('items', <?= $item ['id']?>, '<?= __ ('Delete') ?> <?= $item ['item_desc'] ?>')"><?= __ ('Delete') ?></button>
-		  </div>
-	 </div>
-
-<?php 
-}
-?>
-
-<script>
- $(".currency-format").mask ("<?= __ ('currency_format') ?>", {reverse: true});
- $(".integer-format").mask ("<?= __ ('currency_format') ?>", {reverse: true});
-</script>
-
-<?= $this->Html->script ("Items/edit") ?>
-<?= $this->Html->script ("Items/variant_pricing") ?>
+<script src="/assets/js/item_submit.js"></script>

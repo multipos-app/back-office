@@ -28,11 +28,6 @@ class HourlyController extends PeriodController {
 
     function index (...$args) {
 
-        if (!$this->session) {
-
-            return $this->logout ();
-        }
-		  
         Time::setToStringFormat('Y-m-d H:i:s');
         
         date_default_timezone_set ($this->tz ());
@@ -168,17 +163,12 @@ class HourlyController extends PeriodController {
 				$col ++;
 		  }
 		  
-		  $data = ['prev' => $startDate - ONE_WEEK,
-					  'next' => $startDate + ONE_WEEK,
-					  'len' => $this->len,
-					  'periods' => $this->periods,
-					  'hourly' => $hourly,
-					  'snap' => true,
-					  'dow' => $this->dow ()];
-		  
-		  return ($this->response (__ ('Hourly Sales'),
-											'Hourly',
-											'index',
-											$data));
+		  $this->set (['prev' => $startDate - ONE_WEEK,
+							'next' => $startDate + ONE_WEEK,
+							'len' => $this->len,
+							'periods' => $this->periods,
+							'hourly' => $hourly,
+							/* 'snap' => true,*/
+							'dow' => $this->dow ()]);
 	 }
 }

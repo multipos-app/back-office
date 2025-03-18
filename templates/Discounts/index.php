@@ -1,81 +1,65 @@
-<?= $this->Html->css ("Discounts/index") ?>
 
-<div class="discount-controls-grid">
-	 
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
-	 </div>
 
-	 <?php
-    echo $this->input ('fa-text-size',
-                       ['id' =>'addon_typeahead',
-								'class' =>'form-control',
-							  'placeholder' => __ ('Discount description')]);
-	 ?>
-	 
-	 <div class="grid-cell grid-cell-left action-icon" onclick="search ('addon_desc_search')">
-		  <i class="far fa-search fa-med"></i>
-	 </div>
-
-	 <div class="form-cell form-right">
-		  
-		  <?php echo $this->Form->select ('add_discount',
-													 $addonTypes,
-													 ['id' => 'add_discount',
-													  'class' => 'custom-dropdown',
-													  'label' => false]); ?>
-	 </div>
-</div>	 
-
-<div class="discount-grid">
-
-	 <div class="grid-cell grid-cell-separator"></div>
-	 <div class="grid-cell grid-cell-left grid-cell-separator"><?= __ ('Description'); ?></div>
-	 <div class="grid-cell grid-cell-left grid-cell-separator"><?= __ ('Print Description'); ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Start Date'); ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('End Date'); ?></div>
-	 
-	 <?php
-	 
-	 foreach  ($addons as $addon) {
-
-		  foreach (['start_time', 'end_time'] as $date) {
-
-				$addon [$date] = strlen ($addon [$date]) > 0 ? $addon [$date] : '---';
-		  }
-		  
-		  $action = 'onclick="openForm (' . $addon ['id'] . ',\'/discounts/' . $addon ['addon_type'] . '/' . $addon ['id'] . '\')"';
-	 ?>
-	 
-	 <div class="grid-row-wrapper" <?= $action ?>>
-		  
-		  <div class="grid-cell grid-cell-left tag_<?= $addon ['id'] ?>"></div>
-
-		  <div class="grid-cell grid-cell-left">
-				<?= $addon ['description'] ?>
-		  </div>
-
-		  <div class="grid-cell grid-cell-left">
-				<?= $addon ['print_description'] ?>
-		  </div>
-
-		  <div class="grid-cell grid-cell-center">
-				<?= $addon ['start_time'] ?>
-		  </div>
-		  
-		  <div class="grid-cell grid-cell-center">
-				<?= $addon ['end_time'] ?>
-		  </div>
-		  
-	 </div>
-		  <?php
-		  }
+<div class="row g-1 m-3">
+	 <div class="col-4">
+		  <?=
+		  $this->Form->select ('add_discount',
+								 $addonTypes,
+								 ['id' => 'add_discount',
+								  'data-bs-toggle' => 'modal',
+								  'data-bs-target' => '#discount_modal',
+								  'value' => '',
+								  'class' => 'form-select',
+								  'label' => false,
+								  'required' => 'required'])
 		  ?>
+	 </div>
 </div>
 
-<div id="pages" class="grid-cell grid-cell-center grid-span-all"></div>
-<div id="action_form"></div>
+<table class="table table-hover g-1 m-3">
+	 <thead>
+		  <tr>
+				<th><?= __ ('Description'); ?></th>
+				<th><?= __ ('Print Description'); ?></th>
+				<th><?= __ ('Start Date'); ?></th>
+				<th><?= __ ('End Date'); ?></th>
+		  </tr>
+	 </thead>
+	 <tbody>
+		  
+		  <?php
+		  
+		  foreach  ($addons as $addon) {
 
-<?= $this->Html->script (['Discounts/index']); ?>
+				foreach (['start_time', 'end_time'] as $date) {
+					 
+					 $addon [$date] = strlen ($addon [$date]) > 0 ? $addon [$date] : '---';
+				}
+				
+				$action = 'onclick="openForm (' . $addon ['id'] . ',\'/discounts/' . $addon ['addon_type'] . '/' . $addon ['id'] . '\')"';
+		  ?>
+
+		  <tr>
+				<td><?= $addon ['description'] ?></td>
+				<td><?= $addon ['print_description'] ?></td>
+				<td> <?= $addon ['start_time'] ?> </td>
+				<td> <?= $addon ['end_time'] ?> </td>
+<?php
+}
+?>
+		  </tr>
+	 </tbody>
+</table>
+
+<div class="modal fade" id="discount_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="discount_desc" class="modal-title"><?= __ ('Discount') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="modal_content" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>

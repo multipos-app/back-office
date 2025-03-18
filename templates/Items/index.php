@@ -1,59 +1,89 @@
-<?= $this->Html->css ("Items/index") ?>
 
-<div class="form-grid controls-grid">
-	 
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
-	 </div>
 
-	 <div class="form-cell form-control-cell">
-		  <input type="text" id="item_desc" class="form-control" placeholder="<?= __ ('SKU or description') ?>">
+<style>
+
+ .search-grid {
+	  
+	  display: grid;
+	  width: 100%;
+	  grid-template-columns: 1fr .1fr 1fr 1fr 1fr;
+	  margin-top: 25px;
+	  margin-bottom: 25px;
+ }
+ 
+</style>
+
+<div class="row search-grid">
+	 
+	 <div >
+		  <input type="text" class="form-control" id="item_search" value="" placeholder="<?= __ ('Search, SKU, description')?>">
 	 </div>
 	 
-	 <div class="grid-cell grid-cell-center action-icon" onclick="search ('item_desc')"><i class="far fa-search fa-med"></i></div>
-	 
-	 <div class="form-cell">
-		  
-		  <?php echo $this->Form->select ('department_id',
-													 $departments,
-													 ['onchange' => "search ('department_id')",
-													  'id' => 'department_id',
-													  'class' => 'custom-dropdown',
-													  'label' => false,
-													  'value' => false]); ?>
+	 <div>
+		  <i class="bx bx-search-alt icon-lg" onclick="search ()"></i>
 	 </div>
 	 
-	 <div class="grid-cell"></div>
-	 <div class="form-cell form-right">
-		  
-		  <?php
-		  				
-		  echo $this->Form->select ('add_item',
-											 $pricingOptions,
-											 ['id' => 'add_item',
-											  'class' => 'custom-dropdown',
-											  'label' => false]);
+	 <div>
+		  <?=
+		  $this->Form->select ('department_search',
+									  $departments,
+									  ['id' => 'department_search',
+										'value' => '',
+										'class' => 'form-select',
+										'label' => false,
+										'onchange' => 'departmentSearch ()'])
 		  ?>
 	 </div>
 	 
+	 <div>
+		  <?=
+		  $this->Form->select ('pricing_search',
+									  [null => __ ('Pricing search'), 
+										'standard' => __ ('Standard'), 
+										'variant' => __ ('Variant'), 
+										'open' => __ ('Open'), 
+										'metric' => __ ('Metric')],
+									  ['id' => 'pricing_search',
+										'value' => '',
+										'class' => 'form-select',
+										'label' => false,
+										'onchange' => 'pricingSearch ()'])
+		  ?>
+	 </div>
+	 
+	 <div>
+		  <?=
+		  $this->Form->select ('add_item',
+									  $pricingOptions,
+									  ['id' => 'add_item',
+										'data-bs-toggle' => 'modal',
+										'data-bs-target' => '#item_modal',
+										'value' => '',
+										'class' => 'form-select',
+										'label' => false,
+										'required' => 'required'])
+		  ?>
+	 </div>
 </div>
 
-<div class="item-grid">
+<table class="table table-hover table_sm">
+	 <thead>
+		  <tr>
 
-	 <div class="grid-cell grid-cell-separator"></div>
-	 <div class="grid-cell grid-cell-separator" onclick="javascript:colSort ('items', 'sku');"><span class="sort-link"><?= __ ('SKU') ?></span></div>
-	 <div class="grid-cell grid-cell-separator" onclick="javascript:colSort ('items', 'item_desc');"><span class="sort-link"><?= __ ('Item description') ?></span></div>
-	 <div class="grid-cell grid-cell-separator grid-cell-left"><?= __ ('Supplier'); ?></div>
-	 <div class="grid-cell grid-cell-separator grid-cell-right"><?= __ ('Price'); ?></div>
-	 <div class="grid-cell grid-cell-separator grid-cell-right"><?= __ ('Cost'); ?></div>
-	 <div class="grid-cell grid-cell-separator grid-cell-right"><?= __ ('Inventory'); ?></div>
-
+				<th><?= $this->Paginator->sort ('sku', __ ('SKU')) ?></th>
+				<th><?= $this->Paginator->sort ('item_desc', __ ('Item description')) ?></th>
+				<th><?= __ ('Supplier'); ?></th>
+				<th style="text-align: end;"><?= __ ('Price'); ?></th>
+				<th style="text-align: end;"><?= __ ('Cost'); ?></th>
+				<th style="text-align: end;"><?= __ ('Inventory'); ?></th>
+				<th></th>
+		  </tr>
+	 </thead>
+	 
 	 <?php
 	 
 	 foreach ($items as $item) {
-
+		  
 		  $supplierID = 0;
 
 		  if (!isset ($item ['inv_items'] [0])) {
@@ -65,119 +95,228 @@
 													'package_quantity' => 0,
 													'on_hand_count' => 0];
 		  }
-		  
-		  $action = 'onclick="openForm (' . $item ['id'] . ',\'/items/edit/' . $item ['id'] . '/0\')"';
 
-	 ?>
-	 
-	 <div class="grid-row-wrapper" <?= $action ?>>
-
-		  <div id="tag_<?= $item ['id'] ?>" class="grid-cell grid-cell-left"></div>
-		  <div class="grid-cell grid-cell-left"><?= $item ['sku'] ?></div>
-		  <div class="grid-cell grid-cell-left"><?php echo $item ['item_desc'];?></div>
-
-		  <?php
-
+		  $template = '';
 		  if (isset ($item ['item_prices'] [0])) {
 
-				$pricing = ["class" => "standard",
-								"price" => $item ['item_prices'] [0] ['price'],
-								"amount"=> $item ['item_prices'] [0] ['price'],
-								"cost" => 0];
+				$template = $item ['item_prices'] [0] ['class'];
+		  }
+		  
+	 ?>
+	 <tbody>
 
-				if (isset ($item ['item_prices'] [0] ['pricing'])) {
-					 
-					 $pricing = json_decode ($item ['item_prices'] [0] ['pricing'], true);
-				}
-
-				$price = 0;
-				$cost = 0;
-				$profit = 0;
-				$itemDesc = $item ['item_desc'];
+		  <script>
+			item = <?= json_encode ($item) ?>;			
+		  </script>
+		  
+		  <tr role="button" data-bs-toggle="modal" data-bs-target="#item_modal" onclick="edit (<?= $item ['id'] ?>,'<?= $template ?>')">
 				
-				switch ($item ['item_prices'] [0] ['class']) {
+				<td><?= $item ['sku'] ?></td>
+				<td><?= $item ['item_desc'] ?></td>
 
-					 case 'standard':
-					 case 'metric':
-					 case 'group':
+				<?php
 
-						  $cost = floatval ($item ['item_prices'] [0] ['cost']);
+				if (isset ($item ['item_prices'] [0])) {
+
+					 $pricing = ["class" => "standard",
+									 "price" => $item ['item_prices'] [0] ['price'],
+									 "amount"=> $item ['item_prices'] [0] ['price'],
+									 "cost" => 0];
+
+					 if (isset ($item ['item_prices'] [0] ['pricing'])) {
 						  
-						  if (isset ($item ['item_prices'] [0] ['price'])) {
+						  $pricing = json_decode ($item ['item_prices'] [0] ['pricing'], true);
+					 }
 
-								$price = floatval ($item ['item_prices'] [0] ['price']);
-						  }
-						  else if (isset ($item ['item_prices'] [0] ['amount'])) {  // legacy
+					 $price = 0;
+					 $cost = 0;
+					 $profit = 0;
+					 $itemDesc = $item ['item_desc'];
+					 
+					 switch ($item ['item_prices'] [0] ['class']) {
 
-								$price = floatval ($item ['item_prices'] [0] ['amount']);
-						  }
-						  
+						  case 'standard':
+						  case 'metric':
+						  case 'group':
 
-						  if (($price > 0) && ($cost > 0)) {
+								$cost = floatval ($item ['item_prices'] [0] ['cost']);
 								
-								$profit = 100 - (($cost / $price) * 100.0);
-						  }
-						  else if (($price > 0) && ($item ['item_prices'] [0] ['cost'] == 0)) {
+								if (isset ($item ['item_prices'] [0] ['price'])) {
+
+									 $price = floatval ($item ['item_prices'] [0] ['price']);
+								}
+								else if (isset ($item ['item_prices'] [0] ['amount'])) {  // legacy
+
+									 $price = floatval ($item ['item_prices'] [0] ['amount']);
+								}
 								
-								$profit = 100.0;
-						  }
 
-						  $price = $this->moneyFormat ($price);
-						  $cost = $this->moneyFormat ($cost);
+								if (($price > 0) && ($cost > 0)) {
+									 
+									 $profit = 100 - (($cost / $price) * 100.0);
+								}
+								else if (($price > 0) && ($item ['item_prices'] [0] ['cost'] == 0)) {
+									 
+									 $profit = 100.0;
+								}
 
-						  $onHandCount = $item ['inv_items'] [0] ['on_hand_count'] < 0 ? 0 : $item ['inv_items'] [0] ['on_hand_count'];
-						  
-						  $supplierID = 0;
-						  if ($item ['inv_items'] [0] ['supplier_id'] > 0) {
+								$price = $this->moneyFormat ($price);
+								$cost = $this->moneyFormat ($cost);
 
-								$supplierID = $item ['inv_items'] [0] ['supplier_id'];
-						  }
-						  
-						  $html =
-								'<div class="grid-cell grid-cell-left">' . $suppliers [$supplierID] . '</div>' .
-								'<div class="grid-cell grid-cell-right">'.$price.'</div>' .
-								'<div class="grid-cell grid-cell-right">' . $cost . '</div>' .
-								'<div class="grid-cell grid-cell-right">' . $onHandCount . '</div>';
+								$onHandCount = $item ['inv_items'] [0] ['on_hand_count'] < 0 ? 0 : $item ['inv_items'] [0] ['on_hand_count'];
+								
+								$supplierID = 0;
+								if ($item ['inv_items'] [0] ['supplier_id'] > 0) {
 
-						  echo $html;
-						  break;
-						  
-					 case 'size':
-						  
-						  $html =
-								'<div class="grid-cell grid-cell-left"></div>' . 
-								'<div class="grid-cell grid-cell-left"></div>' . 
-								'<div class="grid-cell grid-cell-left"></div>' . 
-								'<div class="grid-cell grid-cell-left"></div>';
+									 $supplierID = $item ['inv_items'] [0] ['supplier_id'];
+								}
+								
+								$html =
+									 '<td>' . $suppliers [$supplierID] . '</td>' .
+									 '<td style="text-align: end;">'.$price.'</td>' .
+									 '<td style="text-align: end;">' . $cost . '</td>' .
+									 '<td style="text-align: end;">' . $onHandCount . '</td>';
 
-						  echo $html;
-						  break;
-						  
-					 default:
-						  
-						  echo '<div class="grid-cell grid-cell-left"></div>';
-						  echo '<div class="grid-cell grid-cell-left"></div>';
-						  echo '<div class="grid-cell grid-cell-left"></div>';
-						  echo '<div class="grid-cell grid-cell-left"></div>';
-						  break;
+								echo $html;
+								break;
+								
+						  case 'size':
+								
+								$html =
+									 '<td></td>' . 
+									 '<td style="text-align: end;"></td>' . 
+									 '<td style="text-align: end;"></td>' . 
+									 '<td style="text-align: end;"></td>';
+
+								echo $html;
+								break;
+								
+						  default:
+								
+								echo '<td></td>';
+								echo '<td style="text-align: end;"></td>';
+								echo '<td style="text-align: end;"></td>';
+								echo '<td style="text-align: end;"></td>';
+								break;
+					 }
 				}
-		  }
-		  else {
-				echo '<div class="grid-cell grid-cell-left"></div>';
-				echo '<div class="grid-cell grid-cell-right">0.00</div>';
-				echo '<div class="grid-cell grid-cell-right">0.00</div>';
-		  }
-		  
-		  ?>
-		  
-	 </div>
-	 
+				else {
+					 echo '<td></td>';
+					 echo '<td style="text-align: end;">0.00</td>';
+					 echo '<td style="text-align: end;">0.00</td>';
+				}
+				?>
+				
 	 <?php
 	 }
 	 ?>
+		  </tr>
+	 </tbody>
+</table>
+
+<div class="row g-1 mt-3">
+	 <div class="col-12 text-center">
+		  <div id="pages" class="pagination"></div>
+		  <nav class="pagination">
+
+				<nav class="pagination">
+					 
+ 					 <ul class="pagination">
+						  <?= $this->Paginator->numbers () ?>
+					 </ul>
+				</nav>
+ 		  </nav>
+	 </div>
 </div>
 
-<div id="pages" class="grid-cell grid-cell-center grid-span-all"></div>
-<div id="action_form"></div>
+<div class="modal fade" id="item_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="item_desc" class="modal-title"><?= __ ('Edit item') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="modal_content" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
 
-<?= $this->Html->script (['Items/index']); ?>
+<script>
+ 
+ function edit (id, template) {
+	  
+	  $.ajax ({
+         url: '/items/edit/' + id + '/' + template,
+         type: 'GET',
+         success: function (data) {
+
+				 data = JSON.parse (data);				 
+				 $('#modal_content').html (data.html);
+         }
+     });
+ }
+ 
+ function search () {
+	  
+	  window.location = '/items/index/item_desc/' + $('#item_search').val ()
+ }
+ 
+ $('#add_item').change (function () {
+
+	  console.log (`pricing option... ${$('#add_item').val ()}`);
+	  
+	  switch ($('#add_item').val ()) {
+
+			case 'standard':
+			case 'variant':
+			case 'open':
+			case 'metric':
+				 
+				 $.ajax ({
+					  url: '/items/edit/0/' + $('#add_item').val (),
+					  type: "GET",
+					  success: function (data) {
+							
+							data = JSON.parse (data);
+							$('#modal_content').html (data.html);
+					  }
+				 });
+	  }
+ });
+ 
+ $('#item_search').typeahead ({
+	  
+     source: function (query, result) {
+			
+			$.ajax ({
+             url: "/search/items/sku_and_desc/" + query,
+             type: "GET",
+             success: function (data) {
+
+					  data = JSON.parse (data);
+					  
+					  result ($.map (data, function (item) {
+							
+							return item
+                 }));
+             }
+			});
+     },
+	  updater: function (item) {
+			
+			window.location = '/items/index/id/' + item.id;
+	  }
+ });
+
+ function departmentSearch () {
+	  
+	  window.location = '/items/index/department_id/' + $('#department_search').val ();
+ }
+ 
+function pricingSearch () {
+	  
+	  window.location = '/items/index/pricing/' + $('#pricing_search').val ();
+ }
+ 
+</script>

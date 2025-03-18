@@ -1,30 +1,29 @@
+<style>
 
-<?= $this->Html->css ("TaxGroups/index") ?>
+ .modal-content {
 
-<div class="controls-grid">
-	 
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
-	 </div>
+	  width: 900px !important;
+ }
+ 
+</style>
 
-	 <div></div>
-	 
-	 <div class="grid-cell grid-cell-right">
-		  <a onclick="javascript:edit (0)" class="btn btn-secondary"><?= __ ('Add tax group'); ?></a>
-	 </div>
+<div class="row g-1 mt-3 mb-3">
+	 <button class="btn btn-success col-sm-2" data-bs-toggle="modal" data-bs-target="#tax_modal" onclick="edit (0)"><?= __ ('Add tax group') ?></button>
 </div>
 
-<div class="tax-grid">
+<table class="table table-hover g-1 m-3">
+	 <thead>
+		  <tr>
+				<th><?= __ ('Description') ?></th>
+				<th><?= __ ('Rate', true) ?></th>
+				<th><?= __ ('Alt rate', true) ?></th>
+				<th><?= __ ('Fixed rate', true) ?></th>
+				<th><?= __ ('Fixed alt rate', true) ?></th>
+		  </tr>
+	 </thead>
 	 
-	 <div class="grid-cell grid-cell-separator"></div>
-	 <div class="grid-cell grid-cell-separator"><?= __ ('Description') ?></div>
-	 <div class="grid-cell grid-cell-right grid-cell-separator"><?= __ ('Rate', true) ?></div>
-	 <div class="grid-cell grid-cell-right grid-cell-separator"><?= __ ('Alt rate', true) ?></div>
-	 <div class="grid-cell grid-cell-right grid-cell-separator"><?= __ ('Fixed rate', true) ?></div>
-	 <div class="grid-cell grid-cell-right grid-cell-separator"><?= __ ('Fixed alt rate', true) ?></div>
-	 
+	 <tbody>
+			  
 	 <?php
 	 
 	 foreach  ($taxGroups as $taxGroup) {
@@ -33,9 +32,7 @@
 		  $altRate = 0;
 		  $fixedRate = 0;
 		  $fixedAltRate = 0;
-		  
-		  $action = 'onclick="openForm (' . $taxGroup ['id'] . ',\'/tax-groups/edit/' . $taxGroup ['id'] . '\')"';
-		  
+		  		  
 		  foreach ($taxGroup ['taxes'] as $tax) {  // sum the rates
 
 				switch ($tax ['type']) {
@@ -56,39 +53,47 @@
 		  
 	 ?>
 	 
-	 <div class="grid-row-wrapper" <?= $action ?>>
+		  <tr role="button" data-bs-toggle="modal" data-bs-target="#tax_modal" onclick="edit (<?= $taxGroup ['id'] ?>)">
+				<td><?=$taxGroup ['short_desc'] ?></td>
+				<td><?= $rate.'%' ?></td>
+				<td><?= $altRate.'%' ?></td>
+				<td><?= $fixedRate ?></td>
+				<td><?= $fixedAltRate ?></td>
+		  </tr>
 		  
-		  <div id="tag_<?= $taxGroup ['id'] ?>" class="grid-cell grid-cell-left"></div>
-		  
-		  <div class="grid-cell grid-cell-left">
-				<?=$taxGroup ['short_desc'] ?>
-		  </div>
-		  
-		  <div class="grid-cell grid-cell-right">
-				<?= $rate.'%' ?>
-		  </div>
-		  
-		  <div class="grid-cell grid-cell-right">
-				<?= $altRate.'%' ?>
-		  </div>
-
-		  <div class="grid-cell grid-cell-right">
-				<?= $fixedRate ?>
-		  </div>
-		  
-		  <div class="grid-cell grid-cell-right">
-				<?= $fixedAltRate ?>
-		  </div>
-
-	 </div>
-
 	 <?php
 	 }
 	 ?>
+	 </tbody>
+</table>
 
+<div class="modal fade" id="tax_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="item_desc" class="modal-title"><?= __ ('Tax group edit') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="modal_content" class="modal-body">
+            </div>
+        </div>
+    </div>
 </div>
 
-<div id="pages" class="grid-cell grid-cell-center grid-span-all"></div>
-<div id="action_form"></div>
+<script>
+ 
+ function edit (id) {
+	  
+	  $.ajax ({
+         url: "/tax-groups/edit/" + id,
+         type: "GET",
+         success: function (data) {
 
-<?= $this->Html->script ("TaxGroups/index") ?>
+				 data = JSON.parse (data);
+				 
+				 $('#modal_content').html (data.html)
+            }
+        });
+	 }
+
+</script>

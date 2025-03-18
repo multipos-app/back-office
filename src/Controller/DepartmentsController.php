@@ -24,13 +24,12 @@ use App\Model\Entity\Department;
 class DepartmentsController extends PosAppController {
 
     
-    public $paginate = ['limit' => 20,
-                        'order' => ['department_desc asc']];
+    public $paginate = ['limit' => 20];
 
     private $departmentTypes = null;
     
     public function initialize (): void {
-    
+		  
         parent::initialize ();
         
         $this->departmentTypes = [0 => __ ('Not set'),
@@ -44,23 +43,27 @@ class DepartmentsController extends PosAppController {
 
     public function index (...$params) {
         
-         $departments = $this->paginate ();
-         $departmentTypes = $this->departmentTypes;
+		  $departments = $this->paginate ();
+        $departmentTypes = $this->departmentTypes;
+		  
+        $this->set (['departments' => $departments,
+							'departmentTypes' => $departmentTypes]);
+	 }
+	 
+    public function edit ($id) {
+		  
+ 		  $this->debug ("department edit... $id");
 
-        return ($this->response (__ ('Departments'),
-                                 'Departments',
-                                 'index',
-                                 compact ('departments', 'departmentTypes'),
-                                 true,
-                                 'ajax',
-                                 true));
-    }
-  
-    public function edit ($id = 0) {
-    
         $department = null;
+		  $departmentsTable = TableRegistry::get ('Departments');
+		  
+        if (!empty ($this->request->getData ())) {
 
-        if ($id == 0) {
+				$this->update ($id, $this->request->getData (), $departmentsTable);
+				return $this->redirect ('/departments');
+		  }
+		  
+		  if ($id == 0) {
 
 				$department = ['id' => 0,
 									'department_desc' => '',
@@ -70,91 +73,68 @@ class DepartmentsController extends PosAppController {
 									'department_order' => 0,
 									'is_negative' => false,
 									'pricing' => null];      
-        }
-        else {
-        
-            $query = TableRegistry::get ('Departments')
-                   ->find ()
-                   ->where (['id' => $id]);
-      
-            $department = $query->first ();
-        }
-		  
-		  $pricing = [];
-		  $query = TableRegistry::get ('Pricing')
-										->find ('all')
-										->order (['name' => 'asc']);
-        
-		  foreach ($query as $p) {
-            
-				$pricing [$p ['id']] = $p ['name'];
+		  }
+		  else {
+				
+				$query = TableRegistry::get ('Departments')
+											 ->find ()
+											 ->where (['id' => $id]);
+				
+				$department = $query->first ();
 		  }
 		  
 		  $departmentTypes = $this->departmentTypes;
 		  
-		  $isNegative = [0 => __ ('No'),
-							  1 => __ ('Yes')];
-	 
-        return ($this->response (__ ($department ['department_desc']),
-                                 'Departments',
-                                 'edit',
-                                 compact ('department', 'pricing', 'departmentTypes', 'isNegative')));
+ 		  $this->set (['department' => $department,
+							'departmentTypes' => $departmentTypes,
+							'isNegative' => [0 => __ ('No'),
+												  1 => __ ('Yes')]]);
+		  
+ 		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('Departments')
+								->setTemplate ('edit');
 
- 		  $this->debug ($department);
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
+		  
     }
-   
-    public function update () {
+    
+    private function update ($id, $department, $departmentsTable) {
 
-        $status = -1;
+		  $this->debug ("department update... $id");
+		  $this->debug ($department);
+		  
+        $department ['department_desc'] = strtoupper ($department ['department_desc']);
         
-        if (!empty ($this->request->getData ())) {
+        if ($id == 0) {
 
-            $this->debug ($this->request->getData ());
+				$department ['department_desc'] = strtoupper ($department ['department_desc']);
+			   $department = $departmentsTable->newEntity ($department);
+				$departmentsTable->save ($department);
+		  }
+		  else {
 
-            $departmentsTable = TableRegistry::get ('Departments');
-            $dept = $this->request->getData ();
-            $department = false;
-            
-            $dept ['department_desc'] = strtoupper ($dept ['department_desc']);
-            
-            if ($dept ['department_id'] > 0) {
+				$isNegative = isset ($department ['is_negative']) ? 1 : 0;
+				
+				$this->debug ("department is negative... $isNegative");
 
-                $department = $departmentsTable
-                            ->find ()
-                            ->where (['id' => $dept ['department_id']])
-                            ->first ();
-                
-                $department ['department_desc'] = strtoupper ($dept ['department_desc']);
-                $department ['department_type'] = intval ($dept ['department_type']);
-                $department ['is_negative'] = intval ($dept ['is_negative']);
-            }
-            else {
-
-                $department = $departmentsTable->newEntity ($dept);
-            }
-
-            if ($department) {
-                
-                $this->save ('departments', $department);
-                $status = 0;
-            }
+            $departmentsTable->updateAll (['department_desc' => strtoupper ($department ['department_desc']),
+														 'department_type' => intval ($department ['department_type']),
+														 'is_negative' => $isNegative],
+														['id' => $id]);
         }
-        
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
-    }
-  
+	 }
+	 
     public function delete ($id) {
-    		  
-		  $status = 1;
+    	  
         $department = $this->Departments->findById ($id)->firstOrFail ();
         if ($this->Departments->delete ($department)) {
-				
-            $status = 0;
-        }
-		  
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
+		  }
     }
 }
 

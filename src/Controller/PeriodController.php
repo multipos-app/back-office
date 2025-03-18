@@ -22,7 +22,7 @@ class PeriodController extends PosAppController {
     public $dates;
     public $len;
     public $periodDateFormat = 'D n/j';
-	 public $periods;
+	 public $periods = false;
 	 public $currPeriod;
 	 public $conditions = [];
 	 public $join = [];
@@ -35,8 +35,8 @@ class PeriodController extends PosAppController {
     public function getPeriods ($startDate = null, $type = 'weekly', $clear = true) {
 
         $this->periods = [];
-        $utcOffset = 5; // $this->tzOffset ($this->tz ());
-        
+		  $utcOffset = $this->tzOffset ($this->tz ());
+
         switch ($type) {
 
 				case 'weekly':

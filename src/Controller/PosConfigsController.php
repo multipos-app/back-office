@@ -39,7 +39,7 @@ class PosConfigsController extends PosAppController {
 	  */
 
 	 public function index (...$params) {
-        
+		  
         $this->initConfigs ();
         $configs = $this->configs;
         $templates = $this->templates;
@@ -70,13 +70,10 @@ class PosConfigsController extends PosAppController {
 					 $templates [$config ['id']] = $config ['desc'];
 				}
 		  }
-		  
-        return ($this->response (__ ('POS Cofigurations'),
-                                 'PosConfigs',
-                                 'index',
-                                 compact ('configs',
-														'locations',
-														'templates')));
+
+		  $this->set (['configs' => $configs,
+							'locations' => $locations,
+							'templates' => $templates]);
     }
 
 	 /**
@@ -138,7 +135,7 @@ class PosConfigsController extends PosAppController {
 		  $config = json_decode ($config, true);
 		  
 		  if ($config) {
-						  		
+				
 				$posConfig = ['config_desc' => strtoupper ($configName),
 								  'config' => json_encode ($config),
 								  'config_type' => 0];
@@ -150,7 +147,7 @@ class PosConfigsController extends PosAppController {
 		  
         return $this->index ();
     }
-    	 
+    
 	 /**
 	  *
 	  *
@@ -159,7 +156,7 @@ class PosConfigsController extends PosAppController {
     public function settings ($id) {
 
 		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'devices.php';
-		  		  
+		  
         $posConfigTable = TableRegistry::get ('PosConfigs');
         $posConfig = $posConfigTable
                    ->find ()
@@ -226,7 +223,7 @@ class PosConfigsController extends PosAppController {
             $this->debug ('.....................................................................');
 				$this->debug ($this->request->getData ());
 				$this->debug ('.....................................................................');
-								
+				
             $options = $this->request->getData () ['options'];
 				
             $posConfigTable = TableRegistry::get ('PosConfigs');
@@ -262,10 +259,10 @@ class PosConfigsController extends PosAppController {
 					 /* $config ['devices'] [$key] = $devices [$key] ['options'] [$val];*/
 				}
 
-					 /* $config ['devices'] [$key] = ['name' => $devices [$key] ['name'],
-						 'class' => $devices [$key] ['class'],
-						 'params' => $devices [$key] ['params']];
-					  */
+				/* $config ['devices'] [$key] = ['name' => $devices [$key] ['name'],
+					'class' => $devices [$key] ['class'],
+					'params' => $devices [$key] ['params']];
+				 */
 				
 				$this->debug ($config ['devices']);
 
@@ -273,7 +270,7 @@ class PosConfigsController extends PosAppController {
 											 ->find ('all', ['fields' => ['key', 'type', 'default', 'name', 'description']]);
 				
 				foreach ($query as $option) {
-					
+					 
 					 $val = false;
 					 if (isset ($options [$option ['key']])) {
 						  
@@ -443,55 +440,56 @@ class PosConfigsController extends PosAppController {
 	  *
 	  */
 
-    public function upload ($id) {
+    public function upload () {
 
-        $null = '';
+ 		  $this->debug ("upload... ");
+		  $this->debug ($this->request->getData ());
+		  $this->debug ($_FILES);
+
 		  if (!empty ($this->request->getData ())) {
 				
+				$configID = $this->request->getData () ['upload_pos_config_id'];
 				$handle = fopen ($_FILES ['upload_file'] ['tmp_name'], "r");
 				
-				if ($handle === false) {
+				if ($handle) {
 
-				}
-
-				$json = '';
-				
-				while (!feof ($handle)) {
-
-					 $json .= fgets ($handle);
-				}
-				
-				fclose ($handle);
-				
-				if (strlen ($json) > 0) {
+					 $json = '';
 					 
-					 $posConfigTable = TableRegistry::get ('PosConfigs');
-					 $configID = intVal ($id);
-					 
-					 $posConfig = $posConfigTable
-                    ->find ()
-                    ->where (['id' => $configID])
-                    ->first ();
-					 
-					 $json = preg_replace ([ '/ {2,}/', '/<!--.*?-->|\t|(?:\r?\n[ \t]*)+/s'], [' ', ''], $json);
+					 while (!feof ($handle)) {
 
-					 if ($posConfig) {
+						  $json .= fgets ($handle);
+					 }
+					 
+					 fclose ($handle);
 
-						  $posConfig ['config'] = $json;
-						  $this->save ('PosConfigs', $posConfig);
-						  $this->notifyPOS ();
+					 
+					 if (strlen ($json) > 0) {
+						  
+						  $posConfigTable = TableRegistry::get ('PosConfigs');
+						  
+						  $posConfig = $posConfigTable->find ()
+																->where (['id' => $configID])
+																->first ();
+						  $decode = json_decode ($json, true);
+
+						  if (!$decode) {
+								
+								return $this->ajax (['status' => 1,
+															'status_text' => 'invalid json file ' . $_FILES ['upload_file'] ['full_path']]);
+						  }
+						  						  
+						  if ($posConfig) {
+								
+								$posConfig ['config'] = preg_replace (['/ {2,}/', '/<!--.*?-->|\t|(?:\r?\n[ \t]*)+/s'], [' ', ''], $json);
+								$this->save ('PosConfigs', $posConfig);
+								$this->notifyPOS ();
+						  }
 					 }
 				}
-
-				return $this->index ();
 		  }
-		  
-		  $configID = $id;
-		  return ($this->response (__ ('POS Cofiguration upload'),
-											'PosConfigs',
-											'upload',
-											compact ('configID')));
-    }
+
+		  return $this->ajax (['status' => 0]);
+	 }
 	 
 	 /**
 	  *
@@ -526,9 +524,28 @@ class PosConfigsController extends PosAppController {
 	  *
 	  */
 
-    public function clone ($id) {
+    public function clone () {
+		  
+		  if (!empty ($this->request->getData ())) {
 
-		  return $this->index ();
+				$this->debug ($this->request->getData ());
+
+				$id = $this->request->getData () ['clone_pos_config_id'];
+				$posConfigsTable = TableRegistry::get ('PosConfigs');
+
+				if ($id > 0) {
+					 
+					 $config = $posConfigsTable->find ()
+													  ->where (['id' => $id])
+													  ->first ();
+
+					 $config = $posConfigsTable->newEntity ($config->toArray ());
+					 $config ['config_desc'] = $this->request->getData () ['config_desc'];
+					 $config ['create_time'] = time ();
+					 $posConfigsTable->save ($config);
+				}
+		  }
+		  return $this->ajax (['status' => 0]);
 	 }
 	 
  	 /**
@@ -541,7 +558,7 @@ class PosConfigsController extends PosAppController {
 		  $this->debug ("delete config... $id");
 		  
 		  TableRegistry::get ('PosConfigs')->deleteAll (['id' => $id]);
-	  
+		  
 		  return $this->index ();
 	 }
 	 

@@ -144,19 +144,13 @@ class ItemHIstoryController extends PeriodController {
             
             $depts [$d ['id']] = $d ['department_desc'];
         }
-
-        $data = ['prev' => $startDate - ONE_WEEK,
-                 'next' => $startDate + ONE_WEEK,
-                 'len' => $this->len,
-                 'periods' => $this->periods,
-                 'departments' => $this->departments,
-                 'depts' => $depts];
-
-        return ($this->response (__ ('Item History'),
-                                 'ItemHistory',
-                                 'index',
-                                 $data));
-        
+		  
+		  $this->set (['prev' => $startDate - ONE_WEEK,
+							'next' => $startDate + ONE_WEEK,
+							'len' => $this->len,
+							'periods' => $this->periods,
+							'departments' => $this->departments,
+							'depts' => $depts]);
     }
 }
 ?>

@@ -26,8 +26,10 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\Folder;
 use Cake\Filesystem\File;
 
+require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
+
 class BusinessUnitsController extends PosAppController {
-    
+
     public function initialize (): void {
 		  
         parent::initialize ();
@@ -36,159 +38,142 @@ class BusinessUnitsController extends PosAppController {
 
     public function index (...$params) {
 		  
+        $bus = TableRegistry::get ('BusinessUnits')
+									 ->find ()
+									 ->all ();
+
+		  $businessUnits = [];
+		  
+		  foreach ($bus as $bu) {
+				
+				$bu ['phone_1'] = $this->phoneFormat ($bu ['phone_1']);
+
+				$buType = '';
+				switch ($bu ['business_type']) {
+
+					 case BU_CORP:
+						  $bu ['business_type'] = __ ('Primary business');
+						  break;
+
+					 case BU_LOCATION:
+						  $bu ['business_type'] = __ ('Location');
+						  break;
+				}
+		  }
+		  
+		  $this->set (['businessUnits' => $bus]);
+    }
+
+	 /**
+	  *
+	  * edit or update
+	  *
+	  **/
+	 
+    public function edit ($id) {
+		  
+		  if (!$this->session) {
+
+				return $this->redirect ('/');
+		  }
+
+		  $this->debug ("bu edit... $id");
+
         require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'states.php';
 
         $businessUnitsTable = TableRegistry::get ('BusinessUnits');
         
         if (!empty ($this->request->getData ())) {
 
+				// update and return to bu index
+
+				$this->update ($id, $this->request->getData (), $businessUnitsTable);
+ 				return $this->redirect ('/business-units');
+       }
+
+		  // lookup or create a new business unit
+		  
+		  $bu = null;
+		  if ($id == 0) {
 				
-            $businessUnitsTable
-                ->updateAll (['business_name' => strtoupper ($this->request->getData () ['business_name']),
-                              'email' => strtoupper ($this->request->getData () ['email']),
-                              'addr_1' => strtoupper ($this->request->getData () ['addr_1']),
-                              'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
-                              'city' => strtoupper ($this->request->getData () ['city']),
-                              'state' => $this->request->getData () ['state'],
-                              'postal_code' => $this->request->getData () ['postal_code'],
-                              'phone_1' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_1']),
-                              'phone_2' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_2']),
-                              'timezone' => $this->request->getData () ['timezone']],
-                             ['business_type' => 1]);
-            
-        }
-        
-        $primaryBusiness = TableRegistry::get ('BusinessUnits')
-													 ->find ()
-													 ->where (['business_type = 1'])
-													 ->first ();
-
-        $query = TableRegistry::get ('BusinessUnits')
-										->find ()
-										->where (['business_type = 2']);
-
-
-        $data = ['primaryBusiness' => $primaryBusiness,
-					  'businessUnits' => $query->all (),
-					  'states' => $states,
-					  'timeZones' => $timeZones];
-		  
-        return ($this->response (__ ('Business Units'),
-                                 'BusinessUnits',
-                                 'index',
-                                 $data));
-    }
-    
-    public function edit ($id = 0) {
-
-        require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'states.php';
-		  
-        $businessUnits = TableRegistry::get ('BusinessUnits');
-        
-        $primaryBusiness = $businessUnits
-                         ->find ()
-                         ->where (['business_type = 1'])
-                         ->first ();
-		  
-        if (!empty ($this->request->getData ())) {
-
-				if ($this->request->getData () ['business_name']) {
-					 
-					 $bu = $businessUnits->newEntity ($this->request->getData ());
-					 $businessUnits->save ($bu);
-				}
-				else {
-					 
-					 $businessUnitsTable->updateAll (['business_name' => strtoupper ($this->request->getData () ['business_name']),
-																 'email' => $this->request->getData () ['email'],
-																 'addr_1' => strtoupper ($this->request->getData () ['addr_1']),
-																 'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
-																 'city' => strtoupper ($this->request->getData () ['city']),
-																 'state' => $this->request->getData () ['state'],
-																 'postal_code' => $this->request->getData () ['postal_code'],
-																 'phone_1' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_1']),
-																 'phone_2' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_2']),
-																 'timezone' => $this->request->getData () ['timezone']],
-																['business_type' => 1]);
-				}
+				$bu = ['id' => 0,
+						 'business_type' => BU_LOCATION,
+						 'business_name' => '',
+						 'email' => '',
+						 'addr_1' => '',
+						 'addr_2' => '',
+						 'city' => '',
+						 'state' => '',
+						 'postal_code' => '',
+						 'phone_1' => ''];
+		  }
+		  else {
+				
+				$bu = $businessUnitsTable
+										 ->find ()
+										 ->where (['id' => $id])
+										 ->first ();
 		  }
 		  
-        $bu = ['id' => $id,
-					'business_name' => '',
-					'email' => '',
-					'addr_1' => '',
-					'addr_2' => '',
-					'city' => '',
-					'state' => '',
-					'postal_code' => '',
-					'phone_1' => '',
-               'phone_2' => '',
-               'timezone' => ''];
+        $data = ['bu' => $bu,
+					  'states' => $states];
 		  
-        if ($id > 0) {
+		  $this->set ($data);
+		  
+ 		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('BusinessUnits')
+								->setTemplate ('edit');
+
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
+	 }
+	 
+	 /**
+	  *
+	  * update or create
+	  *
+	  **/
+
+	 private function update ($id, $bu, $businessUnitsTable) {
+		  
+		  if ($id == 0) {
 				
-				$bu = $businessUnits
-            ->find ()
-            ->where (['id' => $id])
-            ->first ();
+				foreach (['business_name', 'addr_1', 'addr_2', 'city'] as $field) {
+					 
+					 $bu [$field] = strtoupper ($bu [$field]);
+				}
+				
+				$bu ['phone_1'] = preg_replace ('/\(|\)|\s+|\-/', '', $bu ['phone_1']);
+				
+				$bu = $businessUnitsTable->newEntity ($bu);
+				$businessUnitsTable->save ($bu);
 		  }
-		  
-        $sameAsPrimary = [0 => __ ('No'),
-                          1 => __ ('Yes')];
-        
-        return ($this->response (__ ('Edit location'),
-                                 'BusinessUnits',
-                                 'edit',
-                                 compact ('bu', 'sameAsPrimary', 'primaryBusiness', 'states', 'timeZones')));    
-    }
-
-    public function settings ($buID) {
-		  
-        $businessUnits = TableRegistry::get ('BusinessUnits');
-        $businessUnit = $businessUnits
-                      ->find ()
-                      ->where (['id' => $buID])
-                      ->first ();
-        
-        if (!empty ($this->request->getData ())) {
-
-            $businessUnit ['business_name'] = $this->request->getData () ['business_name'];
-            $businessUnit ['phone_1'] = $this->request->getData () ['phone_1'];
-            $businessUnit ['addr_1'] = $this->request->getData () ['addr_1'];
-            $businessUnit ['contact'] = $this->request->getData () ['contact'];
-            $businessUnit ['postal_code'] = $this->request->getData () ['postal_code'];
-            $businessUnit ['city'] = $this->request->getData () ['city'];
-            $businessUnit ['email'] = $this->request->getData () ['email'];
-
-            $this->save ('BusinessUnits', $businessUnit);
-            return $this->redirect (['controller' => 'sales', 'action' => 'index']);
-        }
-		  
-		  
-        if ($businessUnit) {
-
-            $businessUnit ['params'] = json_decode ($businessUnit ['params'], true);
-            
-            $this->set ('businessUnit', $businessUnit);
-            $this->set ('states', $states);
-
-            switch ($this->bus [$this->bu] ['locale']) {
-
-					 case 'da_DK':
-						  
-						  $this->render ('settings_dk');
-						  break;
-            }
+		  else {
 				
-            return;
-        }
-    }
-	 
-    public function addPayment () {
+				$businessUnitsTable->updateAll (['business_name' => strtoupper ($this->request->getData () ['business_name']),
+															'email' => $this->request->getData () ['email'],
+															'addr_1' => strtoupper ($this->request->getData () ['addr_1']),
+															'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
+															'city' => strtoupper ($this->request->getData () ['city']),
+															'state' => $this->request->getData () ['state'],
+															'postal_code' => $this->request->getData () ['postal_code'],
+															'phone_1' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone_1'])],
+														  ['id' => $id]);
+		  }
+	 }
 
-    }
-	 
-    public function pos () {
+	 /**
+	  *
+	  * send a message to a POS
+	  *
+	  **/
+
+	 public function pos () {
         
         $pu = TableRegistry::get ('PosUnits');
         $employees = TableRegistry::get ('Employees');
@@ -223,7 +208,7 @@ class BusinessUnitsController extends PosAppController {
                 
                 $token = $posUnit ['token'];
                 $message = '[]';
-                                
+                
                 switch ($method) {
 								
 						  case 'z':
@@ -396,50 +381,27 @@ class BusinessUnitsController extends PosAppController {
                        1 => __ ('Full, all store data'),
                        2 => __ ('Employees'),
                        3 => __ ('Menus and configuration'),
-                       4 => __ ('Pending, schedule for future'),
                        5 => __ ('Customers')];
 
-        return ($this->response (__ ('POS Batches'),
-                                 'BusinessUnits',
-                                 'batches',
-                                 compact ('batches', 'batchTypes')));
+		  $this->set (['batches' => $batches,
+							'batchTypes' => $batchTypes]);
     }
     
-    public function create () {
-
-        $status = -1;
+    public function createBatch () {
         
         if (!empty ($this->request->getData ())) {
-            
+
+				$this->debug ($this->request->getData ());		
 				$this->loadComponent ('Batch');
-            
-            $submit = null;
-            if (strlen ($this->request->getData () ['submit_date']) > 0) {
-                
-                $submit = date ('yy-m-d', strtotime ($this->request->getData () ['submit_date']));
-                
-                if (strlen ($this->request->getData () ['submit_time']) > 0) {
-                    
-                    $submit .= ' ' . $this->request->getData () ['submit_time'] . ':00';
-                }
-                else {
-                    $submit .= '00:00:00';
-                }
-            }
-            
-            // $submit = $this->localToUTC ($submit, $this->tz ());
             
             $batchID = $this->Batch->createBatch ($this->request->getData () ['batch_type'],
 																  $this->merchant ['bu_id'],
-																  $this->request->getData () ['batch_desc'],
+																  '',
 																  date ('Y-m-d H:i:s', time ()));
-
-            $status = 0;
 				$this->notifyPOS ();
         }
 
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
+		  return $this->redirect ('/business-units/batches');
     }
 
     
@@ -448,20 +410,23 @@ class BusinessUnitsController extends PosAppController {
         $status = -1;
 
         if (!empty ($this->request->getData ())) {
+				
+				$this->debug ($this->request->getData ());		
 
-            $batches = TableRegistry::get ('Batches');
-            foreach ($this->request->getData () ['batches'] as $batchID) {
+            $batchEntriesTable = TableRegistry::get ('BatchEntries');
+            $batchesTable = TableRegistry::get ('Batches');
+				
+				foreach ($this->request->getData () as $batch => $value) {
                 
-                $batchID = intVal (substr ($batchID, 1));
-
-                TableRegistry::get ('BatchEntries')->deleteAll (['batch_id' => $batchID]);
-                TableRegistry::get ('Batches')->deleteAll (['id' => $batchID]);
+                $batchID = intVal (substr ($batch, 1));  // id looks like '_123'
+					 
+                $batchEntriesTable->deleteAll (['batch_id' => $batchID]);
+					 $batchesTable->deleteAll (['id' => $batchID]);
                 
             }
         }
-        
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
+		  
+     	  return $this->redirect ('/business-units/batches');   
     }
 
     public function serverLog () {
@@ -478,7 +443,7 @@ class BusinessUnitsController extends PosAppController {
     }
 
     public function apps () {
-               
+        
         $appsDir = '/multipos/www/d/webroot/apps';
 
         foreach (scandir ($appsDir, SCANDIR_SORT_DESCENDING) as $file) {
@@ -506,10 +471,7 @@ class BusinessUnitsController extends PosAppController {
 				}
 		  }
 
-		  return ($this->response (__ ('Receipts'),
-                                 'BusinessUnits',
-                                 'receipts',
-                                 compact ('locations'))); 
+		  $this->set (['locations' => $locations]);
 	 }
 
 	 public function receipt ($buID) {

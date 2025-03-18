@@ -25,27 +25,10 @@ require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 
 class MenusController extends PosAppController {
     
-    public function index (...$args) {
+    public function menu ($configID, $menuName = null, $menuIndex = 0) {
 
-        $posConfigTable = TableRegistry::get ('PosConfigs');
-        $posConfig = $posConfigTable
-                   ->find ()
-                   ->where (['id' => $args [0]])
-                   ->first ();
-        
-        $posConfig = $posConfig->toArray ();
-        $posConfig ['config'] = json_decode ($posConfig ['config'], true);
+		  $this->debug ("menu... $configID $menuName $menuIndex");
 		  
-        $data = ['posConfig' => $posConfig];
-		  
-        return ($this->response (__ ('Menus'),
-                                 'Menus',
-                                 'index',
-                                 compact ('posConfig')));
-    }
-	 
-    public function all ($configID) {
-
         $posConfigTable = TableRegistry::get ('PosConfigs');
         $posConfig = $posConfigTable
                    ->find ()
@@ -55,181 +38,69 @@ class MenusController extends PosAppController {
         $posConfig = $posConfig->toArray ();
         $posConfig ['config'] = json_decode ($posConfig ['config'], true);
 		  
-        $data = ['posConfig' => $posConfig];
-		  
-        return ($this->response (__ ('Menus'),
-                                 'Menus',
-                                 'all',
-                                 compact ('posConfig')));
-    }
+		  $menus = [];
 
-    function button () {
+		  if ($menuName == null) {
+				
+				// get the name of the first menu
+				
+				foreach ($posConfig ['config'] ['pos_menus'] as $key => $value) {
+					 
+		  			 if (!$menuName) {
+						  
+						  $menuName = $key;
+						  break;
+					 }
+				}
+		  }
+
+		  foreach ($posConfig ['config'] ['pos_menus'] [$menuName] ['horizontal_menus'] as $menu) {
+
+				$menus [] = $menu ['name'];
+		  }
+
+        $this-> set (['posConfig' => $posConfig,
+							 'menus' => $menus,
+							 'menuName' => $menuName,
+							 'menuIndex' => $menuIndex]);
+	 }
+
+	 public function update () {
 
 		  if (!empty ($this->request->getData ())) {
 
-				$template = 'empty';
-				$data = [];
-				$extras = [];
-				$button = $this->request->getData ();
-				$new = isset ($button ['new']);
+				$update = $this->request->getData ();
 
-				$this->debug ('menus button... ');
-				$this->debug ($button);
+				$this->debug ($update);
 
-				switch ($button ['class']) {
-						  
-					 case 'Item':
-					 case 'DefaultItem':
+				$posConfigsTable = TableRegistry::get ('PosConfigs');
+				$posConfig = $posConfigsTable
+                   ->find ()
+                   ->where (['id' => $update ['config_id']])
+                   ->first ();
 
-						  if (isset ($button ['exists']) && $button ['exists']) {
-
-								$template = 'item_edit';
-						  }
-						  else {
-								
-								$template = 'item';
-								
-								$button ["text"] = "";
-								$button ["class"] = $button ['class'];
-								$button ["color"] =  "#999999";
-								$button ["params"] = ["sku" =>  ""];
-								
-								$extras ['pricingOptions'] = [null => __ ('Add Item'),
-																		'existing' => 'Existing item',
-																		'standard_pricing' => 'Standard pricing, one price per item',
-													 					'variant_pricing' => 'Variant pricing (size, color...)',
-																		'open_pricing' => 'Open/enter price, prompt for price',
-																		'metric_pricing' => 'Price by volume/weight, prompt for value'];
-						  }	
-						  break;
-
-					 case 'CashTender':
-
-						  $template = 'cash_tender';
-						  break;
-
-					 case 'Navigate':
-
-						  $template = 'navigate';
-
-						  if ($new) {
-								
-								$button ["text"] = "";
-								$button ["class"] = "Navigate";
-								$button ["color"] =  "#999999";
-						  }
-						  break;
-
-					 case 'ItemMarkdown':
-
-						  $template = 'item_markdown';
-
-						  if ($new) {
-								
-								$button ["text"] = "";
-								$button ["class"] = "ItemMarkdown";
-								$button ["color"] =  "#999999";
-								$button ["params"] = ["receipt_text" => ""];
-						  }
-						  break;
-						  
-					 case 'SaleDiscount':
-
-						  $template = 'sale_discount';
-						  $button ["class"] = "SaleDiscount";
-						  
-						  if ($new) {
-								
-								$button ["color"] =  "#999999";
-								$button ["params"] = ["receipt_text" => "",
-															 "percent" =>  "0"];
-						  }
-						  break;
-						  
-					 case 'Null':
-						  
-						  $query = TableRegistry::get ('PosControlCategories')
-														->find ('all', ['contain' => ['PosControls']])
-														->where (['enabled' => 1]);
-
-						  $controls = [];
-						  foreach ($query as $controlCategories) {
-								
-								$controls ['separator-' . $controlCategories ['id']] =
-									 ['desc' => $controlCategories ['name']];
-								
-								foreach ($controlCategories ['pos_controls'] as $control) {
-									 
-									 $controls [$control ['class']] = ['text' => $control ['description'],
-																				  'class' => $control ['class'],
-																				  'params' => json_decode ($control ['params'], true),
-																				  'help' => $control ['help_text']];
-								}
-						  }
-						  
-						  $button ["text"] = "";
-						  $button ["color"] = "#999999";
-						  $template = 'empty';
-						  $button ['controls'] = $controls;
-						  break;
-
-					 default:
-						  
-						  $template = 'no_params';
-						  break;
-				}
+				// decode the original
 				
-				$data = ['status' => 0,
-							'button' => $button];
+				$posConfig ['config'] = json_decode ($posConfig ['config'], true);
 
-				if (count ($extras)) {
-
-					 foreach ($extras as $key => $value) {
-
-						  $data [$key] = $value;
-					 }
-				}
-
-				/* $this->debug ("menus button... $template");
-					$this->debug ($data);*/
+				// update with new menu
 				
-				return ($this->response (__ ('Menus'),
-												 'Menus',
-												 $template,
-												 $data));
-		  }
-		  else {
+				$posConfig ['config'] ['pos_menus'] [$update ['menu_name']] ['horizontal_menus'] [$update ['menu_index']] = $update ['menu'];
+							  
+				// encode updated config
+								
+				$posConfig ['config'] = json_encode ($posConfig ['config']);
 				
-				return ($this->response (__ ('Menus'),
-												 'Menus',
-												 'empty',
-												 ['status' => 1]));
-		  }
-
-	 }
-
-	 function update ($id) {
-
-		  $response = ['status' => 1];
-		  
-		  if (($id > 0) && !empty ($this->request->getData ())) {
+				// $posConfigsTable->save ($posConfig);
 				
-				$config = json_encode ($this->request->getData () ['config']);
-
-				$posConfigTable = TableRegistry::get ('PosConfigs');
-				$posConfig = $posConfigTable
-					->find ()
-					->where (['id' => $id])
-					->first ();
-				
-				$posConfig ['config'] = $config;
 				$this->save ('PosConfigs', $posConfig);
-				$response ['status'] = 0;
+
+				$this->ajax (['status' => 0]);
+
+				$this->debug ('menu update...');
+				
 				$this->notifyPos ();
+
 		  }
-		  
-		  $this->set ('response', $response);
-		  $this->viewBuilder ()->setLayout ('ajax');
-		  $this->RequestHandler->respondAs ('json');
 	 }
 }

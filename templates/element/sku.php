@@ -1,63 +1,65 @@
-<style>
-
- .gen-sku-grid {
-	  
-     display: grid;
-     width: 100%;
-     grid-template-rows: 1;
-     grid-template-columns: 1fr 5fr;
-	  grid-column-gap: 0px;
- }
- 
-</style>
-
 <?php
 
-if ($item ['id'] > 0) {
-
-	 echo $this->input ('fa-barcode',
-							  ['id' => 'sku',
-								'name' =>'item[sku]',
-								'value' => $item ['sku'],
-								'class' => 'form-control']);
+if (strlen ($sku) > 0) { ?>
+	 
+	 <label for="sku" class="col-sm-3 form-label"><?= __ ('SKU') ?></label>
+	 <div class="col-sm-9">
+		  <?= $this->input ('sku',
+								  ['name' => 'sku',
+									'value' => $sku,
+									'class' => 'form-control'])
+		  ?>
+	 </div>
+<?php
 }
 else {
 ?>
 	 
-	 <div class="gen-sku-grid">
-
-		  <div class="grid-cell grid-cell-center" onclick="autoSku ()"><i class="far fa-rotate fa-large" alt="Next 5 digit SKU"></i></div>
-		  <div class="grid-cell grid-cell-left">
-				<?= $this->input ('fa-barcode',
-										['id' => 'sku',
-										 'name' =>'item[sku]',
-										 'value' => $item ['sku'],
-										 'class' => 'form-control']) ?>
-		  </div>
+	 <label for="sku" class="col-sm-3 form-label"><?= __ ('SKU') ?></label>
+	 <div class="col-sm-4">
+		  <?= $this->input ('sku',
+								  ['id' => 'sku',
+									'name' => 'sku',
+									'value' => $sku,
+									'class' => 'form-control'])
+		  ?>
 	 </div>
-	 
+	 <div class="col-sm-5">
+		  <?=
+		  $this->Form->select ("auto_sku",
+									  [null => __ ('Create unique 5, 7 or 8 digit SKU'),
+										5 => 5,
+										7 => 7,
+										8 => 8],
+									  ['id' => 'auto_sku',
+										'value' => $item ['sku'],
+										'class' => 'form-select',
+										'label' => false])
+		  ?>
+	 </div>
+	 </div>
 <?php
 }
 ?>
 
 <script>
  
- function autoSku () {
-
+ $('#auto_sku').change (function () {
+	  
 	  $.ajax ({
-			url: "/items/auto-sku/",
+			url: "/items/auto-sku/" + $('#auto_sku').val (),
 			type: "GET",
 			success: function (data) {
 				 
 				 data = JSON.parse (data);
-				 
-				 console.log (data);
-
 				 if (data.status == 0) {
+					  
+					  console.log (`sku ${data.sku}`);
 					  
 					  $('#sku').val (data.sku);
 				 }
 			}
-     });
- }
+	  });
+ });
+
 </script>

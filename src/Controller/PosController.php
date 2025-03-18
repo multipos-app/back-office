@@ -182,10 +182,6 @@ class PosController extends PosApiController {
             $ticketNo = $this->request->getData () ['ticket'] ['ticket_no'];
         }
 
-		  $this->debug ('ticket ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
-		  $this->debug ($this->request->getData ());
-		  $this->debug ('ticket ------------------------------------------------------------------------------------');
-
 		  $this->request->getData () ['ticket'] ['complete_time'] = date ('Y-m-d H:i:s', time ());
 
         /* $log = ['ticket' => ['dbname' => $this->request->getData () ['dbname'],

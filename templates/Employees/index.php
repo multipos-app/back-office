@@ -1,40 +1,25 @@
-<?= $this->Html->css ("Employees/index") ?>
 
-</style>
 
-<div class="controls-grid">
-	 
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
-	 </div>
- 
-	 
-	 <div></div>
-	 
-	 <div class="grid-cell grid-cell-right">
-		  <a onclick="openForm ('0','/employees/edit/0')" class="btn btn-secondary"><?= __ ('Add employee'); ?></a>
-	 </div>
-	 
+<div class="row g-1 mt-3 mb-3">
+	 <button class="btn btn-success col-sm-2" data-bs-toggle="modal" data-bs-target="#employee_modal" onclick="edit (0)"><?= __ ('Add employee') ?></button>
 </div>
 
-<div class="employee-grid">
+<table class="table table-hover">
+	 <thead>
+		  <tr>
+				<th><?= __ ('Name') ?></th>
+				<th><?= __ ('Employee Number') ?></th>
+				<th><?= __ ('Profile') ?></th>
+		  </tr>
+	 </thead>
 	 
-	 <div class="grid-cell grid-cell-left grid-cell-separator"></div>
-	 <div class="grid-cell grid-cell-left grid-cell-separator "><?= __ ('Name') ?></div>
-	 <div class="grid-cell grid-cell-left grid-cell-separator"><?= __ ('Employee Number') ?></div>
-	 <div class="grid-cell grid-cell-left grid-cell-separator "><?= __ ('Profile') ?></div>
+	 <tbody>
 
 	 <?php 
-
-	 $this->debug ($employees);
-	 $this->debug ($profiles);
 	 
 	 foreach ($employees as $employee) {
 		  
-		  $action = 'onclick="openForm (' . $employee ['id'] . ',\'/employees/edit/' . $employee ['id'] . '\')"';
-		  $profileDesc =  '';
+
 		  if ($employee ['profile_id']) {
 
 				$profileDesc = $profiles [$employee ['profile_id']] ['profile_desc'];
@@ -42,22 +27,47 @@
 		  
 	 ?>
 		  
-		  <div class="grid-row-wrapper" <?= $action ?>>
-
-				<div id="tag_<?= $employee ['id'] ?>" class="grid-cell grid-cell-left"></div>
-				<div class="grid-cell grid-cell-left"><?= $employee ['fname'].' '.$employee ['lname'];?></div>
-				<div class="grid-cell grid-cell-left"><?= $employee ['username'] ?></div>
-				<div class="grid-cell grid-cell-left"><?= $profileDesc ?></div>
+		  <tr role="button" data-bs-toggle="modal" data-bs-target="#employee_modal" onclick="edit (<?= $employee ['id'] ?>)">
+				<td><?= $employee ['fname'].' '.$employee ['lname'];?></td>
+				<td><?= $employee ['username'] ?></td>
+				<td><?= $profileDesc ?></td>
 				
-		  </div>
-
+		  </tr>
+		  
 	 <?php
 	 }
 	 ?>
-	 
+	 </tbody>
+
+</table>
+
+<div class="modal fade" id="employee_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="employee_desc" class="modal-title"><?= __ ('Employee edit') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="modal_content" class="modal-body">
+            </div>
+        </div>
+    </div>
 </div>
 
-<div id="pages" class="grid-cell grid-cell-center grid-span-all"></div>
-<div id="action_form"></div>
+<script>
+ 
+ function edit (id) {
+	  
+	  $.ajax ({
+         url: "/employees/edit/" + id,
+         type: "GET",
+         success: function (data) {
 
-<?= $this->Html->script ("Employees/index") ?>
+				 data = JSON.parse (data);
+				 
+				 $('#modal_content').html (data.html)
+            }
+        });
+	 }
+
+</script>

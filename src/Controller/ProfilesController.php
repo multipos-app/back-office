@@ -26,16 +26,12 @@ use App\Model\Entity\ProfilePermission;
 class ProfilesController extends PosAppController {
 
     public function index (...$params) {
-         
+
         $query = TableRegistry::get ('Profiles')->find ('all');
         $profiles = $this->paginate ($query);
-    
-        $merchant = $this->merchant;
-        return ($this->response (__ ('Employee profiles'),
-                                 'Profiles',
-                                 'index',
-                                 compact ('merchant', 'profiles')));
-    }
+		  $this->set (['merchant' => $this->merchant,
+							'profiles' => $profiles]);
+	 }
 
     function edit ($id = null) {
 
@@ -57,7 +53,7 @@ class ProfilesController extends PosAppController {
                 
                 foreach ($profile ['profile_permissions'] as $permission) {
 
-                    $permissions [] = str_replace ('cloud.multipos.lib.pos.controls.', '', $permission ['profile_class']);
+                    $permissions [] = str_replace ('cloud.multipos.pos.controls.', '', $permission ['profile_class']);
                 }
             }
             
@@ -97,10 +93,11 @@ class ProfilesController extends PosAppController {
             }
         }
 
-        return ($this->response ($profileDesc,
-                                 'Profiles',
-                                 'edit',
-                                 compact ('profile', 'profileDesc', 'categoryID', 'categories', 'permissions')));
+		  $this->set (['profile' => $profile,
+							'profileDesc' => $profileDesc,
+							'categoryID' => $categoryID,
+							'categories' => $categories,
+							'permissions' => $permissions]);
     }
   
     public function update ($id) {

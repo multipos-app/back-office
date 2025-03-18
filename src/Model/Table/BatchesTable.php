@@ -8,7 +8,8 @@ class BatchesTable extends Table {
     
     public function initialize (array $config): void {
 		  
-        $this->hasMany ('BatchEntries', ['dependent' => true, 'cascadeCallbacks' => true]);
+        $this->hasMany ('BatchEntries', ['dependent' => true,
+													  'cascadeCallbacks' => true]);
     }
 }
 

@@ -28,7 +28,7 @@ class DiscountsController extends PosAppController {
                         'order' => ['id desc']];
 	 
     public function index (...$params) {
-
+		  
         $d = [];
         $addons = TableRegistry::get ('Addons')
 										 ->find ('all')
@@ -57,13 +57,10 @@ class DiscountsController extends PosAppController {
                        'mix_and_match/0/percent' => __ ('Mix and match, markdown percent'),
                        'discount_sale/0' => __ ('Discount sale, all items'),
                        'discount_department/0' => __ ('Department Discount')];
-        
-        return ($this->response (__ ('Discounts'),
-                                 'Discounts',
-                                 'index',
-                                 compact ('addons',
-														'addonTypes')));
-    }
+
+		  $this->set (['addons' => $addons,
+							'addonTypes' => $addonTypes]);
+	 }
     
     public function mixAndMatch ($id, $type = null) {
 

@@ -25,8 +25,8 @@ class CustomersController extends PosAppController {
     
     public $paginate = ['limit' => 25];
 
-    public function index (...$params) {       
-		  
+    public function index (...$params) {
+
         $customers = [];
         $q = null;
         
@@ -45,16 +45,12 @@ class CustomersController extends PosAppController {
         foreach ($this->paginate ($q) as $customer) {
             
             $customer ['phone'] = $this->phoneFormat ($customer ['phone']);
-            $customers [] = $customer;
+            $customer ['last_update'] = date ('M d', strtotime ($customer ['last_update']));
+				$customers [] = $customer;
         }
-        
-        return ($this->response (__ ('Customers'),
-                                 'Customers',
-                                 'index',
-                                 compact ('customers'),
-                                 true,
-                                 'ajax',
-                                 true));
+		  
+ 		  $this->set (['merchant' => $this->merchant,
+							'customers' => $customers]);
 	 }
     
     public function edit ($id = 0) {
@@ -66,7 +62,7 @@ class CustomersController extends PosAppController {
         if ($id == 0) {
 
             // generate a customer number
-                        
+            
             $customer = ['id' => 0,
 								 'fname' => '',
 								 'lname' => '',
@@ -150,7 +146,7 @@ class CustomersController extends PosAppController {
 
             $customer = false;
             $customerTable = TableRegistry::get ('Customers');
- 
+				
             if ($id > 0) {
                 
                 $customer = $customerTable
@@ -183,7 +179,7 @@ class CustomersController extends PosAppController {
                                                         'state' => strtoupper ($this->request->getData () ['state']),
                                                         'postal_code' => $this->request->getData () ['postal_code']]);
             }
-                
+            
             $this->save ('Customers', $customer);
         }
 
@@ -362,7 +358,7 @@ class CustomersController extends PosAppController {
         return '';
     }
 
-	 function randPhone () {
+	 function rand () {
 
 		  $customers = TableRegistry::get ('Customers')
 											 ->find ()
@@ -382,7 +378,10 @@ class CustomersController extends PosAppController {
 				 * 				*/
 				
 				$customer ['phone'] = strval (rand (10,99)) . strval (rand (10,99)) . strval (rand (10,99)) . strval (rand (10,99)) . strval (rand (10,99));
-				$customer ['loyalty_points'] = rand (0,99);
+				$customer ['loyalty_points'] = 0;
+				$customer ['uuid'] = $this->uuid ();
+				$customer ['city'] = 'anytown';
+				$customer ['pin'] = sprintf ("%04d", rand (999,9999));
 
 				TableRegistry::get ('Customers')->save ($customer);
 		  }

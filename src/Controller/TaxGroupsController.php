@@ -37,80 +37,68 @@ class TaxGroupsController extends PosAppController {
         foreach ($query as $tg) {
             $taxGroups [] = $tg;
         }
-      
-        $merchant = $this->merchant;
-        return ($this->response (__ ('Taxes'),
-                                 'TaxGroups',
-                                 'index',
-                                 compact ('merchant', 'taxGroups')));
+        
+		  $this->set (['merchant' => $this->merchant,
+							'taxGroups' => $taxGroups]);
     }
 
     public function edit ($id) {
 
-        $this->debug ("tax edit... $id");
-        
-        $taxGroup = null;
-        
-        if ($id > 0) {
-            
-            $taxGroup = TableRegistry::get ('TaxGroups')
-                      ->find ()->where (["id = $id"])
-                      ->contain (['Taxes'])
-                      ->first ();
-        }
-        else {
-            
-            $taxGroup = TableRegistry::get ('TaxGroups')->newEntity ();
-            $taxGroup ['id'] = null;
-            $taxGroup ['short_desc'] = '';
-            $taxGroup ['taxes'] = [['id' => null,
-                                    'rate' => '',
-                                    'alt_rate' => '',
-                                    'short_desc' => '',
-                                    'type' => 'percent']];
-        }
-        
-        $taxTypes = ['percent' => __ ('Percent'),
-                     'fixed' => __ ('Fixed')];
-        
-        $this->debug ($taxGroup);
-        
-        return ($this->response ($taxGroup ['short_desc'],
-                                 'TaxGroups',
-                                 'edit',
-                                 compact ('taxGroup', 'taxTypes')));
-    }
-    
-    public function update ($id = 0) {
+		  $taxGroupsTable = TableRegistry::get ('TaxGroups');
 
-        $status = -1;
         if (!empty ($this->request->getData ())) {
 
+				$this->update ($id, $this->request->getData (), $taxGroupsTable);
+				return $this->redirect ('/tax-groups');
+		  }
+
+        $taxGroup = null;
+        
+        if ($id == 0) {
 				
-				$taxGroup = $this->request->getData ();
-
-				$this->debug ($taxGroup);
-				
-				$taxes = $taxGroup ['taxes'];
-				unset ($taxGroup ['taxes']);
-
-				$taxGroup ['short_desc'] = strtoupper ($taxGroup ['short_desc']);
-				
-				$this->save ('TaxGroups', TableRegistry::get ('TaxGroups')->newEntity ($taxGroup));
-
-				foreach ($taxes as $tax) {
-
-					 $tax ['tax_group_id'] = $taxGroup ['id'];
-					 $tax ['short_desc'] = strtoupper ($taxGroup ['short_desc']);
-                $this->save ('Taxes', TableRegistry::get ('Taxes')->newEntity ($tax));
-            }
-
-            $status = 0;
+            $taxGroup ['id'] = 0;
+            $taxGroup ['short_desc'] = '';
+            $taxGroup ['taxes'] = [];
+           
+        }
+        else {
+				$taxGroup = $taxGroupsTable
+                      ->find ()->where (["id = $id"])
+                      ->contain (['Taxes'])
+                      ->first ();  
         }
         
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
+		  $this->set (['taxGroup' => $taxGroup,
+							'taxTypes' => ['percent' => __ ('Percent'),
+												'fixed' => __ ('Fixed')]]);
+		  
+		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('TaxGroups')
+								->setTemplate ('edit');
 
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
+    }
+	 	 
+    public function update ($id, $taxGroup, $taxGroupsTable) {
+
+
+		  $this->debug ($taxGroup);
+		  
+        if ($id == 0) {
+				
+				$taxGroup ['short_desc'] = strtoupper ($taxGroup ['short_desc']);				
+				$this->save ('TaxGroups', TableRegistry::get ('TaxGroups')->newEntity ($taxGroup));
+
+		  }
+		  else {
+				
+        }
     }
 
     public function delete ($id) {
@@ -120,6 +108,31 @@ class TaxGroupsController extends PosAppController {
         return $this->redirect (['action' => 'index']);
         
     }
+
+	 /**
+	  *
+	  * format a new tax row and send it back to the tax groups edit dialog
+	  *
+	  **/
+	 
+    public function addTax ($row) {
+		  
+   	  $this->set (['row' => $row,
+							'taxTypes' => ['percent' => __ ('Percent'),
+												'fixed' => __ ('Fixed')]]);
+		  
+		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('TaxGroups')
+								->setTemplate ('add_tax');
+		  
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
+	 }
 }
 
 ?>

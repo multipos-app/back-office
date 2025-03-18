@@ -1,65 +1,95 @@
-<?= $this->Html->css ("Employees/edit") ?>
-<script>
- var employee = <?php echo json_encode ($employee, true); ?>;
-</script>
 
-<div class="form-section">
-	 <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i><?= $employee ['lname']?>,&nbsp;<?= $employee ['fname']?>
-</div>
 
-<form id="employee_edit" name="employee_edit">
+<form id="employee_edit" name="employee_edit" method="post" action="/employees/edit/<?= $employee ['id'] ?>">
 	 
 	 <div class="form-grid employee-edit-grid">
 
-		  <div class="form-cell form-desc-cell"><?= __('Cashier number') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('username', ['value' => $employee ['username'], 'class' => 'form-control', 'label' => false, 'required' => true]); ?>
-		  </div>
-		  
-		  <div class="form-cell form-desc-cell"><?= __('First Name') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('fname', ['value' => $employee ['fname'], 'class' => 'form-control', 'label' => false, 'required' => true]); ?>
-		  </div>
-
-		  <div class="form-cell form-desc-cell"><?= __('Last Name') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('lname', ['value' => $employee ['lname'], 'class' => 'form-control', 'label' => false, 'required' => true]); ?>
-		  </div>
-
-		  <div class="form-cell form-desc-cell"><?= __('PIN') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('password1', ['value' => '', 'type' => 'password', 'class' => 'form-control', 'label' => false, 'required' => true, 'autocomplete' => false]); ?>
-		  </div>
-
-		  <div class="form-cell form-desc-cell"><?= __('Repeat PIN') ?></div>
-		  <div class="form-cell form-control-cell">
-				<?php echo $this->Form->control ('password2', ['value' => '', 'type' => 'password', 'class' => 'form-control', 'label' => false, 'required' => true, 'autocomplete' => false]); ?>
-		  </div>
-
-		  <div class="form-cell form-desc-cell"><?= __('Profile') ?></div>
-		  <div class="form-cell form-control-cell">
-				<div class="select">
-					 <?php echo $this->Form->select ('profile_id',
-																$profiles, ['class' => 'custom-dropdown',
-																				'label' => false,
-																				'value' => $employee ['profile_id'],
-																				'required' => true]); ?>
+		  <div class="row g-1 m-3">
+				<label for="username" class="col-sm-4 form-label"><?= __('Cashier number') ?></label>
+				<div class="col-sm-8">
+					 
+					 <?= 
+					 $this->Form->input ('username', 
+												['id' => 'username', 
+												 'value' => $employee ['username'], 
+												 'class' => 'form-control', 
+												 'label' => false, 
+												 'required' => 'required']) ?>
 				</div>
 		  </div>
-	 </div>
-
-	 <div class="form-submit-grid">
 		  
-		  <div>
-				<button type="submit" id="employee_update" class="btn btn-success btn-block control-button"><?= __ ('Save') ?></button>
+		  <div class="row g-1 m-3">
+				<label for="fname" class="col-sm-4 form-label"><?= __('First name') ?></label>
+				<div class="col-sm-8">
+					 
+					 <?= 
+					 $this->Form->input ('fname', 
+												['id' => 'fname', 
+												 'value' => $employee ['fname'], 
+												 'class' => 'form-control', 
+												 'label' => false, 
+												 'required' => 'required']) ?>
+				</div>
 		  </div>
 		  
-		  <div>
-				<button type="button" class="btn btn-warning" onclick="del ('employees', <?= $employee ['id']?>, '<?= __ ('Delete') ?> <?= $employee ['fname'] ?>')"><?= __ ('Delete') ?></button>
+		  <div class="row g-1 m-3">
+				<label for="lname" class="col-sm-4 form-label"><?= __('Last name') ?></label>
+				<div class="col-sm-8">
+					 
+					 <?= 
+					 $this->Form->input ('lname', 
+												['id' => 'lname', 
+												 'value' => $employee ['lname'], 
+												 'class' => 'form-control', 
+												 'label' => false, 
+												 'required' => 'required']) ?>
+				</div>
 		  </div>
-		  
-	 </div>
 
+		  <div class="row g-1 m-3">
+				<label for="password1" class="col-sm-4 form-label"><?= __('PIN') ?></label>
+				<div class="col-sm-8">
+					 
+					 <?= 
+					 $this->Form->input ('password1', 
+												['id' => 'password1', 
+												 'value' => $employee ['password1'], 
+												 'class' => 'form-control', 
+												 'label' => false, 
+												 'required' => 'required']) ?>
+				</div>
+		  </div>
+
+		  <div class="row g-1 m-3">
+				<label for="password2" class="col-sm-4 form-label"><?= __('Repeat PIN') ?></label>
+				<div class="col-sm-8">
+					 
+					 <?= 
+					 $this->Form->input ('password2', 
+												['id' => 'password2', 
+												 'value' => $employee ['password2'], 
+												 'class' => 'form-control', 
+												 'label' => false, 
+												 'required' => 'required']) ?>
+				</div>
+		  </div>
+
+		  <div class="row g-1 m-3">
+				<label for="profile" class="col-sm-4 form-label"><?= __('PIN') ?></label>
+				<div class="col-sm-8">
+					 
+					 <?= 
+					 $this->Form->select ('profile_id',
+												 $profiles, ['class' => 'form-select',
+																 'label' => false,
+																 'value' => $employee ['profile_id'],
+																 'required' => true]);
+					 ?>
+				</div>
+		  </div>
+
+		  <div class="text-center">
+				<button type="submit" class="btn btn-success">Save</button>
+		  </div>
+	 </div>
 </form>
-
-<?= $this->Html->script ("Employees/edit") ?>

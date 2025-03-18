@@ -1,20 +1,3 @@
-<?php
-
-if (!isset ($merchant)) {
-
-	 // session was lost...
-	 
-	 $this->debug ('no merchant...');
-	 $this->debug ($_SERVER);
-	 exit;
-}
-
-$logo = 'multi<span class="logo-red-small">POS</span>';
-
-?>
-
-<!DOCTYPE html>
-
 <!-- /**
 	  * Copyright (C) 2023 multiPos, LLC
 	  *
@@ -32,199 +15,276 @@ $logo = 'multi<span class="logo-red-small">POS</span>';
 	  */
 	-->
 
-<script>
- 
- if (location.protocol == 'http:') { location.href = location.href.replace (/^http:/, 'https:'); }
- 
- var locale = '<?= $locale ?>';
- var merchant = <?php echo json_encode ($merchant, true); ?>;
- var merchants = <?php echo json_encode ($merchant ['business_units'], true); ?>;
- var buIndex = merchant ['bu_index'];
- var ctrl = '<?= $controller ?>';
- var webroot = '<?= $this->request->getAttribute ('webroot') ?>';
- var pages = [];
- var pageAction = 'index/sales';
- var pageAbsolute = false;
- var bu = false;
- var buCurrent = 0;
- var currencyFormat = '<?= __ ('currency_format') ?>';
- var percentFormat = '<?= __ ('percent_format') ?>'
- var phoneFormat = '<?= __ ('phone_format') ?>'
- var postalCodeFormat = '<?= __ ('postal_code_format') ?>'
- var integerFormat = '<?= __ ('integer_format') ?>'
-
-</script>
-
-
+<!DOCTYPE html>
 <html lang="en">
 
 	 <head>
 		  <meta charset="utf-8">
 		  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-		  
-		  <title>multiPOS</title>
-		  <meta content="Cloud POS System" name="descriptison">
-		  <meta content="retail pos cloud" name="keywords">
+		  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
 
-		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		  <title>multiPOS</title>
+		  <meta content="" name="description">
+		  <meta content="" name="keywords">
+
+		  <!-- Favicons -->
+		  <link href="/assets/img/favicon.png" rel="icon">
+		  <link href="apple-touch-icon.png" rel="apple-touch-icon">
+
+		  <!-- Google Fonts -->
+		  <link href="https://fonts.gstatic.com" rel="preconnect">
+		  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 		  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
 
-		  <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Quicksand:wght@300&display=swap" rel="stylesheet">
-		  <script src="https://kit.fontawesome.com/3a5f45cd4d.js" crossorigin="anonymous"></script>
+		  <!-- Vendor CSS Files -->
 
-		  <?php
-		  echo $this->Html->css (['bootstrap',
-										  'aos',
-										  'bootstrap-icons',
-										  'glightbox',
-										  'style',
-										  'grids',
-										  'multipos',
-										  'nav-menu',
-										  'forms',
-										  'default']);
-		  ?>
+		  <link href="/assets/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+		  <link href="/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+		  <link href="/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
 
-		  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css'>
-		  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.4/css/tether.min.css'>
-		  <link rel='stylesheet' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.css'>
-		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+		  <!-- Template Main CSS File -->
 
-		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> 
-		  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-		  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
-		  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+		  <link href="/assets/css/style.css" rel="stylesheet">
 
+		  <!-- Local -->
 
-		  <?= $this->Html->script ('typeahead.js') ?>
-		  <?= $this->Html->script ('tools.js') ?>
+		  <link href="/assets/css/multipos.css" rel="stylesheet">
+		  <link href="/assets/css/cake.css" rel="stylesheet">
+
+		  <!-- Early javascript files -->
 		  
+		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> 
+		  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.13.4/jquery.mask.min.js"></script>	  
+		  <script src="/assets/js/typeahead.js"></script>
+		  <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
 	 </head>
 
 	 <body>
-								 
-		  <div id="multipos_modal_overlay" class="multipos-modal">
-				<div id="multipos_modal_content" class="multipos-modal-content">
-					 <div class="lds-hourglass"></div>
-				</div>
-		  </div>
-					 
-		  <div class="container">
-				<div class="row">
-					 <div id="sidebar" class="sidebar">
-						  
-						  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="fa fa-circle-x"></i></a>
-						  
-						  <ul class="mainmenu">
-								
-								<?php echo render ($merchant ['menus'], $this) ?>
-								<li><a href="/"><i class="fa fa-right-from-bracket fa-small"></i><span><?= __ ('Logout') ?></span></a></li>
-								
-						  </ul>
-					 </div>
-				</div>
-		  </div>
-		  
-		  <div id="main">
 
-				<div class="top-grid">
-					 <div id="nav_button">
-						  <button class="openbtn" onclick="openNav()"><i class="fa fa-bars"></i></button>
-					 </div>
-					 <div class="grid-cell grid-cell-right">
-						  <span class="logo logo-small">
-								multi<span class="logo-red-small">POS</span>
+		  <!-- ======= Header ======= -->
+		  <header id="header" class="header fixed-top d-flex align-items-center">
+
+		<div class="d-flex align-items-center justify-content-between">
+					 <a href="index.html" class="logo d-flex align-items-center">
+						  <span class="d-none d-lg-block">
+								<?php 
+								echo $this->element ('logo');
+								?>
 						  </span>
-					 </br>
-					 <span class="logo-tiny">Back Office</span>
-					 </div>
-				</div>
+					 </a>
+					 
+					 <i class="bi bi-list toggle-sidebar-btn"></i>
+					 
+				</div><!-- End Logo -->
+
+				<nav class="header-nav ms-auto">
+					 
+					 <ul class="d-flex align-items-center">
+						  
+						  <li class="nav-item p-3">
+
+								<?php
+								
+								if (count ($merchant ['bu_list']) > 2) {
+									 
+									 echo $this->Form->select ('bu_index',
+																		$merchant ['bu_list'],
+																		['id' => 'bu_index',
+																		 'class' => 'form-select',
+																		 'label' => false,
+																		 'value' => $merchant ['bu_index'],
+																		 'onchange' => 'buSelect ()']);
+								}
+								?>
+								
+						  </li>
+						  
+						  <li class="nav-item dropdown">
+								<a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+									 <i class="bi bi-bell"></i>
+									 <span class="badge bg-primary badge-number"></span>
+								</a><!-- End Notification Icon -->
+
+						  </li><!-- End Notification Nav -->
+
+						  <li class="nav-item dropdown">
+
+								<a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+									 <i class="bi bi-chat-left-text"></i>
+									 <span class="badge bg-success badge-number"></span>
+								</a><!-- End Messages Icon -->
+
+						  </li>
+
+						  <li class="nav-item dropdown">
+								
+								<a class="nav-link nav-icon" href="/business-units">
+									 <i class="bx bxs-user"></i>
+								</a><!-- End Messages Icon -->
+								
+						  </li>
+					 </ul>
+					 
+				</nav><!-- End Icons Navigation -->
+
+		  </header><!-- End Header -->
+
+		  <!-- ======= Sidebar ======= -->
+		  
+		  <aside id="sidebar" class="sidebar">
+
+				<ul class="sidebar-nav" id="sidebar-nav">
+
+					 <li class="nav-item">
+						  <a class="nav-link collapsed" href="/dashboard">
+								<i class="bx bx-home"></i>
+								<span><?= __ ('Dashboard') ?></span>
+						  </a>
+					 </li>
+
+					 <li class="nav-item">
+						  
+						  <li class="nav-item">
+								<a class="nav-link collapsed" href="/item-history">
+									 <i class="bx bxs-calendar"></i>
+									 <span><?= __ ('Item History') ?></span>
+								</a>
+						  </li>
+						  
+						  <li class="nav-item">
+								<a class="nav-link collapsed" href="/hourly">
+									 <i class="bx bxs-time"></i>
+									 <span><?= __ ('Hourly') ?></span>
+								</a>
+						  </li>
+						  
+						  <li class="nav-item">
+								<a class="nav-link collapsed" href="/tickets">
+									 <i class="bx bxs-receipt"></i>
+									 <span><?= __ ('Transactions') ?></span>
+								</a>
+						  </li>
+						  
+						  <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+								<i class="bx bxs-business"></i><span><?= __ ('Store Ops') ?></span><i class="bi bi-chevron-down ms-auto"></i>
+						  </a>
+						  
+						  <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+								<li>
+									 <a href="/items">
+										  <i class="bi bi-circle"></i><span><?= __ ('Items') ?></span>
+									 </a>
+								</li>
+								<li>
+									 <a href="/departments">
+										  <i class="bi bi-circle"></i><span><?= __ ('Departments') ?></span>
+									 </a>
+								</li>
+								<li>
+									 <a href="/tax-groups">
+										  <i class="bi bi-circle"></i><span><?= __ ('Tax') ?></span>
+									 </a>
+								</li>
+								<li>
+									 <a href="/employees">
+										  <i class="bi bi-circle"></i><span><?= __ ('Employees') ?></span>
+									 </a>
+								</li>
+								<li>
+									 <a href="/profiles">
+										  <i class="bi bi-circle"></i><span><?= __ ('Employee Profiles') ?></span>
+									 </a>
+								</li>
+								<li>
+									 <a href="/customers">
+										  <i class="bi bi-circle"></i><span><?= __ ('Customers') ?></span>
+									 </a>
+								</li>
+								<li>
+									 <a href="/suppliers">
+										  <i class="bi bi-circle"></i><span><?= __ ('Suppliers') ?></span>
+									 </a>
+								</li>
+								<!-- <li>
+									  <a href="/business-units/receipts">
+									  <i class="bi bi-circle"></i><span><?= __ ('Receipts') ?></span>
+									  </a>
+									  </li> -->
+						  </ul>
+					 </li>
+
+					 <li class="nav-item">
+						  <a class="nav-link collapsed" href="/pos-configs">
+								<i class="bx bx-menu"></i>
+								<span><?= __ ('POS Menus/Config') ?></span>
+						  </a>
+					 </li>
+
+					 <li class="nav-item">
+						  <a class="nav-link collapsed" href="/business-units/batches">
+								<i class="bx bxs-cloud-download"></i>
+								<span><?= __ ('Batches') ?></span>
+						  </a>
+					 </li>
+					 
+					 <li class="nav-item">
+						  <a class="nav-link collapsed" href="/">
+								<i class="bx bxs-exit"></i>
+								<span>Logout</span>
+						  </a>
+					 </li>
+
+				</ul>
+
+		  </aside><!-- End Sidebar-->
+
+		  <main id="main" class="main">
 				
-				<div id="main_content" class="main-content">
+				<section class="section">
+					 
+					 <?= $this->fetch ('content') ?>
+					 
+				</section>
 
-				</div>
+		  </main><!-- End #main -->
+		  
+		  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+		  
+		  <!-- Vendor JS Files -->
 
-		  </div>
-		  
-		  <?php
-		  
-		  echo $this->Html->script (['aos',
-											  'bootstrap.bundle',
-											  'glightbox',
-											  'typed',
-											  'validate',
-											  'main',
-											  'default']);
-		  ?>
-		  
-		  <script src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js'></script>
-		  <script src='https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.4/js/tether.min.js'></script>
-		  <script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
 		  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.13.4/jquery.mask.min.js"></script>
+		  
+		  <!-- Template Main JS File -->
 
+		  <script src="/assets/js/main.js"></script>
+		  <script src="/assets/js/multipos.js"></script>
+		  
 	 </body>
 
 </html>
 
-<?php
-
-function render ($menus, $view) {
-	 
-	 $html = '';
-	 foreach ($menus as $menu) {
-		  
-		  switch ($menu ['type']) {
-					 
-				case 'menu':
-					 
-					 $controller = $menu ['controller'];
-					 $icon = $menu ['icon'];
-					 $text = __ ($menu ['text']);
-					 
-					 $html .= "<li><a onclick=\"controller ('$controller', false);\"><i class=\"fa $icon fa-small\"></i><span>$text</span></a></li>";
-					 break;
-
-				case 'submenu':
-
-					 $icon = $menu ['icon'];
-					 $html .= '<li class="expand">' .
-								 '<a><i class="fa ' . $icon . ' fa-small"></i>' . $menu ['text']. '&nbsp;<i class="fa fa-caret-down fa-small"></i></a>'.
-								 '<ul class="submenu">' .
-								 render ($menu ['submenu'], $view) .
-								 '</ul>' .
-								 '</li>';
-					 break;
-		  }
-	 }
-	 
-	 return $html;
-}
-?>
-
 <script>
 
- $('.submenu').toggle ();
- openNav ();
- 
- $('.expand').click (function (e) {
+ function buSelect () {
 	  
-	  $('.submenu').toggle ();
- });
+	  $.ajax ({type: "GET",
+				  url: '/pos-app/bu-select/' + $('#bu_index').val (),
+				  success: function (data) {
 
- function openNav () {
-	  
-	  document.getElementById("sidebar").style.width = "250px";
-	  document.getElementById("main").style.marginLeft = "250px";
-	  $('#nav_button').html ('')
-	  $('.dropdown-menu').show ()
+						window.location = '<?= $_SERVER ['REQUEST_URI'] ?>';
+				  }
+	  });
  }
+
  
- function closeNav () {
+ session = setTimeout (() => {
 	  
-	  document.getElementById("sidebar").style.width = "0";
-	  document.getElementById("main").style.marginLeft= "0";
-	  $('#nav_button').html ('<button class="openbtn" onclick="openNav()">☰</button>')
- }
+	  window.location = '/';
+	  
+ }, "1200000");
+
+ const multipos = {pathname: window.location.pathname};  // save the current path
+ const fns  = [];  // function queue for post processing
  
 </script>
-

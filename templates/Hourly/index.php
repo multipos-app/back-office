@@ -1,182 +1,109 @@
-<?php
-/**
- *
- * Copyright (C) 2017 posAppliance, LLC
- * <http://www.posAppliance.com>
- *
- * All rights are reserved. No part of the work covered by the copyright
- * hereon may be reproduced or used in any form or by any means graphic,
- * electronic, or mechanical, including photocopying, recording, taping,
- * or information storage and retrieval systems -- without written
- * permission signed by an officer of posappliance, LLC.
- *
- */
 
-?>
+<?php 
 
-<style>
+$report = [];
+$dayTotals = array_fill (0, 8, 0);
 
- .search-grid {
-	  
-	  margin-top: 25px;
-     width: 100%;
-     grid-template-rows: 1fr;
-     grid-template-columns: 120px 1fr 6fr;
-	  grid-column-gap: 10px;
- }
- 
- .form-controls-grid {
-     grid-template-columns: 1fr 5fr !important;
- }
-
-</style>
-
-<form id="hourly">
-	 <div class="form-grid search-grid">
-		  
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
-	 </div>
-
-	 <div class="form-cell form-control-cell">
-				<input type="text" id="start_date" name="start_date" class="form-control datetimepicker-input start-date" autocomplete="off" onchange="searchDate ()" placeholder="<?= __ ('Search Start Date') ?>"/>
-		  </div>
-		  
-		  <div class="grid-cell"></div>
-	 </div>
-</form>
-
-<div id="page_export" class="grid-container-<?= $len ?>">
+for ($hour = 0; $hour < $hourly ['hid']; $hour ++) {
 	 
-	 <div class="grid-cell grid-cell-right grid-span-all">
-		  
-		  <a onclick="javascript:skip(<?= $prev ?>, 'hourly');" class="action-icon"><i class="far fa-arrow-left fa-large action-icon"></i></a>		
-		  <a onclick="javascript:skip(<?= $next ?>, 'hourly');" class="action-icon"><i class="far fa-arrow-right fa-large action-icon"></i></a>		  
-		  <a href="#" onclick="javascript:exporter('hourly', <?= $len + 2 ?>);"><i class="far fa-download fa-large action-icon"></i></a>
-
-	 </div>
+	 $report [$hour] = array ($hourly ['times'] [$hour]);
+	 $total = 0;
 	 
-	 <?php 
-	 
-	 $report = [];
-	 $dayTotals = array_fill (0, 8, 0);
-
-	 for ($hour = 0; $hour < $hourly ['hid']; $hour ++) {
-
-		  $report [$hour] = array ($hourly ['times'] [$hour]);
-		  $total = 0;
-
-		  for ($day = 0; $day < 7; $day ++) {
-				
-				array_push ($report [$hour], $hourly [$day] [$hour]);
-		  }
-		  array_push ($report [$hour], $total);
-	 }
-
 	 for ($day = 0; $day < 7; $day ++) {
 		  
-		  for ($hour = 0; $hour < $hourly ['hid']; $hour ++) {
-
-				$dayTotals [$day] += $hourly [$day] [$hour] ['amount'];
-		  }
-		  
-		  $dayTotals [7] += $dayTotals [$day];
+		  array_push ($report [$hour], $hourly [$day] [$hour]);
 	 }
-	 
-	 echo '<div class="grid-cell grid-cell-separator data-cell">' .  __ ('Time') . '</div>';
-	 foreach ($periods as $period) {
-		  
-		  echo '<div class="grid-cell grid-cell-separator grid-cell-right data-cell">'  .  $period ['period']  .  '</div>';
-	 }
-	 
-	 echo '<div class="grid-cell grid-cell-separator grid-cell-right data-cell">' .  __ ('Total') . '</div>';
+	 array_push ($report [$hour], $total);
+}
 
-	 $start = $dow;
-	 $end = $dow + 1;
-	 $start = 0;
-	 $end = 9;
-	 $oneHour = 60 * 60;
+for ($day = 0; $day < 7; $day ++) {
 	 
 	 for ($hour = 0; $hour < $hourly ['hid']; $hour ++) {
-	 		  
-		  echo '<div class="grid-row-wrapper">';
-		  $dayTotal = 0;
 		  
-		  for ($day = $start; $day < $end; $day ++) {
-
-				switch ($day) {
-
-					 case 0:
-						  echo '<div class="grid-cell grid-cell-left data-cell">' . substr ($report [$hour] [$day], 11, 5) . '</div>';
-						  break;
-
-					 case 8:
-						  
-						  echo '<div class="grid-cell grid-cell-right data-cell">' . $this->moneyFormat ($dayTotal) . '</div>';
-						  break;
-
-					 default:
-
-						  $action = $this->moneyFormat ($report [$hour] [$day] ['amount']);
-						  
-						  if (isset ($report [$hour] [$day] ['link'])) {
-
-								$startHour = $report [$hour] [$day] ['link'] ['start'];
-								$endHour = $report [$hour] [$day] ['link'] ['end'];
-								$buID = $report [$hour] [$day] ['link'] ['business_unit_id'];
-								
-								$url = "tickets/index/start_hour/$startHour/end_hour/$endHour/business_unit_id/$buID";
-								$action = '<a class="report-link" onclick="controller (\'' .$url . '\', false)"' . '>' . $this->moneyFormat ($report [$hour] [$day] ['amount']) . '</a>';
-
-								echo '<div class="grid-cell grid-cell-right data-cell">' . $action . '</div>';
-								$dayTotal += $report [$hour] [$day] ['amount'];
-						  }
-						  else {
-
-								echo '<div class="grid-cell grid-cell-right data-cell">' . $this->moneyFormat ($report [$hour] [$day] ['amount']) . '</div>';
-						  }
-						  						  
-						  break;
-				}
-		  }
-		  echo '</div>';
+		  $dayTotals [$day] += $hourly [$day] [$hour] ['amount'];
 	 }
-
-	 echo '<div class="grid-cell grid-cell-left grid-cell-separator data-cell">'.__ ('Total', true).'</div>';
-	 for ($day = 0; $day < 8; $day ++) { echo '<div class="grid-cell grid-cell-right grid-cell-separator data-cell">' . $this->moneyFormat ($dayTotals [$day]) . '</div>'; }
-	 ?>
 	 
-</div>
+	 $dayTotals [7] += $dayTotals [$day];
+}
+?>
 
-<script>
- 
- function search () {
+<table class="table table-hover">
+	 
+	 <thead align="right">
+		  <tr><th></th>
+				<?php 
+				foreach ($periods as $period) {
+				?>
+					 <th align="right"><?= $period ['period'] ?></th>
+				<?php
+				}
+				?>
+				<th align="right"><?=  __ ('Total') ?></th>
+		  </tr>
+	 </thead>
+	 
+	 <tbody>
 
-	  let url = '/hourly/index';
-	  
-	  if ($('#start_date').val ().length > 0) {
+		  <?php
 
-			url += '/start_date/' + $('#start_date').val () + ' 00:00:00';
-	  }
-	  else if ($('#ytd').val () > 0) {
+		  $start = $dow;
+		  $end = $dow + 1;
+		  $start = 0;
+		  $end = 9;
+		  $oneHour = 60 * 60;
 
-			url += '/ytd/' + $('#ytd').val ();
-	  }
+		  $html = '<tr>';
+		  for ($hour = 0; $hour < $hourly ['hid']; $hour ++) {
+	 			
+				$dayTotal = 0;
+				
+				for ($day = $start; $day < $end; $day ++) {
+					 
+					 switch ($day) {
+								
+						  case 0:
+								$html .= '<td>' . substr ($report [$hour] [$day], 11, 5) . '</td>';
+								break;
 
-	  controller (url, true);
- }
- 
- $('#start_date').datepicker ({
-	  altFormat: 'yy-mm-dd',
-	  altField: '#start_date'});
- 
- function searchDate () {
-	  
-	  controller ('/hourly/index/start_date/' + $('#start_date').val (), true);
- }
+						  case 8:
+								
+								$html .= '<td align="right">' . $this->moneyFormat ($dayTotal) . '</td>';
+								break;
 
-</script>
+						  default:
 
-<?= $this->Html->script ('exporter.js') ?>
+								$action = $this->moneyFormat ($report [$hour] [$day] ['amount']);
+								
+								if (floatval ($report [$hour] [$day] ['amount']) != 0.0) {
+
+									 // $utcHour = $hour - $this->tzOffset ($this->tz);
+										  
+									 $startTime = sprintf ("%s %02d:00:00", substr ($periods [$day] ['start'], 0, 10), $hour);
+									 $endTime = sprintf ("%s %02d:00:00", substr ($periods [$day] ['start'], 0, 10), $hour + 1);
+									 
+									 $link = "/tickets/index/start_hour/$startTime/end_hour/$endTime/business_unit_id/1";
+										  
+									 $this->debug ("val... $link");
+									 									 
+									 $html .= '<td align="right"><a href="' . $link . '">' . $this->moneyFormat ($report [$hour] [$day] ['amount']) . '</a></td>';
+								}
+								else {
+
+									 $html .= '<td align="right" style="color:#777;">' . $this->moneyFormat ($report [$hour] [$day] ['amount']) . '</td>';
+								}
+								break;
+					 }
+				}
+				$html .= '</tr>';
+		  }
+
+		  $html .= '<tr><td>'.__ ('Total', true).'</td>';
+		  for ($day = 0; $day < 8; $day ++) {
+				
+				$html .= '<td align="right">' . $this->moneyFormat ($dayTotals [$day]) . '</td>';
+		  }
+
+		  echo $html;
+		  ?>
+	 </tbody>
+</table>

@@ -1,269 +1,140 @@
 <!DOCTYPE html>
-
-<!-- /**
-	  * Copyright (C) 2023 multiPos, LLC
-	  *
-	  * Licensed under the Apache License, Version 2.0 (the "License");
-	  * you may not use this file except in compliance with the License.
-	  * You may obtain a copy of the License at
-	  *
-	  *     https://www.apache.org/licenses/LICENSE-2.0
-	  *
-	  * Unless required by applicable law or agreed to in writing, software
-	  * distributed under the License is distributed on an "AS IS" BASIS,
-	  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	  * See the License for the specific language governing permissions and
-	  * limitations under the License.
-	  */
-	-->
-
-<script type="text/javascript">
- 
- if (location.protocol == 'http:') { location.href = location.href.replace (/^http:/, 'https:'); }
- 
-</script>
-
 <html lang="en">
-	 
-	 <head>
-		  <meta charset="utf-8">
-		  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-		  <title>multiPOS</title>
-		  <meta content="Cloud POS System" name="descriptison">
-		  <meta content="retail pos cloud" name="keywords">
-		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Quicksand:wght@300&display=swap" rel="stylesheet">
-		  		  
-		  <?php
-		  
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Login - multiPOS</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
  
-		  echo $this->Html->css (['icofont.min.css',
-										  'remixicon',
-										  'boxicons.min',
-										  'venobox',
-										  'aos',
-										  'bootstrap-icons',
-										  'glightbox',
-										  'swiper-bundle.min',
-										  'style',
-										  'login',
-										  'default-login-bg']);
+  <link href="/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  
+  <!-- Local -->
 
-		  $logo = 'multi<span class="logo-red">POS';
-		  $serverName = explode ('.', $_SERVER ['HTTP_HOST']) [0];
-		  
+  <link href="/assets/css/multipos.css" rel="stylesheet">
 
-		  /* $logoFile = ROOT . DS . 'src' . DS  . 'Controller' . DS . $serverName . '.inc';
-			  $this->debug ($logoFile);
+  <!-- Template Main CSS File -->
 
-			  if (file_exists ($logoFile)) {
-			  
-			  $logo = file_get_contents ($logoFile, false);
-			  }*/
-				
-		  ?>
+  <link href="/assets/css/style.css" rel="stylesheet">
 
-		  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css'>
-		  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'>
-		  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.4/css/tether.min.css'>
-		  <link rel='stylesheet' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.css'>
-		  
-		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> 
-		  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-		  
-		  <link rel="preconnect" href="https://fonts.googleapis.com">
-		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- =======================================================
+  * Template Name: multiPOS
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Updated: Apr 20 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+		 ======================================================== -->
 
-		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+</head>
 
-		  <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Quicksand:wght@300&display=swap" rel="stylesheet">
-		  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+<body>
 
-	 </head>
-	 
-	 <body class="login-bg">
-		  
-		  <div class="logo">
-				<?= $logo ?>
+  <main>
+    <div class="container">
+
+      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+
+              <div class="d-flex justify-content-center py-4">
+                <a href="index.html" class="logo d-flex align-items-center w-auto">
+                    <span class="d-none d-lg-block">
+								<?php 
+								echo $this->element ('logo');
+								?>
+						  </span>
+                </a>
+              </div><!-- End Logo -->
+
+              <div class="card mb-3">
+
+                <div class="card-body">
+
+                  <div class="pt-4 pb-2">
+                    <h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
+                    <p class="text-center small">Enter your username & password to login</p>
+                  </div>
+
+                  <form class="row g-3 needs-validation" novalidate action="user/login" method="post">
+
+                    <div class="col-12">
+                      <label for="yourUsername" class="form-label">Username</label>
+                      <div class="input-group has-validation">
+                        <span class="input-group-text" id="inputGroupPrepend">@</span>
+                        <input type="text" name="uname" class="form-control" id="uname" required>
+                        <div class="invalid-feedback">Please enter your username.</div>
+                      </div>
+                    </div>
+
+                    <div class="col-12">
+                      <label for="yourPassword" class="form-label">Password</label>
+                      <input type="password" name="passwd" class="form-control" id="passwd" required>
+                      <div class="invalid-feedback">Please enter your password!</div>
+                    </div>
+
+                    <div class="col-12">
+                       <p class="small mb-0"><a href="/users/forgot-password"><?= __ ('Forgot password') ?></a></p>
+                   </div>
+                    <div class="col-12">
+                      <button class="btn btn-primary w-100" type="submit">Login</button>
+                    </div>
+                    <div class="col-12">
+                      <p class="small mb-0">Don't have account?&nbsp;<a href="/user/get-started"><?= __ ('Get started.') ?></a></p>
+                    </div>
+                  </form>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+	 <!-- ======= Footer ======= -->
+	 <footer id="footer" class="footer" style="left:0;">
+		  <div class="copyright">
+				&copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
 		  </div>
-		  
-		  <section id="login" class="login">
-				
-				<!-- <div id="login-button">
-					  <?= $this->Html->image ('login-w-icon.png'); ?>
-					  </div> -->
-				
-				<div id="container">
-					 
-					 <h1>Log In</h1>
-					 <span class="close-btn">
-						  <img src="https://cdn4.iconfinder.com/data/icons/miu/22/circle_close_delete_-128.png"></img>
-					 </span>
-					 
-					 <form id="login_form" action="<?= $this->request->getAttribute ('webroot') ?>merchants/index" method="post">
-						  <input id="uname" name="uname" value="" placeholder="E-mail">
-						  <input id="passwd" type="password" name="passwd" value="" placeholder="Password">
-						  <button type="submit" onclick="login ()">Log in</button>
-						  <div class="control-grid">
-								<div id="forgot">Recover password</div>
-								<div id="register">Get started</div>
-						  </div>
-					 </form>
-					 
-				</div>
-				
-				<!-- Forgot Password Container -->
-				<div id="forgot-container">
-					 <h1>Recover password</h1>
-					 
-					 <form id="forgot">
-						  <input type="email" id="forgot_email" name="forgot_email" placeholder="E-mail">
-						  <button type="submit" class="orange-btn" onclick="pw ()">Get new password</button>
-					 </form>
-				</div>
-				
+		  <div class="credits">
+				<!-- All the links in the footer should remain intact. -->
+				<!-- You can delete the links only if you purchased the pro version. -->
+				<!-- Licensing information: https://bootstrapmade.com/license/ -->
+				<!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
+				Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
 		  </div>
-		  
-		  </section>
-		  
-		  <?php
-		  
-		  echo $this->Html->script (['aos',
-											  'bootstrap.bundle',
-											  'glightbox',
-											  'isotope.pkgd',
-											  'typed',
-											  'noframework.waypoints',
-											  'validate',
-											  'main']);
-		  
-		  ?>
-		  
-		  <footer id="login-footer" class="login-footer">
-				<div class="container">
-					 <div class="copyright">
-					 </div>
-				</div>
-		  </footer>
-	 </body>
-	 
+	 </footer> <!-- End Footer -->
+
+  </main> <!-- End #main -->
+ 
+  
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+
+  <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+</body>
+
 </html>
-
-<script>
- 
- function login () {
-
-	  if ($('#uname').val ().length == 0) {
-
-			alert ('<?= __ ('Email required')?>');
-			return;
-	  }
-	  else if ($('#passwd').val ().length == 0) {
-			alert ('<?= __ ('Password required')?>');
-			return;
-	  }
-	  
-	  $('#login_form').submit ();
- }
-
- function pw () {
-
-	  $.each ()
-	  if ($('#forgot_email').val ().length == 0) {
-
-			alert ('<?= __ ('Email required')?>');
-			return;
-	  }
-	  
-	  $('#pw').submit ();
- }
-
- $(document).ready (function  () {
-	  
-	  $("#container").fadeIn ();
-	  TweenMax.from ("#container", .4, { scale: 0, ease:Sine.easeInOut});
-	  TweenMax.to ("#container", .4, { scale: 1, ease:Sine.easeInOut});
-	  
-	  /* Forgot password */
-	  
-	  $('#forgot').click (function () {
-			
-			$("#container").fadeOut (function () {
-				 
-				 $("#forgot-container").fadeIn ();
-			});
-	  });
-	  
-	  $('#register_form_submit').on ('click', function (e) {
-
-			let valid = true;
-			/* $('#register_form :input:visible[required="required"]').each (function () {
-				
-				if (!this.validity.valid) {
-
-				this.reportValidity ();
-				valid = false;
-				}
-				});
-
-				if (!valid) {
-
-				return;
-				}*/
-			
-			e.preventDefault ();
-			console.log ("get started submit...")
-
-			$.ajax ({type: "POST",
-						url: '/register',
-						data: $('#register_form').serialize (),
-						success: function (data) {
-
-							 data = JSON.parse (data);
-							 console.log (data);
-
-							 switch (data ['status']) {
-
-								  case 0:
-										
-										$('#register-container').fadeOut ("slow",function () {
-											 
-											 $("#container").fadeIn ();
-											 TweenMax.from ("#container", .4, { scale: 0, ease:Sine.easeInOut});
-											 TweenMax.to ("#container", .4, { scale: 1, ease:Sine.easeInOut});
-										});
-										
-										alert (data ['status_text']);
-										
-										break;
-
-								  default:
-
-										alert (data ['status_text']);
-							 }
-						},
-						fail: function () {
-							 
-							 console.log ('fail...');
-						},
-						always: function () {
-							 
-							 console.log ('always...');
-						}
-			});
-	  });
-	  
-	  $('#login-footer').click (function () {
-			
-			$('#fname').val ('Quentin')
-			$('#lname').val ('Olson')
-			$('#bname').val ('multiPOS LLC')
-			$('#email').val ('qolson@posappliance.com')
-			$('#passwd1').val ('zzzzz')
-			$('#passwd2').val ('zzzzz')
-	  });
- });
- 
-</script>

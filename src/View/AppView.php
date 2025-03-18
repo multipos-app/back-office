@@ -39,9 +39,7 @@ class AppView extends View
 
     private $fields;
 
-    public function initialize(): void {
-
-    }
+    public function initialize(): void { }
 
 	 // public function input ($id, $val, $icon, $class, $click, $placeholder) {
         
@@ -94,4 +92,5 @@ class AppView extends View
             $this->log ("log type unkown... " . gettype ($obj));
         }
     }
+
 }

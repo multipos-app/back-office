@@ -57,24 +57,8 @@ class SuppliersController extends PosAppController {
             $supplier ['phone1'] = $this->phoneFormat ($supplier ['phone1']);
             $suppliers [] = $supplier;
         }
-        
-        switch ($this->merchant ['role']) {
-					 
-				case 'pos':
-					 
-					 $this->viewBuilder ()->setLayout ('pos_web');
-					 $this->render ('pos_index');
-					 break;
-					 
-				default:
-					 
-					 return ($this->response (__ ('Suppliers'),
-													  'Suppliers',
-													  'index',
-													  compact ('suppliers')));
-					 
-					 break;
-        }
+
+		  $this->set (['suppliers' => $suppliers]);
     }
 	 
     public function edit ($id = 0) {

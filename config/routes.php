@@ -44,7 +44,7 @@ return static function (RouteBuilder $routes) {
      */
     $routes->setRouteClass(DashedRoute::class);
 
-    $routes->scope('/', function (RouteBuilder $builder) {
+    $routes->scope ('/', function (RouteBuilder $builder) {
 
         /*
          * Here, we are connecting '/' (base path) to a controller called 'Pages',
@@ -53,17 +53,13 @@ return static function (RouteBuilder $routes) {
          */
         // $builder->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
         
-        $builder->connect('/', ['controller' => 'Merchants', 'action' => 'index', 'home']);
+        $builder->connect('/', ['controller' => 'User', 'action' => 'index', 'home']);
+        $builder->connect('/bad-login', ['controller' => 'User', 'action' => 'bad-login', 'home']);
 
         /*
          * ...and connect the rest of 'Pages' controller's URLs.
          */
         $builder->connect('/pages/*', 'Pages::display');
-		  
-        $builder->connect('/clips/*', 'Pages::display');
-		  
-        $builder->connect('/.env/*', ['controller' => 'Dump', 'action' => 'index', 'home']);
-        $builder->connect('/.git/*', ['controller' => 'Dump', 'action' => 'index', 'home']);
 
         /*
          * Connect catchall routes for all controllers.

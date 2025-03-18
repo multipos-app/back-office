@@ -1,216 +1,222 @@
 
-<style>
- 
-.controls-grid {
+<nav>
+	 <ol class="breadcrumb">
+		  <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+		  <li class="breadcrumb-item active">POS Configs</li>
+	 </ol>
+</nav>
+<table class="table table-hover">
+	 <thead align="center">
+		  <tr>
+				<th align="left"><?= __ ('Description') ?></th>
+				<th><?= __ ('Menus') ?></th>
+				<th><?= __ ('Settings') ?></th>
+				<th><?= __ ('Download') ?></th>
+				<th><?= __ ('Upload') ?></th>
+				<th><?= __ ('Clone') ?></th>
+				<th><?= __ ('Delete') ?></th>
+		  </tr>
+	 </thead>
 	 
-    width: 100%;
-    grid-template-rows: auto;
-    grid-template-columns: 120px repeat(5, 2fr);
-	 grid-column-gap: 10px;
-	 margin-top: 25px;
- }
+	 <tbody>
 
- .configs-grid {
+		  <?php
 
-     display: grid;
-     width: 100%;
-     grid-template-rows: auto;
-     grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
-	  grid-row-gap: 0px;
-	  grid-column-gap: 0px;
-	  margin-top: 25px;
- }
- 
- .config-templates-grid {
+		  $i = 0;
+		  foreach ($configs as $config) {
 
-     display: grid;
-     width: 100%;
-     grid-template-rows: auto;
-     grid-template-columns: 2fr 2fr 1fr;
-	  grid-row-gap: 10px;
-	  grid-column-gap: 10px;
-	  margin-top: 25px;
- }
+		  ?>
 
- 
-</style>
+				<tr>
+					 <td align="left">
+						  <?= $config ['config_desc'] ?>
+					 </td>
+					 <td align="center">
+						  <a href="/menus/menu/<?= $config ['id'] ?>">
+								<i class="bx bx-menu icon-lg"></i>
+						  </a>
+					 </td>
+					 </td>
+					 <td align="center">
+						  <div class="icon">
+								<a href="#"><i class="bx bxs-wrench icon-lg"></i></a>
+								<!-- <a href="/pos-configs/settings"><i class="bx bxs-wrench icon-lg"></i></a> -->
+						  </div>
+					 </td>
+					 <td align="center">
+						  <div class="icon">
+								<a href="/pos-configs/download/<?= $config ['id']?>"><i class="bx bx-cloud-download icon-lg"></i></a>
+						  </div>
+					 </td>
+					 <td align="center">
+						  <div class="icon" data-bs-toggle="modal" data-bs-target="#upload_modal">
+								<!-- <i class="bx bx-cloud-upload icon-lg"></i> -->
+								<i class="bx bx-cloud-upload icon-lg" onclick="setConfig ('upload', <?= $config ['id']?>)"></i>
+						  </div>
+					 </td>
+					 <td align="center">
+						  <div class="icon">
+						  <div class="icon" data-bs-toggle="modal" data-bs-target="#clone_modal">
+								<i class="bx bx-copy icon-lg" onclick="setConfig ('clone', <?= $config ['id']?>)"></i>
+						  </div>
+					 </td>
+					 <td align="center">
+						  <div class="icon">
+								<i class="bx bxs-trash icon-lg"></i>
+						  </div>
+					 </td>
+				</tr>
+		  <?php
+		  }
+		  ?>
+	 </tbody>
+</table>
 
-<div class="form-grid controls-grid">
+<div class="modal fade" id="upload_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+					 <div id="modal_header"><?= __ ('Upload file') ?></div>
+					 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div id="modal_content" class="modal-body">
+					 
+					 <form id="upload_form" enctype="multipart/form-data" method="post" accept-charset="utf-8" class="row g-3" method="post" action="/pos-configs/upload">
+						  
+						  <input type="hidden" id="upload_pos_config_id" name="upload_pos_config_id" value="0">
+						  	  
+						  <div class="row mb-3">
+								<label for="inputNumber" class="col-sm-4 col-form-label">File Upload</label>
+								<div class="col-sm-8">
+									 <input type="file" id="upload_file" name="upload_file">
+								</div>
+						  </div>
+						  
+						  <div class="row g-3">
+								<div class="col-12 text-center">
+									 <button type="submit" id="import_button" class="btn btn-primary" onclick="upload ()"><?= __ ('Upload/Import') ?></button>
+								</div>
+						  </div>
+						  
+					 </form>
 
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
-	 </div>
-	 
+				</div>
+		  </div>
+    </div>
 </div>
 
-<div class="configs-grid">
-
-	 <div class="grid-cell grid-cell-left grid-cell-separator"><?= __ ('Description') ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Menus') ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Settings') ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Download') ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Upload') ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Clone') ?></div>
-	 <div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Delete') ?></div>
-
-	 <?php
-
-	 $i = 0;
-	 foreach ($configs as $config) {
-	 ?>
-
-		  <div class="grid-cell grid-cell-left grid-cell-fa">
-
-				<a onclick="controller ('menus/all/<?= $config ['id']?>', false)"> <?= $config ['config_desc'] ?></a>
-
-		  </div>
-		  
-		  <div class="grid-cell grid-cell-center">
-				
-				<a onclick="controller ('menus/index/<?= $config ['id']?>', false)"><i class="far fa-grid fa-large action_icon"></i></a>
-
-				<?php
-				// this->Form->select ('menus', $menus, ['id' => 'menu_' . $config ['id'], 'class' => 'custom-dropdown', 'onchange' => 'menu (' . $config ['id'] . ')', 'label' => false]);
-				?>
-				
-		  </div>
-		  
-		  <div class="grid-cell grid-cell-center">
-				<a onclick="controller ('pos-configs/settings/<?= $config ['id']?>', false)"><i class="far fa-tools fa-large action_icon"></i></a>
-		  </div>
-		  		  
-		  <div class="grid-cell grid-cell-center">
-				<a href=/pos-configs/download/<?= $config ['id'] ?>><i class="far fa-cloud-download fa-large action_icon"></i></a>
-		  </div>
-		  
-		  <div class="grid-cell grid-cell-center">
-				
-				<div class="grid-cell grid-cell-center">
-					 <a onclick="upload (<?= $config ['id'] ?>)"><i class="far fa-cloud-upload fa-large action_icons"></i></a>
+<div class="modal fade" id="clone_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+					 <div id="modal_header"><?= __ ('Clone configuration') ?></div>
+					 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
-				
-		  </div>
+				<div id="modal_content" class="modal-body">
+					 
+					 <form id="clone_form" enctype="multipart/form-data" method="post" accept-charset="utf-8" class="row g-3" method="post" action="/pos-configs/upload">
+						  
+						  <input type="hidden" id="clone_pos_config_id" name="clone_pos_config_id" value="0">
 
-		  <div class="grid-cell grid-cell-center">
-				
-				<div class="grid-cell grid-cell-center">
-					 <a onclick="clone (<?= $config ['id'] ?>)"><i class="far fa-clone fa-large action_icons"></i></a>
+						  <div class="row mb-3">
+
+								<div class="col-12">
+									 <label for="sku" class="form-label">Configuration description</label>
+									 <?= $this->input ('fa-text-size',
+															 ['id' => 'config_desc',
+															  'name' =>'config_desc',
+															  'value' => '',
+															  'class' => 'form-control'])
+									 ?>
+								</div>
+						  </div>
+						  
+						  <div class="row g-3">
+								<div class="col-12 text-center">
+									 <button type="submit" id="import_button" class="btn btn-primary" onclick="clone ()"><?= __ ('Clone') ?></button>
+								</div>
+						  </div>
+						  
+					 </form>
+
 				</div>
-				
 		  </div>
-		  
-		  <div class="grid-cell grid-cell-center">
-				<a onclick="deleteConfig (<?= $config ['id'] ?>, '<?= $config ['config_desc'] ?>')"><i class="far fa-trash fa-large action_icon"></i></a>
-		  </div>
-		  
-	 <?php
-	 }
-	 ?>
-
-</div>
-
-<div class="form-grid config-templates-grid">
-	 	 
-	 <div class="grid-cell grid-cell-left">
-		  
-		  <?= $this->Form->select ('config_id', $templates, ['id' => 'config_id', 'class' => 'custom-dropdown', 'label' => false, 'placeholder' => __ ('Configuration Name')]) ?>
-		  
-	 </div>
-	 
-	 <div class="grid-cell grid-cell-left">
-		  <input type="text" id="config_desc" placeholder="Description" class="form-control"/>
-	 </div>
-	 
-	 <div class="grid-cell grid-cell-left">		  
-		  <button type="submit" id="add_config" class="btn btn-primary btn-block control-button"><?= __ ('Add configuration') ?></button>
-	 </div>
-	 
+    </div>
 </div>
 
 <script>
 
- function menu (configID) {
+ /**
+  *
+  * set hidden input pos_config_id so it will be included in the form
+  *
+  **/
+ 
+ function setConfig (action, id) {
+
+	  let configID = '#' + action + '_pos_config_id';
 	  
-	  controller ('pos-configs/menus/' + configID + '/' + $('#menu_' + configID).val (), false);	  
-	  $('#menu_' + configID).val ('');
+	  console.log ('set config id.. ' + configID);
+	  
+	  $(configID).val (id);
  }
-  
- function configEdit (e, id) {
+ 
+  function getFile (file) {
 	  
-	  window.window.location.href = '<?= $this->request->getAttribute ('webroot'); ?>pos-configs/' + $(e).val () + '/' + id;
- }
-
- function getFile (input, configID) {
-	  
-	  var file = input.files [0];
-
-	  console.log ('upload... ' + file.name + ' ' + configID);
-	  
-	  $('#file_name').html (file.name);
- 	  $('#import-button').removeClass ('btn-secondary');
- 	  $('#import-button').addClass ('btn-success');
- }
-
- function upload (configID) {
-
-	  console.log ('upload... ' + configID);
-	  controller ('/pos-configs/upload/' + configID, true);
+     var file = file.files [0];  
+     $('#file_name').val (file.name);
+ 	  $('#import_button').removeClass ('btn-secondary');
+ 	  $('#import_button').addClass ('btn-success');
  }
 
-  function deleteConfig (configID, configDesc) {
+ function upload () {
+	  
+	  $('#upload_form').submit (function (e) {
+			
+			$.ajax ({url: '/pos-configs/upload/',
+						type: 'POST',
+						data: new FormData (this),
+						processData: false,
+						contentType: false,
+						success: function (data) {
 
-		console.log ('delete... ' + configID + ' ' + configDesc);
+							 data = JSON.parse (data);
+							 if (data.status != 0) {
 
-		if (confirm ('<?= __ ('Delete POS configuration ')?>' + configDesc + '<?= __ ('?')?>')) {
-			 
-			 console.log ('deleting... ' + configID);
-			 
-			 let url = '/pos-configs/delete-config/' + configID;
-			 
-			 $.ajax ({type: "GET",
-						 url: url,
-						 success: function (data) {
-							  
-							  console.log ('success...');
-							  controller ('pos-configs', false);
-						 },
-						 fail: function () {
-							  
-							  console.log ('fail...');
-						 },
-						 always: function () {
-							  
-							  console.log ('always...');
-						 }
-			 });
-		}
-  }
-
- $('#add_config').on ('click', function (e) {
-
-     e.preventDefault ();
-	  console.log ($('#config_id').val () + " " + $('#config_desc').val ());
-
-	  let url = '/pos-configs/add-config/' + $('#config_id').val () + "/" + $('#config_desc').val ();
-
-	  $.ajax ({type: "GET",
-				  url: url,
-				  success: function (data) {
-
-						console.log ('success...');
-						controller ('pos-configs', false);
-				  },
-				  fail: function () {
-
-						console.log ('fail...');
-				  },
-				  always: function () {
-
-						console.log ('always...');
-				  }
+								  alert (data.status_text);
+							 }
+							 
+							 window.location = '/pos-configs/index';
+						}
+			});
+			
+			e.preventDefault ();
 	  });
- });
+ }
+ 
+  function clone () {
 	  
+	  $('#clone_form').submit (function (e) {
+			
+			$.ajax ({url: '/pos-configs/clone/',
+						type: 'POST',
+						data: new FormData (this),
+						processData: false,
+						contentType: false,
+						success: function (data) {
+
+							 data = JSON.parse (data);
+							 if (data.status != 0) {
+
+								  alert (data.status_text);
+							 }
+							 
+							 window.location = '/pos-configs/index';
+						}
+			});
+			
+			e.preventDefault ();
+	  });
+ }
+ 
 </script>
