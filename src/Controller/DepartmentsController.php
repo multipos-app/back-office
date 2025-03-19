@@ -106,9 +106,6 @@ class DepartmentsController extends PosAppController {
     
     private function update ($id, $department, $departmentsTable) {
 
-		  $this->debug ("department update... $id");
-		  $this->debug ($department);
-		  
         $department ['department_desc'] = strtoupper ($department ['department_desc']);
         
         if ($id == 0) {

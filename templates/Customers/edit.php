@@ -53,7 +53,7 @@
 				$this->Form->input ('phone', 
 										  ['id' => 'phone', 
 											'value' => $customer ['phone'], 
-											'class' => 'form-control', 
+											'class' => 'form-control phone-format', 
 											'label' => false, 
 											'required' => 'required']) ?>
 		  </div>
@@ -67,7 +67,7 @@
 				$this->Form->input ('addr_1', 
 										  ['id' => 'addr_1', 
 											'value' => $customer ['addr_1'], 
-											'class' => 'form-control phone-format', 
+											'class' => 'form-control', 
 											'label' => false,
 											'required' => 'required']) ?>
 		  </div>

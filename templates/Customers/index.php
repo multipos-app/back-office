@@ -2,7 +2,6 @@
 <table class="table table-hover">
 	 <thead>
 		  <tr>
-				<th></th>
 				<th><?= $this->Paginator->sort ('email', __ ('Email')) ?></th>
 				<th><?= $this->Paginator->sort ('lname', __ ('Name')) ?></th>
 				<th><?= __ ('Phone') ?></th>
@@ -20,16 +19,17 @@
 	 <?php
 	 
 	 foreach  ($customers as $customer) {
+
+		  $role = ' role="button" data-bs-toggle="modal" data-bs-target="#customer_modal" onclick="edit (' . $customer ['id'] . ')"';
 	 ?>
-		  <tr role="button" data-bs-toggle="modal" data-bs-target="#customer_modal" onclick="edit (<?= $customer ['id'] ?>)">				
-				<td id="tag_<?= $customer ['id'] ?>"></td>	
-				<td><?= $customer ['email'] ?></td>
-				<td><?= $customer ['fname'] . ' ' . $customer ['lname'] ?></td>
-				<td><?= $customer ['phone'] ?></td>
+		  <tr>				
+				<td<?= $role ?>><?= $customer ['email'] ?></td>
+				<td<?= $role ?>><?= $customer ['fname'] . ' ' . $customer ['lname'] ?></td>
+				<td<?= $role ?>><?= $customer ['phone'] ?></td>
 				<td><?= $customer ['last_update'] ?></td>
-				<td><?= $customer ['total_visits'] ?></td>
-				<td><?= $customer ['total_sales'] ?></td>
-				<td><?php
+				<td align="right"><?= $customer ['total_visits'] ?></td>
+				<td align="right"><?= $customer ['total_sales'] ?></td>
+				<td align="right"><?php
 
 					 if ($customer ['total_visits'] > 0) {
 						  echo $customer ['total_sales'] / $customer ['total_visits'];
@@ -39,10 +39,10 @@
 					 }
 					 ?>
 				</td>
-				<td><?= $customer ['loyalty_points'] ?></td>
+				<td align="right"><?= $customer ['loyalty_points'] ?></td>
 
-				<td align="center">
-					 <i class="bx bx-link-external icon-lg" data-bs-toggle="modal" data-bs-target="#modal_search"></i>
+				<td align="right">
+					 <a href="/tickets/index/customer_id/<?= $customer ['id'] ?>" target="_blank?"<i class="bx bx-link-external icon-lg"></i></a>
 				</td>
 		  </tr>
 

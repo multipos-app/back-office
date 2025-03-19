@@ -78,14 +78,15 @@ for ($day = 0; $day < 7; $day ++) {
 
 									 // $utcHour = $hour - $this->tzOffset ($this->tz);
 										  
-									 $startTime = sprintf ("%s %02d:00:00", substr ($periods [$day] ['start'], 0, 10), $hour);
-									 $endTime = sprintf ("%s %02d:00:00", substr ($periods [$day] ['start'], 0, 10), $hour + 1);
-									 
-									 $link = "/tickets/index/start_hour/$startTime/end_hour/$endTime/business_unit_id/1";
-										  
-									 $this->debug ("val... $link");
-									 									 
-									 $html .= '<td align="right"><a href="' . $link . '">' . $this->moneyFormat ($report [$hour] [$day] ['amount']) . '</a></td>';
+									 /* $startTime = sprintf ("%s %02d:00:00", substr ($periods [$day] ['start'], 0, 10), $hour);
+										 $endTime = sprintf ("%s %02d:00:00", substr ($periods [$day] ['start'], 0, 10), $hour + 1);
+										 
+										 $link = "/tickets/index/start_hour/$startTime/end_hour/$endTime/business_unit_id/1";
+										 
+										 $this->debug ("val... $link");
+									 	 
+										 $html .= '<td align="right"><a href="' . $link . '">' . $this->moneyFormat ($report [$hour] [$day] ['amount']) . '</a></td>';*/
+									 $html .= '<td align="right" style="color:#000;font-weight:600;">' . $this->moneyFormat ($report [$hour] [$day] ['amount']) . '</td>';
 								}
 								else {
 

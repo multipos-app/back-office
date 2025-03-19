@@ -25,16 +25,16 @@ class CustomersController extends PosAppController {
     
     public $paginate = ['limit' => 25];
 
-    public function index (...$params) {
+    public function index (...$args) {
 
         $customers = [];
         $q = null;
         
-        if (count ($params) > 1) {                        
+        if (count ($args) > 1) {                        
             
             $q = TableRegistry::get ('Customers')
 										->find ()
-										->where (['id' => $params [1]]);
+										->where (['id' => $args [1]]);
         }
         else {
             
@@ -58,6 +58,13 @@ class CustomersController extends PosAppController {
 		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'states.php';
 
 		  $customer = null;
+        $customersTable = TableRegistry::get ('Customers');
+		  
+		  if (!empty ($this->request->getData ())) {
+
+				$this->update ($id, $this->request->getData (), $customersTable);
+				return $this->redirect ('/customers');
+		  }
 
         if ($id == 0) {
 
@@ -76,116 +83,63 @@ class CustomersController extends PosAppController {
         }
         else {
             
-            $customer = TableRegistry::get ('Customers')
-												 ->find ()
-												 ->where (['id' => $id])
-												 ->first ();
+            $customer = $customersTable->find ()
+													->where (['id' => $id])
+													->first ();
         }
 
-        $totals = [];
+		  $this->set (['customer' => $customer,
+							'states' => $states]);
+		  
+ 		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('Customers')
+								->setTemplate ('edit');
 
-        /* $som = $this->startOfMonth ();
-			* $soy = $this->startOfYear ();
-			*/       
-        $monthTotal = 0;
-        $yearTotal = 0;
-        
-        $ticketsTable = TableRegistry::get ('Tickets');
-
-        /* foreach ([$som, $soy] as $d) {
-			*     
-			*     $query = $ticketsTable
-			*            ->find ()
-			*            -> where (["customer_id" => $id,
-			*                       "complete_time > '$d'"]);
-
-			*     $total =$query->select (['sum' => $query->func ()->sum ('total')])->first ();
-			*     
-			*     if ($total ['sum'] != 0) {
-			*         
-			*         $totals [] = $total ['sum'];
-			*     }
-			*     else {
-			*         
-			*         $totals [] = 0;
-			*     }
-			* }*/
-
-        
-        switch ($this->merchant ['locale']) {
-					 
-				case 'da_DK':
-					 
-					 $this->render ('edit_dk');
-					 break;
-
-				default:
-					 
-					 // $customer ['phone'] = strlen ($customer ['phone']) == 9 ? $this->phoneFormat ($customer ['phone']) : '';
-        }
-
-
-		  $this->debug ($customer);
-        
-        return ($this->response (__ ($customer ['fname'] . ' ' . $customer ['lname']),
-                                 'Customers',
-                                 'edit',
-                                 compact ('customer',
-														'totals',
-														'states')));
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
     }
 
-    public function update ($id = 0) {
+    private function update ($id, $customer, $customersTable) {
 
         $status = -1;
-        
-        if (!empty ($this->request->getData ())) {
-
-				$this->debug ("update customer... $id");
-				$this->debug ($this->request->getData ());
-
-            $customer = false;
-            $customerTable = TableRegistry::get ('Customers');
-				
-            if ($id > 0) {
+      				
+        if ($id > 0) {
                 
-                $customer = $customerTable
-                          ->find ()
-                          ->where (['id' => $id])
-                          ->first ();
-                
-                if ($customer) {
-
-                    $customer ['fname'] = strtoupper ($this->request->getData () ['fname']);
-                    $customer ['lname'] = strtoupper ($this->request->getData () ['lname']);
-                    $customer ['email'] = $this->request->getData () ['email'];
-                    $customer ['phone'] = preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone']);
-                    $customer ['addr_1'] = strtoupper ($this->request->getData () ['addr_1']);
-                    $customer ['addr_2'] = strtoupper ($this->request->getData () ['addr_2']);
-                    $customer ['city'] = strtoupper ($this->request->getData () ['city']);
-                    $customer ['state'] = strtoupper ($this->request->getData () ['state']);
-                    $customer ['postal_code'] = $this->request->getData () ['postal_code'];
-                }
-            }
-            else {
-
-                $customer = $customerTable->newEntity (['fname' => strtoupper ($this->request->getData () ['fname']),
-                                                        'lname' => strtoupper ($this->request->getData () ['lname']),
-                                                        'email' => $this->request->getData () ['email'],
-                                                        'phone' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone']),
-                                                        'addr_1' => strtoupper ($this->request->getData () ['addr_1']),
-                                                        'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
-                                                        'city' => strtoupper ($this->request->getData () ['city']),
-                                                        'state' => strtoupper ($this->request->getData () ['state']),
-                                                        'postal_code' => $this->request->getData () ['postal_code']]);
-            }
+            $customer = $customersTable->find ()
+													->where (['id' => $id])
+													->first ();
             
-            $this->save ('Customers', $customer);
-        }
+            if ($customer) {
 
-		  $status = 0;
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
+                $customer ['fname'] = strtoupper ($this->request->getData () ['fname']);
+                $customer ['lname'] = strtoupper ($this->request->getData () ['lname']);
+                $customer ['email'] = strtolower ($this->request->getData () ['email']);
+                $customer ['phone'] = preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone']);
+                $customer ['addr_1'] = strtoupper ($this->request->getData () ['addr_1']);
+                $customer ['addr_2'] = strtoupper ($this->request->getData () ['addr_2']);
+                $customer ['city'] = strtoupper ($this->request->getData () ['city']);
+                $customer ['state'] = strtoupper ($this->request->getData () ['state']);
+                $customer ['postal_code'] = $this->request->getData () ['postal_code'];
+				}
+       }
+        else {
+
+            $customer = $customersTable->newEntity (['fname' => strtoupper ($this->request->getData () ['fname']),
+                                                     'lname' => strtoupper ($this->request->getData () ['lname']),
+                                                     'email' => strtolower ($this->request->getData () ['email']),
+                                                     'phone' => preg_replace ('/\(|\)|\s+|\-/', '', $this->request->getData () ['phone']),
+                                                     'addr_1' => strtoupper ($this->request->getData () ['addr_1']),
+                                                     'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
+                                                     'city' => strtoupper ($this->request->getData () ['city']),
+                                                     'state' => strtoupper ($this->request->getData () ['state']),
+                                                     'postal_code' => $this->request->getData () ['postal_code']]);
+        }
+        $this->save ('Customers', $customer);
     }
 
     public function delete ($id) {
