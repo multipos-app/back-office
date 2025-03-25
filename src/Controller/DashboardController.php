@@ -31,7 +31,7 @@ class DashboardController extends PeriodController {
     }
     
     function index (...$args) {
-
+		  
         $startDate = time ();
         $this->totals = [];
         $summaryType = 1;

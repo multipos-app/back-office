@@ -278,10 +278,6 @@ class CustomersController extends PosAppController {
 																					  'phone' => $customer ['phone'],
 																					  'guid' => $customer ['contactguid'],
 																					  'account_id' => $accountID ++]);
-										  
-										  // $response = $accounting->addAccount ($accountID ++, $customer ['name']);
-
-										  // $this->debug ($response);
 									 }
 									 else {
 										  

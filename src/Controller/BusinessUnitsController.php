@@ -77,8 +77,6 @@ class BusinessUnitsController extends PosAppController {
 				return $this->redirect ('/');
 		  }
 
-		  $this->debug ("bu edit... $id");
-
         require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'states.php';
 
         $businessUnitsTable = TableRegistry::get ('BusinessUnits');
@@ -391,7 +389,6 @@ class BusinessUnitsController extends PosAppController {
         
         if (!empty ($this->request->getData ())) {
 
-				$this->debug ($this->request->getData ());		
 				$this->loadComponent ('Batch');
             
             $batchID = $this->Batch->createBatch ($this->request->getData () ['batch_type'],
@@ -411,8 +408,6 @@ class BusinessUnitsController extends PosAppController {
 
         if (!empty ($this->request->getData ())) {
 				
-				$this->debug ($this->request->getData ());		
-
             $batchEntriesTable = TableRegistry::get ('BatchEntries');
             $batchesTable = TableRegistry::get ('Batches');
 				
@@ -464,7 +459,7 @@ class BusinessUnitsController extends PosAppController {
 		  $locations = [];
 		  
 		  foreach ($this->merchant ['business_units'] as $bu) {
-
+				
 				if ($bu ['business_type'] == BU_LOCATION) {
 
 					 $locations [] = $bu;
@@ -477,12 +472,15 @@ class BusinessUnitsController extends PosAppController {
 	 public function receipt ($buID) {
 
 		  $bu = null;
+		  $buIndex = 0;
+		  
 		  foreach ($this->merchant ['business_units'] as $bu) {
 
 				if ($bu ['id'] == $buID) {
 
 					 break;
 				}
+				$buIndex ++;
 		  }
 		  
 		  $receipt = ['receipt_header' => [["text" => "", "justify" => "center","font" => "bold","size" => "big","feed" => "0"]],
@@ -501,73 +499,59 @@ class BusinessUnitsController extends PosAppController {
 				}
 		  }
 		  
-        return $this->response (__ ('POS Receipt'),
-                                'BusinessUnits',
-                                'receipt',
-                                ['buID' => $buID,
-											'qrcode' => '',
-											'receipt' => $receipt],
-                                false);
+        $this->set (['buID' => $buID,
+							'buIndex' => $buIndex,
+							'qrcode' => '',
+							'receipt' => $receipt]);
 	 }
-
 	 
  	 /**
 	  *
 	  *
 	  */
 
-    public function updateReceipt ($buID) {
-
+    public function updateReceipt ($buID, $buIndex) {
+		  
 		  $receipts = ['receipt_header' => [],
 							'receipt_footer' => []];
+		  $status = 1;
 		  
         if (!empty ($this->request->getData ())) {
-
+				
 				foreach (['receipt_header', 'receipt_footer'] as $section) {
-
+					 
 					 $receipts [$section] = $this->request->getData () [$section];
 				}
-		  }
-		  
-		  $businessUnitsTable = TableRegistry::get ('BusinessUnits');
-		  $bu = $businessUnitsTable->find ()
-											->where (['id' => $buID])
-											->first ();
-		  
-		  $bu ['params'] = json_decode ($bu ['params'], true);
-		  
-		  foreach (['receipt_header', 'receipt_footer'] as $section) {
 				
-				if (isset ($receipts [$section])) {
+		  
+				$businessUnitsTable = TableRegistry::get ('BusinessUnits');
+				$bu = $businessUnitsTable->find ()
+												 ->where (['id' => $buID])
+												 ->first ();
+		  
+				$bu ['params'] = json_decode ($bu ['params'], true);
+		  
+				foreach (['receipt_header', 'receipt_footer'] as $section) {
+				
+					 if (isset ($receipts [$section])) {
 					 
-					 $this->merchant ['business_units'] [$buID] ['params'] [$section] = $receipts [$section];
+						  $this->merchant ['business_units'] [$buIndex] ['params'] [$section] = $receipts [$section];
+					 }
 				}
+				
+				// save it in the session
+		  
+				$session = $this->request->getSession ();
+				$session->write ('merchant', $this->merchant);
+		  
+				// save it in the db
+				
+				$bu ['params'] = json_encode ($this->merchant ['business_units'] [$buIndex] ['params']);
+				$this->save ('BusinessUnits', $bu);
+
+				$status = 0;
 		  }
 		  
-		  // save it in the session
-		  
-		  $session = $this->request->getSession ();
-		  $session->write ('merchant', $this->merchant);
-		  
-		  // save it in the db
-		  
-		  $bu ['params'] = json_encode ($this->merchant ['business_units'] [$buID] ['params']);
-		  $this->save ('BusinessUnits', $bu);
-		  
-		  $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => 0]);
-    }
-}
-
-function guid () {
-    
-    if (function_exists ('com_create_guid') === true) {
-        
-        return trim (com_create_guid (), '{}');
-    }
-    
-    $data = openssl_random_pseudo_bytes (16);
-    $data[6] = chr (ord ($data[6]) & 0x0f | 0x40); // set version to 0100
-    $data[8] = chr (ord ($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
-    return vsprintf ('%s%s-%s-%s-%s-%s%s%s', str_split (bin2hex ($data), 4));
+		  $this->ajax (['status' => $status]);
+	 }
 }

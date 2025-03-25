@@ -266,9 +266,7 @@ class SuppliersController extends PosAppController {
         if ($order) {
             
             if (!empty ($this->request->getData ())) {
-                
-                //$this->debug ($this->request->getData ());
-                
+                                
                 $orderTotal = 0;
                 $orderQuantity = 0;
                 
@@ -377,10 +375,6 @@ class SuppliersController extends PosAppController {
         
         if ($order) {
 
-            // $this->debug ("order... $orderID");
-            // $this->debug ($order);
-            //return $this->redirect (['controller' => 'suppliers', 'action' => 'orders/' . $order ['supplier_id']]);
-            
             $order ['order_date'] = $this->localDateTime (date ('Y-m-d H:i:s'), $this->dateFormat);
 
             $this->set ('order', $order );
@@ -627,9 +621,6 @@ class SuppliersController extends PosAppController {
 
     public function posPrintOrder ($orderID) {
 
-        // $this->debug ("pos print order... $orderID");
-        // $this->debug ($this->merchant);
-        
         $response = ['order_id' => $orderID,
                      'order_items' => []];
         
@@ -668,8 +659,6 @@ class SuppliersController extends PosAppController {
 										->first ();
         
         if ($order) {
-
-            // $this->debug ($order);
             
             $order ['supplier'] = TableRegistry::get ('Suppliers')
 															  ->find ()
@@ -699,8 +688,6 @@ class SuppliersController extends PosAppController {
 						  $order ['items'] = $this->orderItems ($order ['id']);
 						  
             }
-
-            // $this->debug ($order);
             
             return $order;
         }
@@ -750,12 +737,7 @@ class SuppliersController extends PosAppController {
                     
                     $onOrder = intVal (abs ($onHand - $item ['inv_items'] [0] ['on_hand_req']) / $item ['inv_items'] [0] ['package_quantity']);
                 }
-                
-                // $this->debug ('on hand... ' . $onHand . ' ' . $onOrder . ' ' . $item ['inv_items'] [0] ['package_quantity']);
-                
-                // $this->debug ("item... $onOrder");
-                // $this->debug ($item);
-                
+                               
                 if ($onOrder > 0) {
                     
                     // $item ['inv_items'] [0] ['order_quantity'] = $onOrder;
@@ -778,8 +760,6 @@ class SuppliersController extends PosAppController {
 								$salesItem ['quantity'] = 0;
                     }
                     
-                    $this->debug ("item sales... " . $item ['sku'] . ' ' . $salesItem ['quantity']);
-
                     $items [] = ['item_id' => $item ['id'],
 											'sku' => $item ['sku'],
 											'item_desc' => $item ['item_desc'],
@@ -798,8 +778,6 @@ class SuppliersController extends PosAppController {
     }
 
     private function orderItems ($orderID) {
-
-        $this->debug ("order items... $orderID");
         
         $items = [];
 
@@ -853,7 +831,6 @@ class SuppliersController extends PosAppController {
 
         $header .= ',max';
 
-        $this->debug ($header);
         $salesItems = TableRegistry::get ('SalesItemTotals')
 											  ->find ()
 											  ->where (["start_time > '$s'",
@@ -906,11 +883,9 @@ class SuppliersController extends PosAppController {
             }
             
             $q .= sprintf (",%d", $weekSales);
-            $this->debug ($q);
 
             $connection = ConnectionManager::get ('default');
             $update = "update inv_items set on_hand_req = $weekSales where item_id = (select id from items where sku ='$sku')";
-            $this->debug ($update);
             $connection->execute ($update);
         }
     }

@@ -95,9 +95,7 @@ class ItemsController extends PosAppController {
 					->join ($join)
                ->contain (['ItemPrices', 'InvItems']);
         }
-		  
-		  $this->debug ($join);
-		  
+		  		  
         $items = $this->paginate ($q);
 		  
         $departments = [null => __ ('Department')];
@@ -271,8 +269,6 @@ class ItemsController extends PosAppController {
 		  $itemPricesTable = TableRegistry::get ('ItemPrices');
 		  $invItemsTable = TableRegistry::get ('InvItems');
 		  $status = 1;
-
-		  $this->debug ($item);
 		  
 		  if ($id == 0) {
 				
@@ -488,9 +484,7 @@ class ItemsController extends PosAppController {
     public function disable ($id) {
         
         $status = 1;
-		  
-  		  $this->debug ("disable... $id");
-      
+		        
         if ($id > 0) {
 		
             TableRegistry::get ('Items')->updateAll (['enabled' => 0],

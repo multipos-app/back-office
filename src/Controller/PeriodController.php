@@ -37,6 +37,11 @@ class PeriodController extends PosAppController {
         $this->periods = [];
 		  $utcOffset = $this->tzOffset ($this->tz ());
 
+		  if (($this->merchant ['merchant_id'] == 8) && ($this->merchant ['timezone'] == 'America/New_York')) {
+
+				$utcOffset ++;
+		  }
+
         switch ($type) {
 
 				case 'weekly':
@@ -111,8 +116,6 @@ class PeriodController extends PosAppController {
 
 					 $session->delete ('periods');
 					 $session->delete ('curr_period');
-					 
-					 $this->debug ('clear session periods...');
 				}
 		  }
 		  $this->getPeriods ();

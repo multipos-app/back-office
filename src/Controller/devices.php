@@ -13,7 +13,7 @@ $devices = [
 			'options' =>
 				 ['generic' =>
 					  ['name' => 'generic',
-						'desc' => __ ('Android tablet')],
+						'desc' => __ ('Generic android tablet')],
 				  'elo_13' =>
 						['name' => 'elo_13',
 						 'desc' => __ ('ELO Paypoint 13 inch'),
@@ -32,6 +32,18 @@ $devices = [
 											'customer_display' => ['name' => '',
 																		  'desc' => __ (''),
 																		  'class' => 'cloud.multipos.pos.devices.EloCustomerDisplay']]],
+				  'e700' =>
+						['name' => 'e700',
+						 'desc' => __ ('PAX E700'),
+						 'devices' => ['receipt_printer' => ['name' => '',
+																		 'desc' => __ (''),
+																		 'class' => 'cloud.multipos.pos.devices.PaxE700Printer'],
+											'customer_display' => ['name' => '',
+																		  'desc' => __ (''),
+																		  'class' => 'cloud.multipos.pos.views.CustomerFacingDisplay'],
+											'payment' => ['name' => '',
+															  'desc' => __ (''),
+															  'class' => 'cloud.multipos.pos.devices.PaxPayment']]],
 				  'e800' =>
 						['name' => 'e800',
 						 'desc' => __ ('PAX E800'),

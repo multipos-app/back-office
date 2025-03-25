@@ -52,8 +52,6 @@ class DepartmentsController extends PosAppController {
 	 
     public function edit ($id) {
 		  
- 		  $this->debug ("department edit... $id");
-
         $department = null;
 		  $departmentsTable = TableRegistry::get ('Departments');
 		  
@@ -118,8 +116,6 @@ class DepartmentsController extends PosAppController {
 
 				$isNegative = isset ($department ['is_negative']) ? 1 : 0;
 				
-				$this->debug ("department is negative... $isNegative");
-
             $departmentsTable->updateAll (['department_desc' => strtoupper ($department ['department_desc']),
 														 'department_type' => intval ($department ['department_type']),
 														 'is_negative' => $isNegative],

@@ -1,10 +1,14 @@
 
-<nav>
-	 <ol class="breadcrumb">
-		  <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-		  <li class="breadcrumb-item active">POS Configs</li>
-	 </ol>
-</nav>
+
+<div class="row g-1 mt-3 mb-3">
+	 <div class="col-10"></div>
+	 <div class="col-2 d-grid text-center">
+		  <button id="templates" class="btn btn-primary"
+					 data-bs-toggle="modal" data-bs-target="#pos_config_modal"
+					 onclick="modal (0, 'templates')"><?= __ ('Add POS configuration') ?></button>
+	 </div>
+</div>
+
 <table class="table table-hover">
 	 <thead align="center">
 		  <tr>
@@ -39,30 +43,28 @@
 					 </td>
 					 <td align="center">
 						  <div class="icon">
-								<a href="#"><i class="bx bxs-wrench icon-lg"></i></a>
-								<!-- <a href="/pos-configs/settings"><i class="bx bxs-wrench icon-lg"></i></a> -->
+								<a data-bs-toggle="modal" data-bs-target="#pos_config_modal" onclick="modal (<?= $config ['id']?>, 'settings')"><i class="bx bxs-wrench icon-lg"></i></a>
 						  </div>
 					 </td>
 					 <td align="center">
 						  <div class="icon">
-								<a href="/pos-configs/download/<?= $config ['id']?>"><i class="bx bx-cloud-download icon-lg"></i></a>
+								<a href="/pos-configs/download/<?= $config ['id'] ?>"><i class="bx bx-cloud-download icon-lg"></i></a>
 						  </div>
 					 </td>
 					 <td align="center">
-						  <div class="icon" data-bs-toggle="modal" data-bs-target="#upload_modal">
-								<!-- <i class="bx bx-cloud-upload icon-lg"></i> -->
-								<i class="bx bx-cloud-upload icon-lg" onclick="setConfig ('upload', <?= $config ['id']?>)"></i>
-						  </div>
-					 </td>
-					 <td align="center">
-						  <div class="icon">
-						  <div class="icon" data-bs-toggle="modal" data-bs-target="#clone_modal">
-								<i class="bx bx-copy icon-lg" onclick="setConfig ('clone', <?= $config ['id']?>)"></i>
+						  <div class="icon" data-bs-toggle="modal" data-bs-target="#pos_config_modal">
+								<i class="bx bx-cloud-upload icon-lg" onclick="modal (<?= $config ['id']?>, 'upload')"></i>
 						  </div>
 					 </td>
 					 <td align="center">
 						  <div class="icon">
-								<i class="bx bxs-trash icon-lg"></i>
+						  <div class="icon" data-bs-toggle="modal" data-bs-target="#pos_config_modal">
+								<i class="bx bx-copy icon-lg" onclick="modal (<?= $config ['id']?>, 'clone')"></i>
+						  </div>
+					 </td>
+					 <td align="center">
+						  <div class="icon">
+								<i class="bx bxs-trash icon-lg" onclick="deleteConfig (<?= $config ['id']?>, '<?= $config ['config_desc']?>')"></i>
 						  </div>
 					 </td>
 				</tr>
@@ -72,74 +74,16 @@
 	 </tbody>
 </table>
 
-<div class="modal fade" id="upload_modal" tabindex="-1">
+<div class="modal fade" id="pos_config_modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-					 <div id="modal_header"><?= __ ('Upload file') ?></div>
+					 <div id="modal_header"></div>
 					 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
-				<div id="modal_content" class="modal-body">
-					 
-					 <form id="upload_form" enctype="multipart/form-data" method="post" accept-charset="utf-8" class="row g-3" method="post" action="/pos-configs/upload">
-						  
-						  <input type="hidden" id="upload_pos_config_id" name="upload_pos_config_id" value="0">
-						  	  
-						  <div class="row mb-3">
-								<label for="inputNumber" class="col-sm-4 col-form-label">File Upload</label>
-								<div class="col-sm-8">
-									 <input type="file" id="upload_file" name="upload_file">
-								</div>
-						  </div>
-						  
-						  <div class="row g-3">
-								<div class="col-12 text-center">
-									 <button type="submit" id="import_button" class="btn btn-primary" onclick="upload ()"><?= __ ('Upload/Import') ?></button>
-								</div>
-						  </div>
-						  
-					 </form>
-
-				</div>
-		  </div>
-    </div>
-</div>
-
-<div class="modal fade" id="clone_modal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-					 <div id="modal_header"><?= __ ('Clone configuration') ?></div>
-					 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div id="modal_content" class="modal-body">
-					 
-					 <form id="clone_form" enctype="multipart/form-data" method="post" accept-charset="utf-8" class="row g-3" method="post" action="/pos-configs/upload">
-						  
-						  <input type="hidden" id="clone_pos_config_id" name="clone_pos_config_id" value="0">
-
-						  <div class="row mb-3">
-
-								<div class="col-12">
-									 <label for="sku" class="form-label">Configuration description</label>
-									 <?= $this->input ('fa-text-size',
-															 ['id' => 'config_desc',
-															  'name' =>'config_desc',
-															  'value' => '',
-															  'class' => 'form-control'])
-									 ?>
-								</div>
-						  </div>
-						  
-						  <div class="row g-3">
-								<div class="col-12 text-center">
-									 <button type="submit" id="import_button" class="btn btn-primary" onclick="clone ()"><?= __ ('Clone') ?></button>
-								</div>
-						  </div>
-						  
-					 </form>
-
-				</div>
+				
+				<div id="pos_config_content" class="modal-body"></div>
+				
 		  </div>
     </div>
 </div>
@@ -168,55 +112,48 @@
  	  $('#import_button').removeClass ('btn-secondary');
  	  $('#import_button').addClass ('btn-success');
  }
-
- function upload () {
-	  
-	  $('#upload_form').submit (function (e) {
-			
-			$.ajax ({url: '/pos-configs/upload/',
-						type: 'POST',
-						data: new FormData (this),
-						processData: false,
-						contentType: false,
-						success: function (data) {
-
-							 data = JSON.parse (data);
-							 if (data.status != 0) {
-
-								  alert (data.status_text);
-							 }
-							 
-							 window.location = '/pos-configs/index';
-						}
-			});
-			
-			e.preventDefault ();
-	  });
- }
  
-  function clone () {
+  function modal (configID, action) {
+
+	  console.log (`modal... ${configID} ${action}`);
 	  
-	  $('#clone_form').submit (function (e) {
-			
-			$.ajax ({url: '/pos-configs/clone/',
-						type: 'POST',
-						data: new FormData (this),
-						processData: false,
-						contentType: false,
+	  $.ajax ({
+         url: `/pos-configs/${action}/` + configID,
+         type: 'GET',
+         success: function (data) {
+
+				 data = JSON.parse (data);				 
+				 $('#pos_config_content').html (data.html);
+         }
+     });
+  }
+
+ $('#templates').click (function () {
+
+	  $.ajax ({
+         url: '/pos-configs/templates',
+         type: 'GET',
+         success: function (data) {
+
+				 data = JSON.parse (data);				 
+				 $('#templates_content').html (data.html);
+         }
+     });
+ });
+
+function deleteConfig (id, desc) {
+
+	  if (confirm ('<?= __ ('Delete configuration ') ?>"' + desc + '"?')) {
+
+			$.ajax ({url: '/pos-configs/delete-config/' + id,
+						type: 'GET',
 						success: function (data) {
-
-							 data = JSON.parse (data);
-							 if (data.status != 0) {
-
-								  alert (data.status_text);
-							 }
 							 
-							 window.location = '/pos-configs/index';
+							 data = JSON.parse (data);
+							 window.location = '/pos-configs';
 						}
-			});
-			
-			e.preventDefault ();
-	  });
- }
+			});	
+	  }
+}
  
 </script>

@@ -25,13 +25,13 @@ require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 
 class PosConfigsController extends PosAppController {
 
-    private $configs;
-    private $templates;
+	 private $configs;
+	 private $templates;
 	 
-    public function initialize (): void {
-        
-        parent::initialize ();
-    }
+	 public function initialize (): void {
+		  
+		  parent::initialize ();
+	 }
 	 
 	 /**
 	  *
@@ -40,11 +40,11 @@ class PosConfigsController extends PosAppController {
 
 	 public function index (...$params) {
 		  
-        $this->initConfigs ();
-        $configs = $this->configs;
-        $templates = $this->templates;
+		  $this->initConfigs ();
+		  $configs = $this->configs;
+		  $templates = $this->templates;
 		  
-        $locations = [null => __ ('Select location')];
+		  $locations = [null => __ ('Select location')];
 		  
 		  foreach ($this->merchant ['business_units'] as $bu) {
 
@@ -56,128 +56,77 @@ class PosConfigsController extends PosAppController {
 
 		  
 		  $templates = [null => __ ('Add a POS configuration')];
-		  $tmp = $this->templates ();
 		  
-		  $configsDir = ROOT . DS . 'src' . DS  . 'Controller/configs';
-		  $configTemplates = scandir ($configsDir);
-
-		  foreach ($configTemplates as $template) {
-
-				if (strpos ($template, ".json")) {
-
-					 $config = file_get_contents ($configsDir . DS . $template);
-					 $config = json_decode ($config, true);
-					 $templates [$config ['id']] = $config ['desc'];
-				}
-		  }
-
 		  $this->set (['configs' => $configs,
-							'locations' => $locations,
-							'templates' => $templates]);
-    }
+							'locations' => $locations]);
+	 }
 
 	 /**
 	  *
 	  *
 	  */
 
-    private function initConfigs () {
-        
-        $posConfigsTable = TableRegistry::get ('PosConfigs');
-        
-        $this->configs = [];
-        $query = TableRegistry::get ('PosConfigs')->find ('all');
-        foreach ($query as $config) {
+	 private function initConfigs () {
+		  
+		  $posConfigsTable = TableRegistry::get ('PosConfigs');
+		  
+		  $this->configs = [];
+		  $query = TableRegistry::get ('PosConfigs')->find ('all');
+		  foreach ($query as $config) {
 
 				$config ['config'] = json_decode ($config ['config'], true);
 				unset ($config ['pos_config']);
 				$this->configs [] = $config;
-        }
-		  
-        $this->templates = [];
-        $query = TableRegistry::get ('PosConfigTemplates')->find ('all');
-        
-        foreach ($query as $configTemplate) {
-            
-            $this->templates [$configTemplate ['id']] = $configTemplate ['config_desc'];
-        }
-    }
-	 
- 	 /**
-	  *
-	  *
-	  */
-
-    public function selectMenus ($configID) {
-        
-        $posConfig = TableRegistry::get ('PosConfigs')
-											 ->find ()
-											 ->where (['id' => $configID])
-											 ->first ();
-
-        $posConfig ['config'] = json_decode ($posConfig ['config'], true);
-        $this->set ('posConfig', $posConfig);
-    }
-    
-	 /**
-	  *
-	  *
-	  */
-
-    public function addConfig ($configID, $configName) {
-
-        $this->debug ("add config... $configID, $configName");
-
-		  $posConfigsTable = TableRegistry::get ('PosConfigs');
-
-		  $configFile = ROOT . DS . 'src' . DS  . 'Controller/configs/' . $configID . '.json';
-		  $config = file_get_contents ($configFile);
-		  $config = json_decode ($config, true);
-		  
-		  if ($config) {
-				
-				$posConfig = ['config_desc' => strtoupper ($configName),
-								  'config' => json_encode ($config),
-								  'config_type' => 0];
-				
-				$posConfig = $posConfigsTable->newEntity ($posConfig);
-				$posConfigsTable->save ($posConfig);
-				$this->set ('response',  ['status' => 0]);
 		  }
 		  
-        return $this->index ();
-    }
-    
+		  $this->templates = [];
+		  $query = TableRegistry::get ('PosConfigTemplates')->find ('all');
+		  
+		  foreach ($query as $configTemplate) {
+				
+				$this->templates [$configTemplate ['id']] = $configTemplate ['config_desc'];
+		  }
+	 }
+	 	 
 	 /**
 	  *
 	  *
 	  */
 
-    public function settings ($id) {
+	 public function settings ($id) {
 
-		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'devices.php';
+		  require ROOT . DS . 'src' . DS  . 'Controller' . DS . 'devices.php';
 		  
-        $posConfigTable = TableRegistry::get ('PosConfigs');
-        $posConfig = $posConfigTable
-                   ->find ()
-                   ->where (['id' => $id])
-                   ->first ();
-        
-        if ($posConfig) {
+		  $posConfigsTable = TableRegistry::get ('PosConfigs');
 
-            $config = json_decode ($posConfig ['config'], true);
-            
-            $query = TableRegistry::get ('PosOptions')
+		  if (!empty ($this->request->getData ())) {
+				
+				$this->update ($id, $this->request->getData (), $posConfigsTable);
+				$this->ajax (['status' => 0]);
+				return;
+		  }
+		  else {
+				
+				$posConfig = $posConfigsTable->find ()
+													  ->where (['id' => intval ($id)])
+													  ->first ();
+				
+				// decode the current config
+				
+				$config = json_decode ($posConfig ['config'], true);
+							
+				$query = TableRegistry::get ('PosOptions')
 											 ->find ('all', ['fields' => ['key', 'type', 'default', 'name', 'description']]);
 
-				$settings = ['options' => [],
-								 'devices' => []];
+				$settings = ['posConfigID' => $id,
+								 'devices' => $devices,
+								 'options' => []];
 				
-            foreach ($query as $option) {
+				foreach ($query as $option) {
 
-                $option ['on'] = isset ($config [$option ['key']]) && $config [$option ['key']];
-                $settings ['options'] [] = $option->toArray ();
-            }
+					 $option ['on'] = isset ($config [$option ['key']]) && $config [$option ['key']];
+					 $settings ['options'] [] = $option->toArray ();
+				}
 
 				foreach ($devices as $name => $device) {
 					 
@@ -197,258 +146,34 @@ class PosConfigsController extends PosAppController {
 					 $settings ['devices'] [$name] ['selected'] = $device ['name'];
 				}
 				
-	         $posConfigID = $id;
-
-				$this->debug ($settings);
+				$this->set (['posConfigID' => $id,
+								 'settings' => $settings]);
 				
-            return ($this->response (__ ('POS Settings'),
-                                     'PosConfigs',
-                                     'settings',
-                                     compact ('posConfigID',
-															 'settings')));
-        }
-    }
-
-	 /**
-	  *
-	  *
-	  */
-
-    public function updateSettings () {
-        
-        if (!empty ($this->request->getData ())) {
-
-				require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'devices.php';
+ 				$builder = $this->viewBuilder ()
+									 ->setLayout ('ajax')
+									 ->disableAutoLayout ()
+									 ->setTemplatePath ('PosConfigs')
+									 ->setTemplate ('settings');
 				
-            $this->debug ('.....................................................................');
-				$this->debug ($this->request->getData ());
-				$this->debug ('.....................................................................');
+				$view = $builder->build ();
+				$html = $view->render ();
 				
-            $options = $this->request->getData () ['options'];
+				$this->ajax (['status' => 0,
+								  'html' => $html]);
 				
-            $posConfigTable = TableRegistry::get ('PosConfigs');
-            $posConfig = $posConfigTable
-                       ->find ()
-                       ->where (['id' => $this->request->getData () ['pos_config_id']])
-                       ->first ();
-            
-            $config = json_decode ($posConfig ['config'], true);
-				$config ['devices'] = [];
-
-				// handle built in devices
-				
-				$this->debug ($this->request->getData () ['devices'] ['pos']);
-				
-				if (isset ($this->request->getData () ['devices'] ['pos']) && (strlen ($this->request->getData () ['devices'] ['pos']) > 0)) {
-
-					 
-					 $this->debug ('pos...');
-					 $this->debug ($devices ['pos'] ['options'] [$this->request->getData () ['devices'] ['pos']] ['devices']);
-					 
-					 $config ['devices'] = $devices ['pos'] ['options'] [$this->request->getData () ['devices'] ['pos']] ['devices'];
-				}
-				
-				foreach ($this->request->getData () ['devices'] as $key => $val) {
-					 
-					 /* if ($val && !isset... (devices...)) {
-					  */
-					 $this->debug ('dev... ' . $key . ' '. $val);
-					 
-					 /* $this->debug ($devices [$key] ['options'] [$val]);*/
-					 
-					 /* $config ['devices'] [$key] = $devices [$key] ['options'] [$val];*/
-				}
-
-				/* $config ['devices'] [$key] = ['name' => $devices [$key] ['name'],
-					'class' => $devices [$key] ['class'],
-					'params' => $devices [$key] ['params']];
-				 */
-				
-				$this->debug ($config ['devices']);
-
-				$query = TableRegistry::get ('PosOptions')
-											 ->find ('all', ['fields' => ['key', 'type', 'default', 'name', 'description']]);
-				
-				foreach ($query as $option) {
-					 
-					 $val = false;
-					 if (isset ($options [$option ['key']])) {
-						  
-						  $val = true;
-					 }
-					 
-					 $config [$option ['key']] = $val;
-				}
-				
-				$posConfig ['config'] = json_encode ($config);
-				$this->save ('PosConfigs', $posConfig);
-				$this->notifyPOS ();
-				
-				$this->viewBuilder ()->setLayout ('ajax');
-				$this->set ('response', ['status' => 0]);
 		  }
-    }
-    
- 	 /**
-	  *
-	  *
-	  */
-
-    public function customerDisplay ($buID) {
-        
-        $cd = [];
-        $sections = ['left'];
-        
-        $businessUnitsTable = TableRegistry::get ('BusinessUnits');
-        $bu = $businessUnitsTable
-            ->find ()
-            ->where (['id' => $this->buMap [$this->buID] ['id']])
-            ->first ();
-
-        if ($bu) {
-
-            $params = json_decode ($bu ['params'], true);
-
-            foreach ($sections as $section) {
-
-                if (isset ($params ['cd_' . $section])) {
-                    
-                    $cd [$section] = $params ['cd_' . $section];
-                }
-                else {
-                    $cd [$section] = [];
-                }
-            }
-        }
-        else {
-            
-            // wha???
-
-            $this->redirect (['action' => 'index']);
-            return;
-        }
-        
-        if (!empty ($this->request->getData ())) {
-
-            $this->debug ($this->request->getData ());
-            
-            foreach ($sections as $section) {
-
-                if (isset ($this->request->getData () [$section])) {
-                    
-                    $this->buMap [$this->buID] ['params'] ["cd_" . $section] = $this->request->getData () [$section];
-                    $cd [$section] = $this->request->getData () [$section];
-                }
-            }
-				
-            $bu ['params'] = json_encode ($this->buMap [$this->buID] ['params']);
-            $this->save ('BusinessUnits', $bu);
-            $this->redirect (['action' => 'index']);
-        }
-        
-        $this->set ("cd", $cd);
-
-    }
-    
- 	 /**
-	  *
-	  *
-	  */
-
-    public function receipt ($buID) {
-
-		  $this->debug ("receipts... $buID");
-		  $bu = null;
-		  foreach ($this->merchant ['business_units'] as $bu) {
-
-				if ($bu ['id'] == $buID) {
-
-					 break;
-				}
-		  }
-		  
- 		  $this->debug ($bu);
-        $sections = ['receipt_header' => [], 'receipt_footer' => []];
-		  
-		  if ($bu ['params'] != null) {
-
-		  		if (isset ($bu ['params'] ['receipt_header'])) {
-
-					 $sections ['receipt_header'] = $bu ['params'] ['receipt_header'];
-				}
-				
-		  		if (isset ($bu ['params'] ['receipt_footer'])) {
-
-					 $sections ['receipt_footer'] = $bu ['params'] ['receipt_footer'];
-				}
-		  }
-
-		  
-        return $this->response (__ ('POS Receipt'),
-                                'PosConfigs',
-                                'receipt',
-                                ['buID' => $buID,
-											'qrcode' => '',
-											'receipt' => $sescions],
-                                false);
-    }
-    
-	 /**
-	  *
-	  *
-	  */
-
-    public function saveTemplate ($id) {
-
-    }
-    
-    
- 	 /**
-	  *
-	  *
-	  */
-
-    public function settingsRaw ($id) {
-
-        $editMenus = [];
-		  
-        $config = null;
-        $query = TableRegistry::get ('PosConfigs')
-										-> find ()
-										-> where (['id' => $id]);
-        
-        if ($config = $query->first ()) {
-            $this->set ('posConfig', $config);
-        }
-    }
-
-	 /**
-	  *
-	  *
-	  */
-
-    function getParam ($name, $config) {
-
-        if (isset ($config [$name]) && $config [$name]) {
-            return true;
-        }    
-        return false;
-    }
+	 }
 	 
- 	 /**
+	 /**
 	  *
+	  * upload a json configuration file and apply it to an existing configuration
 	  *
 	  */
 
-    public function upload () {
-
- 		  $this->debug ("upload... ");
-		  $this->debug ($this->request->getData ());
-		  $this->debug ($_FILES);
-
+	 public function upload ($id) {
+		  
 		  if (!empty ($this->request->getData ())) {
 				
-				$configID = $this->request->getData () ['upload_pos_config_id'];
 				$handle = fopen ($_FILES ['upload_file'] ['tmp_name'], "r");
 				
 				if ($handle) {
@@ -465,11 +190,11 @@ class PosConfigsController extends PosAppController {
 					 
 					 if (strlen ($json) > 0) {
 						  
-						  $posConfigTable = TableRegistry::get ('PosConfigs');
+						  $posConfigsTable = TableRegistry::get ('PosConfigs');
 						  
-						  $posConfig = $posConfigTable->find ()
-																->where (['id' => $configID])
-																->first ();
+						  $posConfig = $posConfigsTable->find ()
+																 ->where (['id' => $id])
+																 ->first ();
 						  $decode = json_decode ($json, true);
 
 						  if (!$decode) {
@@ -477,100 +202,252 @@ class PosConfigsController extends PosAppController {
 								return $this->ajax (['status' => 1,
 															'status_text' => 'invalid json file ' . $_FILES ['upload_file'] ['full_path']]);
 						  }
-						  						  
+						  
 						  if ($posConfig) {
 								
 								$posConfig ['config'] = preg_replace (['/ {2,}/', '/<!--.*?-->|\t|(?:\r?\n[ \t]*)+/s'], [' ', ''], $json);
 								$this->save ('PosConfigs', $posConfig);
-								$this->notifyPOS ();
 						  }
 					 }
 				}
 		  }
-
-		  return $this->ajax (['status' => 0]);
+		  		  
+		  $this->set (['posConfigID' => $id]);
+		  
+ 		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('PosConfigs')
+								->setTemplate ('upload');
+		  
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
 	 }
-	 
+
+	 /**
+	  *
+	  * create a copy of a configuration
+	  *
+	  */
+
+	 public function clone ($id) {
+		  
+		  if (!empty ($this->request->getData ())) {
+				
+				$posConfigsTable = TableRegistry::get ('PosConfigs');
+
+				$config = $posConfigsTable->find ()
+												  ->where (['id' => $id])
+												  ->first ();
+
+				unset ($config ['id']);
+				
+				$config = $posConfigsTable->newEntity ($config->toArray ());
+				$config ['config_desc'] = strtoupper ($this->request->getData () ['config_desc']);
+				$config ['create_time'] = time ();
+				$posConfigsTable->save ($config);
+		  }
+
+		  $this->set (['posConfigID' => $id]);
+		  
+ 		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('PosConfigs')
+								->setTemplate ('clone');
+		  
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
+	 }
+
+	 /**
+	  *
+	  * settings update
+	  *
+	  */
+
+	 private function update ($id, $settings, $posConfigsTable) {
+		  		  
+		  require ROOT . DS . 'src' . DS  . 'Controller' . DS . 'devices.php';
+
+		  $options = $settings ['options'];
+		  $posConfigsTable = TableRegistry::get ('PosConfigs');
+		  $posConfig = $posConfigsTable
+                       ->find ()
+                       ->where (['id' => $settings ['pos_config_id']])
+                       ->first ();
+		  
+		  $config = json_decode ($posConfig ['config'], true);
+		  $config ['devices'] = [];
+
+		  // handle devices
+
+		  foreach ($devices as $deviceType => $device) {
+
+				if (strlen ($settings ['devices'] [$deviceType]) > 0) {
+
+					 $config ['devices'] [$deviceType] = $device ['options'] [$settings ['devices'] [$deviceType]];
+				}
+					 
+		  }
+		  		  
+		  foreach ($settings ['options'] as $key => $val) {
+				
+				$config [$key] = $val == 'on' ? true : false;
+		  }
+		  
+		  $posConfig ['config'] = json_encode ($config);
+		  $this->save ('PosConfigs', $posConfig);
+	 }
+
 	 /**
 	  *
 	  *
 	  */
 
-    public function download ($id) {
-        
-        $exportDir = $this->request->getAttribute ('webroot') . 'exports';
+	 public function customerDisplay ($buID) {
+		  
+		  $cd = [];
+		  $sections = ['left'];
+		  
+		  $businessUnitsTable = TableRegistry::get ('BusinessUnits');
+		  $bu = $businessUnitsTable
+            ->find ()
+            ->where (['id' => $this->buMap [$this->buID] ['id']])
+            ->first ();
 
-        $query = TableRegistry::get ('PosConfigs')
+		  if ($bu) {
+
+				$params = json_decode ($bu ['params'], true);
+
+				foreach ($sections as $section) {
+
+					 if (isset ($params ['cd_' . $section])) {
+						  
+						  $cd [$section] = $params ['cd_' . $section];
+					 }
+					 else {
+						  $cd [$section] = [];
+					 }
+				}
+		  }
+		  else {
+				
+				// wha???
+
+				$this->redirect (['action' => 'index']);
+				return;
+		  }
+		  
+		  if (!empty ($this->request->getData ())) {
+				
+				foreach ($sections as $section) {
+
+					 if (isset ($this->request->getData () [$section])) {
+						  
+						  $this->buMap [$this->buID] ['params'] ["cd_" . $section] = $this->request->getData () [$section];
+						  $cd [$section] = $this->request->getData () [$section];
+					 }
+				}
+				
+				$bu ['params'] = json_encode ($this->buMap [$this->buID] ['params']);
+				$this->save ('BusinessUnits', $bu);
+				$this->redirect (['action' => 'index']);
+		  }
+		  
+		  $this->set ("cd", $cd);
+	 }
+
+
+	 /**
+	  *
+	  *
+	  */
+
+	 public function download ($id) {
+		  
+		  $exportDir = $this->request->getAttribute ('webroot') . 'exports';
+
+		  $query = TableRegistry::get ('PosConfigs')
 										->find ()
 										->where (['id' => $id]);
 
-        $fname = 'pos-config-' . $id . '.json';
+		  $fname = 'pos-config-' . $id . '.json';
 		  $download = getcwd () . "/exports/$fname";
-
-		  $this->debug ('download... ' . $fname . ' ' . $download);
 		  
-        if ($config = $query->first ()) {
+		  if ($config = $query->first ()) {
 				
-            $json = json_encode (json_decode ($config ['config'], true), JSON_PRETTY_PRINT);    
-            file_put_contents ($download, $json);
-        }
+				$json = json_encode (json_decode ($config ['config'], true), JSON_PRETTY_PRINT);    
+				file_put_contents ($download, $json);
+		  }
 
 		  return $this->response->withFile ($download, ['download' => true,
 																		'name' => $fname]);
-    }
-	 
- 	 /**
-	  *
-	  *
-	  */
+	 }
 
-    public function clone () {
-		  
+	 public function templates () {
+
 		  if (!empty ($this->request->getData ())) {
-
-				$this->debug ($this->request->getData ());
-
-				$id = $this->request->getData () ['clone_pos_config_id'];
+				
+				$file = ROOT . DS . 'src' . DS  . 'Controller/configs/' . $this->request->getData () ['json_file'];
+				$desc = $this->request->getData () ['desc'];
+				$config = file_get_contents ($file);
+				
 				$posConfigsTable = TableRegistry::get ('PosConfigs');
+				$posConfig = $posConfigsTable->newEntity (['config_desc' => strtoupper ($desc),
+																		 'config' => $config,
+																		 'config_type' => 1]);
+				$posConfigsTable->save ($posConfig);
+				
+				return $this->ajax (['status' => 0]);
+		  }
+		  
+		  $templates = [];
+		  
+		  $configsDir = ROOT . DS . 'src' . DS  . 'Controller/configs';
+		  $configTemplates = scandir ($configsDir);
 
-				if ($id > 0) {
-					 
-					 $config = $posConfigsTable->find ()
-													  ->where (['id' => $id])
-													  ->first ();
+		  foreach ($configTemplates as $template) {
 
-					 $config = $posConfigsTable->newEntity ($config->toArray ());
-					 $config ['config_desc'] = $this->request->getData () ['config_desc'];
-					 $config ['create_time'] = time ();
-					 $posConfigsTable->save ($config);
+				if (str_ends_with ($template, ".json")) {
+
+					 $config = file_get_contents ($configsDir . DS . $template);
+					 $config = json_decode ($config, true);
+					 $templates [] = ['json_file' => $template,
+											'desc' => $config ['desc'],
+											'layout' => $config ['root_layout']];
 				}
 		  }
-		  return $this->ajax (['status' => 0]);
+
+		  $this->set (['templates' => $templates]);
+		  
+		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('PosConfigs')
+								->setTemplate ('templates');
+		  
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'html' => $html]);
 	 }
-	 
- 	 /**
+
+	 /**
 	  *
 	  *
 	  */
 
-    public function deleteConfig ($id) {
-
-		  $this->debug ("delete config... $id");
+	 public function deleteConfig ($id) {
 		  
-		  TableRegistry::get ('PosConfigs')->deleteAll (['id' => $id]);
-		  
-		  return $this->index ();
-	 }
-	 
-	 private function templates () {
-
-		  $jsonConfigs = file_get_contents (ROOT . DS . 'src' . DS  . 'Controller' . DS . 'configs.json');
-		  if ($jsonConfigs) {
-
-				$tmp = json_decode ($jsonConfigs, true);
-				return $tmp;
-		  }
-		  
-		  return [];
+		  TableRegistry::get ('PosConfigs')->deleteAll (['id' => $id]);		  
+		  return $this->ajax (['status' => 0]);
 	 }
 }

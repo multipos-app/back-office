@@ -22,38 +22,6 @@ if ($numButtons > 30) {
 
 $rootLayout = '';
 
-/**
- *
- * these must match the layout in the android app/src/main/res/layout and
- * the config layouts in pos/configs
- *
- **/
-
-switch ($posConfig ['config'] ['root_layout']) {
-
-	 case 'handheld_1':
-		  $rootLayout = '<div></div>' .
-							 '<div class="menu-1" onclick="menu (\'handheld_pos_menu\')"></div>';
-		  break;
-		  
-	 case 'layout_oasis':
-		  $rootLayout = '<div></div>' .
-							 '<div class="menu-1" onclick="menu (\'main_menu\')"></div>' .
-							 '<div class="menu-2" onclick="menu (\'keypad\')"></div>' .
-							 '<div class="menu-3" onclick="menu (\'tender_menu\')"></div>' .
-							 '<div class="grid-span-all"><?= __ (\'Select a menu\') ?></div>';
-		  break;
-		  
-	 default:
-
-		  $rootLayout = '<div></div>' .
-							 '<div class="menu-1" onclick="menu (\'main_menu\')"></div>' .
-							 '<div class="menu-2" onclick="menu (\'keypad\')"></div>' .
-							 '<div class="menu-3" onclick="menu (\'tender_menu\')"></div>' .
-							 '<div class="grid-span-all"><?= __ (\'Select a menu\') ?></div>';
-		  break;
-}
-
 $pos = 0;
 $subMenu = 0;
 $rows = count ($menu ['horizontal_menus'] [$menuIndex] ['buttons']) / $menu ['horizontal_menus'] [$menuIndex] ['width'];
@@ -67,55 +35,19 @@ $buttonsTooltip = __ ("Click to select button, \nctrl-x cut, ctrl-c copy ctrl-v 
 
 <link href="/assets/css/menus.css" rel="stylesheet">
 
-<style>
- 
- .menu-button {
-
-	  cursor: pointer;
-	  font-size: <?= $buttonTextSize ?>em;
-	  height: 100px;
-	  color: white !important;
-	  padding-top: 5px;
-	  padding-left: 5px;
-	  border-radius: 5px;
-	  border: solid 2px #aaa;
- }
- 
- .button-grid {
-	  
-	  display: grid;
-	  width: 100%;
-	  grid-template-columns: repeat(<?= $menuWidth ?>, 1fr);
-	  grid-row-gap: 10px;
-	  grid-column-gap: 10px;
- }
-
- .empty-button {
-
-	  cursor: pointer;
-	  height: <?= $buttonHeight ?>px;
-	  color: #000 !important;
-     background: #fff;
-	  border-radius: 5px;
-	  border: solid 2px #aaa;
-	  display: flex;
-	  justify-content: center;
-	  align-items: center;
- }
-
-</style>
-
 <input type="hidden" id="config_id" value="<?= $configID ?>">
 <input type="hidden" id="menu_name" value="<?= $menuName ?>">
 <input type="hidden" id="menu_index" value="<?=$menuIndex ?>">
 
 <div class="menu-grid">
+
+	 <!-- Render the navigation element for this config -->
+
+	 <div class="menu-layout <?= $posConfig ['config'] ['root_layout'] ?>"><?php echo $this->element ($posConfig ['config'] ['root_layout']) ?></div>
+
+	 <!-- button grid goes here -->
 	 
-	 <div class="<?= $posConfig ['config'] ['root_layout'] ?>" data-bs-toggle="tooltip" title="<?= $menusTooltip ?>">
-		  <?= $rootLayout ?>
-	 </div>
-	 
-	 <div id="button_grid" class="button-grid" "data-bs-toggle="tooltip" title="<?= $buttonsTooltip ?>"></div>  <!-- button grid goes here -->
+	 <div id="button_grid" class="button-grid" "data-bs-toggle="tooltip" title="<?= $buttonsTooltip ?>"></div>
 
 <div>
 

@@ -118,8 +118,6 @@ class PosController extends PosApiController {
     public function init () {
 		  
         $response = ['status' => 0];
-
-		  $this->debug ($this->request->getData ());
          
         $this->dbconnect ('m_' . $this->request->getData () ['merchant_id']);
 
@@ -149,8 +147,6 @@ class PosController extends PosApiController {
 										  'pos_config_id' => $this->request->getData () ['pos_config_id'],
 										  'access_token' => $this->guid (),
 										  'refresh_token' => $this->guid ()];
-
-		  $this->debug ($response);
 
         $this->set ('response', $response);
         $this->viewBuilder ()
@@ -254,7 +250,6 @@ class PosController extends PosApiController {
 
             $result = -1;
             $exec = getcwd () . "/../bin/cake ConsumeTicketsByID $dbname $ticketID >/dev/null 2>/dev/null &";
-            $this->debug ("exec... $exec");
             $result = shell_exec ($exec);
         }
     }
@@ -289,9 +284,7 @@ class PosController extends PosApiController {
 	 }
 	 
     function status () {
-		  
-		  $this->debug ($this->request->getData ());
-		  
+		  		  
         $this->set ('response', ['status' => 0]);
         $this->viewBuilder ()
 				 ->setLayout ('ajax')
@@ -311,8 +304,6 @@ class PosController extends PosApiController {
 
 		  $status = 1;
 		  
-		  $this->debug ($this->request->getData ());
-
 		  if (isset ($this->request->getData () ['item'])) {
 
 				$status = 0;
@@ -344,9 +335,6 @@ class PosController extends PosApiController {
 
 				if ($item) {
 					 
-					 $this->debug ('existing item... ');
-					 $this->debug ($item);
-
 					 $item ['item_desc'] = $data ['item_desc'];
 					 $item ['department_id'] = $data ['department_id'];
 					 $itemsTable->save ($item);
@@ -361,8 +349,6 @@ class PosController extends PosApiController {
 				}
 				else {
 					 
-
-					 $this->debug ('new item... ');
 					 
 					 $itemPrices = [];
 					 foreach ($query as $bu) {
@@ -393,7 +379,6 @@ class PosController extends PosApiController {
 				
 
 				$this->batch ('items', $item ['id']);
-				$this->debug ($item);
 				$this->notifyPOS ($merchantID);
 		  }
 		  
@@ -410,9 +395,6 @@ class PosController extends PosApiController {
 	 
     function inventory ($itemID) {
 
-		  $this->debug ("inv... $itemID");
-		  $this->debug ($this->request->getData ());
-		  
         $response = ['status' => 1];
 
         if (!empty ($this->request->getData ())) {
@@ -424,13 +406,9 @@ class PosController extends PosApiController {
 												->where (['item_id' => $itemID,
 															 'business_unit_id' => $this->request->getData () ['business_unit_id']])
 												->first ();
-
-				$this->debug ($invItem);
 				
 				$response = ['status' => 0,
 								 'inv_count' => $invItem ['on_hand_count']];
-
-				$this->debug ($response);
 
 				$this->jsonResponse ($response);
 				return;
@@ -451,9 +429,6 @@ class PosController extends PosApiController {
         $response = ['status' => 1];
 
         if (!empty ($this->request->getData ())) {
-
-            $this->debug ("pos inventory update... ");
-            $this->debug ($this->request->getData ());
 
             $this->dbconnect ('m_' . $this->request->getData () ['merchant_id']);
 
@@ -518,8 +493,6 @@ class PosController extends PosApiController {
 									 ->where ("department_id = $departmentID");
 		  
 		  foreach ($query as $item) {
-
-				$this->debug ($item);
 				
 				$itemPricesTable->deleteAll (['item_id' => $item ['id']]);
 				$itemLinksTable->deleteAll (['item_id' => $item ['id']]);

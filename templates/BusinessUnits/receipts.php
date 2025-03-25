@@ -2,29 +2,44 @@
 <table class="table table-hover">
 	 <thead>
 		  <tr>
-				<th></th>
 				<th><?= __ ('Store') ?></th>
 				<th><?= __ ('Address') ?></th>
+				<th><?= __ ('City') ?></th>
 				<th><?= __ ('Phone') ?></th>
 		  </tr>
 	 </thead>
 	 
 	 <tbody>
-	 
-	 <?php
-	 
-	 foreach ($locations as $location) {
 		  
-	 ?>
-		  <tr>
-				<td><?= $location ['business_name'] ?></td>
-				<td><?= $location ['addr_1'] ?></td>
-				<td><?= $location ['phone_1'] ?></td>
+		  <?php
 
-		  </tr>
+		  $i = 0;
+		  foreach ($locations as $location) {
+				
+		  ?>
+				<tr onclick="receipt (<?= $location ['id'] ?>,<?= $i ?>)">
+					 <td><?= $location ['business_name'] ?></td>
+					 <td><?= $location ['addr_1'] ?></td>
+					 <td><?= $location ['city'] ?></td>
+					 <td><span class="phone-format"> <?= $location ['phone_1'] ?></span></td>
 
-	 <?php
-	 }
-	 ?>
+				</tr>
+
+				<?php
+				
+				$i ++;
+				}
+				?>
 	 </tbody>
 </table>
+
+<script>
+
+ function receipt (buID, buIndex) {
+	  
+	  window.location = `/business-units/receipt/${buID}/${buIndex}`;
+ }
+ 
+ $(".phone-format").mask ("<?= __ ('phone_format') ?>", {});
+
+</script>

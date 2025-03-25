@@ -90,8 +90,6 @@ class PosApiController extends AppController {
 		  $exec = 'mosquitto_pub -h localhost ' .
 					 ' -m \'{"method": "download"}\'' .
 					 ' -t \'multipos/' . $merchantID . '\'';
-
-		  $this->debug ($exec);
 		  
 		  shell_exec ($exec);
 	 }
@@ -118,7 +116,6 @@ class PosApiController extends AppController {
 
 
 				$exec = 'mosquitto_pub -h localhost -t ' . "multipos/$merchantID" . ' -m \'{"method": "download"}\'';
-				$this->debug ($exec);
 				shell_exec ($exec);
 		  }
 

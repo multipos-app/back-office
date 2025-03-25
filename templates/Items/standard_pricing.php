@@ -17,14 +17,14 @@
 	 </div>
 	 
 	 <div class="row g-1">
-		  <label for="price" class="col-sm-4 form-label">Price</label>
+		  <label for="price" class="col-sm-4 form-label"><?= __ ('Price') ?></label>
 		  <div class="col-sm-8">
 				<input type="text" dir="rtl" class="form-control currency-format" name="item_price[price]" value="<?= $item ['item_price'] ['price']?>" placeholder="0.00">
 		  </div>
 	 </div>
 	 
 	 <div class="row g-1">
-		  <label for="cost" class="col-sm-4 form-label">Cost</label>
+		  <label for="cost" class="col-sm-4 form-label"><?= __ ('Cost') ?></label>
 		  <div class="col-sm-8">
 				<input type="text" dir="rtl" class="form-control currency-format" name="item_price[cost]" value="<?= $item ['item_price'] ['cost']?>" placeholder="0.00">
 		  </div>

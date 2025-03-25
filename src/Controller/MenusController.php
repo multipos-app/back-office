@@ -26,8 +26,6 @@ require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 class MenusController extends PosAppController {
     
     public function menu ($configID, $menuName = null, $menuIndex = 0) {
-
-		  $this->debug ("menu... $configID $menuName $menuIndex");
 		  
         $posConfigTable = TableRegistry::get ('PosConfigs');
         $posConfig = $posConfigTable
@@ -71,8 +69,6 @@ class MenusController extends PosAppController {
 
 				$update = $this->request->getData ();
 
-				$this->debug ($update);
-
 				$posConfigsTable = TableRegistry::get ('PosConfigs');
 				$posConfig = $posConfigsTable
                    ->find ()
@@ -94,13 +90,7 @@ class MenusController extends PosAppController {
 				// $posConfigsTable->save ($posConfig);
 				
 				$this->save ('PosConfigs', $posConfig);
-
 				$this->ajax (['status' => 0]);
-
-				$this->debug ('menu update...');
-				
-				$this->notifyPos ();
-
 		  }
 	 }
 }

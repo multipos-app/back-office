@@ -38,9 +38,7 @@ class ItemHIstoryController extends PeriodController {
 		  date_default_timezone_set ("UTC");
 
         $startDate = time ();
-		  
-        $this->debug ($args);
-		  
+		  		  
 		  while (count ($args) > 0) {
 				
 				$key = array_shift ($args);
@@ -72,8 +70,6 @@ class ItemHIstoryController extends PeriodController {
             }
         }
         
-		  $this->debug ('item hist index... ' . time () . ' ' . $startDate . ' ' . date ('Y-m-d H:i', $startDate));
-
         $this->getPeriods ($startDate, $this->periodType);
         $len = count ($this->periods);
 		  

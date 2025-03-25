@@ -43,9 +43,6 @@ class ButtonsController extends PosAppController {
 				$pos = $button ['pos'];
 				$params = [];
 				
-				$this->debug ('buttons controller index... ');
-				$this->debug ($button);
-				
 				$data = ['configID' => $configID,
 							'menuName' => $menuName,
 							'menuIndex' => $menuIndex,
@@ -176,10 +173,7 @@ class ButtonsController extends PosAppController {
     function update () {
 
 		  $status = 1;
-		  
-		  $this->debug ('buttons update... ');
-		  $this->debug ($this->request->getData ());
-		  
+		  		  
 		  if (!empty ($this->request->getData ())) {
 
 				$update = $this->request->getData ();
@@ -198,16 +192,10 @@ class ButtonsController extends PosAppController {
 				$config = json_decode ($posConfig ['config'], true);
 				$button = $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons'] [$pos];
 				
-				$this->debug ('org button... ');
-				$this->debug ($button);
-				
 				$button ['text'] = strtoupper ($update ['text']);
 				$button ['color'] = $update ['color'];
 				$button ['class'] = $update ['class'];
 				$button ['params'] = $update ['params'];
-				
-				$this->debug ('new button... ');
-				$this->debug ($button);
 				
 				$config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons'] [$pos] = $button;
 				$posConfig ['config'] = json_encode ($config);
@@ -238,9 +226,6 @@ class ButtonsController extends PosAppController {
 							'pos' => $button ['pos']];
 				
 				$html = '';
-
-				$this->debug ('buttons controller select template... ');
-				$this->debug ($button);
 				$template = 'index';
 				
 				switch ($button ['button_type']) {
@@ -285,8 +270,6 @@ class ButtonsController extends PosAppController {
 						  $data ['button'] = ['class' => $button ['button_type'],
 													 'text' => $button ['button_text'],
 													 'color' => $this->defaultColor ()];
-
-						  $this->debug ($data);
 						  
 						  $data ['colors'] = $this->colors ();
 				}
@@ -323,9 +306,6 @@ class ButtonsController extends PosAppController {
 				$html = '';
 				$button = $this->request->getData ();
 				
-				$this->debug ('buttons controller item type... ');
-				$this->debug ($button);
-				
 				$data = ['configID' => $button ['config_id'],
 							'menuName' => $button ['menu_name'],
 							'menuIndex' => $button ['menu_index'],
@@ -361,9 +341,7 @@ class ButtonsController extends PosAppController {
 				
 				$view = $builder->build ();
 				$html = $view->render ();
-				
-				$this->debug ("button type template... $template");
-				
+								
 				$this->ajax (['status' => 0,
 								  'html' => $html]);
 		  }
@@ -375,10 +353,6 @@ class ButtonsController extends PosAppController {
 	 function itemAdd () {
 
 		  $button = $this->request->getData ();
-
-		  $this->debug ('buttons controller item-add... ');
-		  $this->debug ($button);
-		  
 
 		  $posConfigsTable = TableRegistry::get ('PosConfigs');
 		  $posConfig = $posConfigsTable

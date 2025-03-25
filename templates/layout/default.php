@@ -206,11 +206,11 @@
 										  <i class="bi bi-circle"></i><span><?= __ ('Suppliers') ?></span>
 									 </a>
 								</li>
-								<!-- <li>
-									  <a href="/business-units/receipts">
-									  <i class="bi bi-circle"></i><span><?= __ ('Receipts') ?></span>
-									  </a>
-									  </li> -->
+								<li>
+									 <a href="/business-units/receipts">
+										  <i class="bi bi-circle"></i><span><?= __ ('Receipts') ?></span>
+									 </a>
+								</li>
 						  </ul>
 					 </li>
 

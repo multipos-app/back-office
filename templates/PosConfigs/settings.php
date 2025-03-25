@@ -1,147 +1,91 @@
-<style>
- 
-  .controls-grid {
-	  
-     display: grid;
-     width: 100%;
-     grid-template-rows: auto;
-     grid-template-columns: 120px 3fr .1fr 2fr 2fr 3fr;
-	  grid-column-gap: 10px;
-	  margin-top: 25px;
- }
 
-.main-grid {
+<form id="settings_form">
 
-     display: grid;
-     width: 100%;
-     grid-template-rows: auto;
-     grid-template-columns: 1fr;
-	  grid-column-gap: 0px;
-	  margin-top: 25px;
- }
+	 <input type="hidden" id="pos_config_id" name="pos_config_id" value="<?= $posConfigID ?>"/>
 
- .device-grid {
-
-     width: 50%;
-     grid-template-rows: auto;
-     grid-template-columns: 1fr 1fr;
- }
- 
- .option-grid {
-	  
-     width: 100%;
-     grid-template-rows: auto;
-     grid-template-columns: 2fr 2fr;
-     grid-column-gap: 15px;
- 	  grid-row-gap: 25px;
- 	  margin-top: 25px;
- }
-
- label {
-
-	  font-size: 1.2em !important;
- }
- 
-</style>
-
-<div class="form-grid controls-grid">
-	 <div class="form-cell">
-		  <button id="multipos_back" class="btn btn-white multipos-back-button" onclick="controllerBack ()">
-				<?= __ ('Back') ?>
-		  </button>
-	 </div>
-</div>
-	 
-<form id="settings" name ="settings">
-
-	 <input type="hidden" name="pos_config_id" value="<?= $posConfigID ?>"/>
-	 
-	 <div class="form-section">
-		  <?= __ ('POS Peripherals') ?>
+	 <div class="row g-1 mt-3">
+		  <div class="col-sm-12 text-center"><h4><?= __ ('POS hardware') ?></h4></div>
 	 </div>
 	 
-	 <div class="main-grid">
+	 <?php
+	 
+	 foreach ($settings ['devices'] as $name => $device) {
+
+		  $this->debug ("device name... $name");
+		  $this->debug ($device);
 		  
-		  <div class="form-grid device-grid">
-				<?php
-								
-				foreach ($settings ['devices'] as $name => $device) {
-	 
-				?>					 
-					 <div class="form-cell form-desc-cell">
-						  <?= $device ['desc'] ?>
-					 </div>
+	 ?>					 
+		  
+		  <div class="row g-1 mt-4">
+				
+				<label for="price" class="col-sm-4 form-label"><?= $device ['desc'] ?></label>
+				<div class="col-sm-6">
 					 
-					 <div class="select">
-						  
-						  <?= $this->Form->select ('devices[' . $name . ']',
-															$device ['options'],
-															['value' => $device ['selected'],
-															 'label' => false,
-															 'class' => 'custom-dropdown',
-															 'required' => 'required']);
-						  ?>
-					 </div>
-				<?php
-				}
-				?>
+					 <?=
+					 $this->Form->select ('devices[' . $name . ']',
+												 $device ['options'],
+												 ['value' => $device ['selected'],
+												  'label' => false,
+												  'class' => 'form-select']);
+					 ?>
+				</div>
 		  </div>
-		  
-		  <div class="form-section">
-				<?= __ ('POS Options') ?>
-		  </div>
-		  
-		  <div class="form-grid option-grid">
-				
-				<?php
-				
-				foreach ($settings ['options'] as $option) {
+	 <?php
+	 }
+	 ?>
+	 </div>
+	 
+	 <div class="row g-1 mt-3">
+		  <div class="col-sm-12 text-center"><h4><?= __ ('POS Options') ?></h4></div>
+	 </div>
+	 
+	 <?php
+	 
+	 foreach ($settings ['options'] as $option) {
 
-				?>						  
-					 <div class="grid-cell grid-cell-left">
-						  <div class="checkbox checkbox-primary">
-								<input type="checkbox" class="styled" name="options[<?= $option ['key']?>]" id="options[<?= $option ['key']?>]" type="checkbox"<?php if ($option ['on']) echo ' checked'; ?>>
-								<label class="grid-label" for="<?= $option ['key'] ?>"><?= $option ['description'] ?></label>
-						  </div>
-					 </div>
-				<?php
-				}
-				?>
-				
+		  $checked = $option ['on'] == true ? ' checked' : '';
+	 ?>
+		  <div class="row g-1 mt-3">
+				<div class="col-sm-4 form-check form-switch">
+					 <input type="hidden" name="options[<?= $option ['key'] ?>]" id="_<?= $option ['key'] ?>" value="off">
+					 <input type="checkbox" class="form-check-input" name="options[<?= $option ['key'] ?>]" id="<?= $option ['key'] ?>"<?= $checked ?>>
+					 <label class="grid-label" for="<?= $option ['key'] ?>" ?><?= $option ['name'] ?></label>	 
+				</div>
+				<div class="col-sm-8"><?= $option ['description'] ?></div>
+		  </div>
+	 <?php
+	 }
+	 ?>
+	 
+	 </div>
+
+	 <div class="row g-3 mt-3">
+		  <div class="col-sm-9"></div>
+ 		  <div class="col-sm-3 d-grid text-center">
+				<button type="submit" class="btn btn-success" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
 		  </div>
 	 </div>
+	 
 </form>
-
-<div class="form-submit-grid">
-	 
-	 <div class="grid-cell">
-		  <button class="btn btn-success btn-block control-button" onclick="javascript:save ()"><?= __ ('Save') ?></button>
-	 </div>
-	 
-	 <div class="grid-cell">
-		  <button class="btn btn-warning btn-block control-button" onclick="javascript:save ()"><?= __ ('Cancel') ?></button>
-	 </div>
-	 
-</div>
 
 <script>
 
- function save () {
 
-	  console.log ($('#settings').serialize ());
+ $('#settings_form').submit (function (e) {
+
+	  e.preventDefault ();
+	  let url = "/pos-configs/settings/" + $('#pos_config_id').val ();
+	  console.log (url);
+
  	  $.ajax ({type: "POST",
-				  url: "/pos-configs/update-settings",
-				  data: $('#settings').serialize (),
+				  url: url,
+				  data: $('#settings_form').serialize (),
 				  success: function (data) {
 
+						data = JSON.parse (data);
 						console.log (data);
-						controller ('pos-configs', false);
+						window.location = '/pos-configs';
 				  }});
- }
- 
- function cancel () {
-
-	  controller ('pos-configs', false);
- }
+ });
 
 </script>

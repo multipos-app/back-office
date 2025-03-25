@@ -84,72 +84,76 @@
  .grid-span-6 {
 	  grid-column: 1/6;
  }
+
+ .header-text {
+
+	  font-size: 110%;
+	  font-weight: 600;
+ }
  
 </style>
 
-<?php 
-$this->debug ($receipt);
-?>
-
 <script>
 
+ buID = <?= $buID ?>;
+ buIndex = <?= $buIndex ?>;
  receipt = <?= json_encode ($receipt) ?>;
 
 </script>
 
-<div class="form-section">
-	 <i class="fa fa-square-xmark fa-large" onclick="closeForm ()"></i>
-</div>
+<form id="receipt" name ="receipt">
 
-<?php
+	 <?php
 
-$this->debug ('receipt...');
-$this->debug ($receipt);
+	 $this->debug ("receipt... $buID $buIndex");
+	 foreach ($receipt as $section => $rows) {
 
-foreach ($receipt as $section => $rows) {
-
-?>
-	 <form id="receipt" name ="receipt">
-
+	 ?>
+		  <div class="row m-3">
+				<div class="col-md-12 text-center"><h4><?= __ ($section) ?></h4></div>
+		  </div>
+		  
 		  <input type="hidden" name="business_unit_id" value="<?= $buID?>">
-		  <div class="receipt-grid">
+		  <input type="hidden" name="bu_index" value="<?= $buIndex?>">
+		  <div class="receipt-grid mt-3 mb-3">
 				
-				<div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Text')?></div>
-				<div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Justify')?></div>
-				<div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Size')?></div>
-				<div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Style')?></div>
-				<div class="grid-cell grid-cell-center grid-cell-separator"><?= __ ('Feed Lines')?></div>
-				<div class="grid-cell grid-cell-center"></div>
+				<div class="header-text"></div>
+				<div class="header-text"><?= __ ('Justify')?></div>
+				<div class="header-text"><?= __ ('Size')?></div>
+				<div class="header-text"><?= __ ('Style')?></div>
+				<div class="header-text"><?= __ ('Feed Lines')?></div>
+				<div class="header-text"></div>
 				
 		  </div>
-
+		  
 		  <div id="<?= $section ?>_lines"></div>
 
-	 </form>
-<?php
-}
-?>
-<div class="form-submit-grid">
-	 
-	 <div>
-		  <button type="submit" id="receipt_update" class="btn btn-success" onclick="save ()"><?= __ ('Save') ?></button>
+	 <?php
+	 }
+	 ?>
+
+	 <div class="row mt-5">
+		  <div class="col-md-5"></div>
+		  <div class="col-md-2 d-grid text-center">
+				<button type="submit" id="receipt_update" class="btn btn-success" onclick="save ()"><?= __ ('Save') ?></button>
+		  </div>
 	 </div>
-	 
-</div>
+
+</form>
 
 <script>
  
  function save () {
 	  
  	  $.ajax ({type: "POST",
-				  url: "/business-units/update-receipt/" + <?= $buID ?>,
+				  url: `/business-units/update-receipt/${buID}/${buIndex}`,
 				  data: receipt,
 				  success: function (data) {
 						
-						closeForm ();
+						window.location = '/business-units/receipts';
 				  }});
  }
-  
+ 
  function render () {
 
 	  $.each (receipt, function (section, rows) {
@@ -189,7 +193,7 @@ foreach ($receipt as $section => $rows) {
 
 	  css = ` rf-justify-${row.justify} rf-font-${row.font} rf-size-${row.size}`;
 
-	  return '<div class="form-cell form-control-cell">' +
+	  return '<div class="mt-2">' +
 				`<input type="text" name="${section}[${i}][text])" id="${section}_text_${i}" ` +
 				`class="form-control${css}" required="required" value="${row.text}" placeholder="add text" ` +
 				`onkeyup=" setText('${section}', ${i})" ` +
@@ -202,8 +206,8 @@ foreach ($receipt as $section => $rows) {
 
 	  id = `#${section}_text_${i}`;
 	  
-	  select = '<div class="form-cell form-control-cell">' +
-				  `<select name="${section}[${i}][justify]" id="${section}_justify_${i}" class="custom-dropdown" required="required" onchange="setClass (\'${section}\', ${i}, \'justify\')">`;
+	  select = '<div class="mt-2">' +
+				  `<select name="${section}[${i}][justify]" id="${section}_justify_${i}" class="form-select" required="required" onchange="setClass (\'${section}\', ${i}, \'justify\')">`;
 
 	  $.each (['left', 'center', 'right'], function (index, val) {
 
@@ -221,8 +225,8 @@ foreach ($receipt as $section => $rows) {
  
  function size (section, row, i) {
 
-	  select = '<div class="grid-cell grid-cell-center">' +
-				  `<select name="${section}[${i}][size]" id="${section}_size_${i}" class="custom-dropdown" required="required" onchange="javascript:setClass (\'${section}\', ${i}, \'size\')">`;
+	  select = '<div class="mt-2 text-center">' +
+				  `<select name="${section}[${i}][size]" id="${section}_size_${i}" class="form-select" required="required" onchange="javascript:setClass (\'${section}\', ${i}, \'size\')">`;
 
 	  $.each (['normal', 'big', 'small'], function (index, val) {
 
@@ -241,8 +245,8 @@ foreach ($receipt as $section => $rows) {
 
  function font (section, row, i) {
 	  
-	  select = '<div class="grid-cell grid-cell-center">' +
-				  `<select name="${section}[${i}][font]" id="${section}_font_${i}" class="custom-dropdown" required="required" onchange="javascript:setClass (\'${section}\', ${i}, \'font\')">`;
+	  select = '<div class="mt-2 text-center">' +
+				  `<select name="${section}[${i}][font]" id="${section}_font_${i}" class="form-select" required="required" onchange="javascript:setClass (\'${section}\', ${i}, \'font\')">`;
 	  
 	  $.each (['normal', 'bold', 'italic', 'bold-italic'], function (index, val) {
 			
@@ -262,8 +266,8 @@ foreach ($receipt as $section => $rows) {
  
  function feed (section, row, i) {
 
-	  return '<div class="grid-cell grid-cell-center">' +
-				`<select name="${section}[${i}][feed]" id="${section}_feed_${i}" class="custom-dropdown" required="required" onchange="javascript:setClass (\'${section}\', ${i}, \'feed\')">` +
+	  return '<div class="mt-2 text-center">' +
+				`<select name="${section}[${i}][feed]" id="${section}_feed_${i}" class="form-select" required="required" onchange="javascript:setClass (\'${section}\', ${i}, \'feed\')">` +
 				'<option value="1">1</option>' +
 				'<option value="2">2</option>' +
 				'<option value="3">3</option>' +
@@ -277,14 +281,14 @@ foreach ($receipt as $section => $rows) {
 
 	  return '<div class="receipt-grid">' +
 				'<div class="grid-span-6"></div>' +
-				'<div class="grid-cell grid-cell-center" onclick="addRow (\'' + section + '\', ' + i + ')"><i class="fa fa-plus fa-large action_icons"></i></div>' +
+				'<div class="mt-2 text-center" onclick="addRow (\'' + section + '\', ' + i + ')"><i class="fa fa-plus fa-large action_icons"></i></div>' +
 				'</div>';
 
  }
  
  function minus (section, i) {
 
-	  return '<div class="grid-cell grid-cell-center" onclick="dropRow (\'' + section + '\', ' + i + ')"><i class="fa fa-minus fa-large action_icons"></i></div>';
+	  return '<div class="mt-2 text-center" onclick="dropRow (\'' + section + '\', ' + i + ')"><i class="fa fa-minus fa-large action_icons"></i></div>';
 
  }
 

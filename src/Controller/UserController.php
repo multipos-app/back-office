@@ -47,9 +47,6 @@ class UserController extends AppController {
 
 	 public function login (...$args) {
 
-		  $this->debug ('user login... ');
-		  $this->debug ($args);
-		  
 		  if (!empty ($this->request->getData ())) {
 				
 				$query = TableRegistry::get ('MerchantUsers')
@@ -178,8 +175,6 @@ class UserController extends AppController {
 	 }
  
 	 public function getStartedResponse () {
-
-		  $this->debug ('get started response... ');
 		  
 	 	  $builder = $this->viewBuilder ()
 								->setLayout ('user')
@@ -189,8 +184,6 @@ class UserController extends AppController {
 	 
 	 public function forgotPassword () {
 
-		  $this->debug ('enter email...');
-
         $builder = $this->viewBuilder ()
 								->setLayout ('user')
 								->enableAutoLayout ()
@@ -198,9 +191,6 @@ class UserController extends AppController {
 	 }
 
 	 public function checkEmail () {
-
-		  $this->debug ("check email...");
-		  $this->debug ($this->request->getData ());
 
 		  $status = 1;
 		  $response = __ ('No user with that email could be found');
@@ -260,8 +250,6 @@ class UserController extends AppController {
 		  $user = $merchantUsersTable->find ()
 											  ->where (['email' => $email])
 											  ->first ();
-
-		  $this->debug ($user);
 		  
 		  if ($user) {
 				
@@ -288,19 +276,9 @@ class UserController extends AppController {
 				
 				$view = $builder->build ();
 				$output = $view->render ();
-				
-				/* $this->loadComponent ('VrMail');
-					$result = $this->VrMail->sendmail ('VideoRegister, password reset', 'noreply@myvideoregister.com', $email, $output);
-					$this->debug ($result);
-
-					$this->loadComponent ('Mailgun');
-					$result = $this->Mailgun->sendmail ('VideoRegister, password reset', 'noreply@myvideoregister.com', $email, $output);
-				 */
-
 
 				$this->loadComponent ('EMail');
 				$result = $this->EMail->sendmail ('VideoRegister, password reset', 'noreply@myvideoregister.com', $email, $output);
-				$this->debug ($result);
 
 				return true;
 		  }
@@ -355,8 +333,6 @@ class UserController extends AppController {
 	  */
 	 
 	 public function edit ($id) {
-
-		  $this->debug ("user edit... $id");
 		  
 		  $user = null;
 		  
@@ -418,7 +394,6 @@ class UserController extends AppController {
 		  
 		  if (!empty ($this->request->getData ())) {
 
-				$this->debug ($this->request->getData ());
 				$merchantUsersTable = TableRegistry::get ('MerchantUsers');
 				$user = null;
 				$response = ['status' => 0];
@@ -456,8 +431,6 @@ class UserController extends AppController {
 						  
                     $session = $this->request->getSession ();
 						  $merchant = $session->read ('merchant');
-
-						  $this->debug ($merchant);
 						  
 						  $user = ['merchant_id' => $merchant ['merchant_id'],
 									  'uname' => $this->request->getData () ['email'],
@@ -483,8 +456,6 @@ class UserController extends AppController {
 	 }
 
 	 function subscriptionExpire ($days, $date) {
-
-		  $this->debug ("user subscription expire... $days, $date");
 		  
 		  $builder = $this->viewBuilder ()
                         ->setLayout ('modal')
@@ -555,7 +526,12 @@ class UserController extends AppController {
 				$this->merchant ['bu_names'] [$businessUnit ['id']] = $businessUnit ['business_name'];
         }
         
-        $this->debug ('login... ' . $merchant ['uname'] . ' -> ' . $merchant ['merchant_id'] . ' -> ' . $merchant ['role'] . ' -> ' . $buIndex . ' '. $_SERVER ['HTTP_X_FORWARDED_FOR']);
+        $this->debug ('login... ' .
+							 $merchant ['uname'] . ' -> ' .
+							 $merchant ['merchant_id'] . ' -> ' .
+							 $merchant ['role'] . ' -> ' .
+							 $buIndex . ' '.
+							 $_SERVER ['HTTP_X_FORWARDED_FOR']);
 		  
         // intitial setup, point to corp
         

@@ -1,0 +1,410 @@
+{
+    "id": "convience_deli",
+    "desc": "Counter top, right hand",
+    "timezone": "America\/New_York",
+    "locale": "en_US",
+    "currency": "USD",
+    "update_interval": "20000",
+    "language": "en",
+    "country": "US",
+    "variant": "",
+    "prompt_open_amount": "false",
+    "show_previous_receipt": "true",
+    "disable_quantity_void": "true",
+    "root_layout": "layout_1r",
+    "item_line_layout": "ticket_item_line",
+    "pos": "generic_tablet",
+    "enter_clerk": "false",
+    "confirm_tender": "true",
+    "show_previous_receipt_no_print": "false",
+    "surveillance": "false",
+    "scanner": "keyboard",
+    "customers": "true",
+    "cash_management": "false",
+    "merge_like_items": "false",
+    "themed": "true",
+    "devices": {
+        "receipt_printer": {
+            "name": "star_micronics",
+            "class": "cloud.multipos.pos.devices.StarPrinter"
+        },
+        "scanner": {
+            "name": "keyboard",
+            "class": "cloud.multipos.pos.devices.KeyboardScanner"
+        }
+    },
+    "pos_menus": {
+        "main_menu": {
+            "menu_description": "Main Menu",
+            "tabs": "true",
+            "horizontal_menus": [
+                {
+                    "type": "controls",
+                    "style": "outline",
+                    "color": "#21512D",
+                    "name": "BREAKFAST",
+                    "width": "5",
+                    "buttons": [
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        },
+								{
+                            "text": "",
+                            "class": "Null",
+                            "color": "transparent"
+                        }
+                    ]
+                }
+				]
+        },
+        "tender_menu": {
+            "menu_description": "Tender Menu",
+            "tabs": "false",
+            "horizontal_menus": [
+                {
+                    "type": "controls",
+                    "style": "outline",
+                    "color": "#5E7981",
+                    "name": "tender 1",
+                    "width": "5",
+                    "buttons": [
+                        {
+                            "class": "NoSale",
+                            "text": "No Sale\/Open Drawer",
+                            "color": "#5E7981"
+                        },
+                        {
+                            "text": "VOID ITEM",
+                            "class": "VoidItem",
+                            "color": "#5E7981",
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "VOID SALE",
+                            "color": "#5E7981",
+                            "class": "VoidSale",
+                            "fixed": "1"
+                        },
+                        {
+                            "class": "PaxTender",
+                            "text": "CREDIT",
+                            "params": {
+                                "open_drawer": "true",
+                                "print_receipt": "false",
+                                "service_fee": "0",
+                                "debit_credit": "credit"
+                            }
+                        },
+                        {
+                            "class": "CheckTender",
+                            "text": "Check Tender",
+                            "params": {
+                                "tender_id": "3"
+                            },
+                            "color": "#5E7981"
+                        },
+                        {
+                            "text": "$5",
+                            "class": "CashTender",
+                            "color": "#5E7981",
+                            "params": {
+                                "tender_id": "1",
+                                "value": "500"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "$10",
+                            "class": "CashTender",
+                            "color": "#5E7981",
+                            "params": {
+                                "tender_id": "1",
+                                "value": "1000"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "$20",
+                            "class": "CashTender",
+                            "color": "#5E7981",
+                            "params": {
+                                "tender_id": "1",
+                                "value": "2000"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "ONE UP",
+                            "class": "CashTender",
+                            "color": "#5E7981",
+                            "params": {
+                                "tender_id": "1",
+                                "value": "0"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "CASH",
+                            "class": "CashTender",
+                            "color": "#5E7981",
+                            "params": {
+                                "tender_id": "1"
+                            },
+                            "fixed": "1"
+                        }
+                    ],
+                    "size": "20"
+                }
+            ]
+        },
+        "keypad": {
+            "menu_description": "Keypad",
+            "tabs": "false",
+            "horizontal_menus": [
+                {
+                    "type": "controls",
+                    "style": "outline",
+                    "name": "keypad",
+                    "width": "4",
+                    "buttons": [
+                        {
+                            "text": "7",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "7"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "8",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "8"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "9",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "9"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "Quantity",
+                            "class": "Quantity",
+                            "color": "#5E7981",
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "4",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "4"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "5",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "5"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "6",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "6"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "Qty+",
+                            "class": "Quantity",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "1"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "1",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "1"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "2",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "2"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "3",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "3"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "Qty-",
+                            "class": "Quantity",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "-1"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "Clear",
+                            "class": "Clear",
+                            "color": "#5E7981",
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "0",
+                            "class": "NumKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "0"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "00",
+                            "class": "MultKey",
+                            "color": "#5E7981",
+                            "params": {
+                                "value": "00"
+                            },
+                            "fixed": "1"
+                        },
+                        {
+                            "text": "Enter",
+                            "class": "Enter",
+                            "color": "#5E7981",
+                            "fixed": "1"
+                        }
+                    ],
+                    "size": "16"
+                }
+            ]
+        }
+    },
+    "pos_displays": [
+        {
+            "name": "ticket",
+            "type": "ticket_display",
+            "layout": "ticket"
+        }
+    ]
+}
