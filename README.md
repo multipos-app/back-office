@@ -3,6 +3,7 @@ This project is the back office component of multipos-app/pos a cloud based back
 
 ## Updates
 
+- 04/02, Complete work on menu creation and edits, lots of little UI fixes 
 - Back office just received a major face lift based on bootstrapmade NiceAdmin.
 
 ## Reporting
