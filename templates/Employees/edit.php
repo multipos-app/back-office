@@ -12,7 +12,7 @@
 					 $this->Form->input ('username', 
 												['id' => 'username', 
 												 'value' => $employee ['username'], 
-												 'class' => 'form-control', 
+												 'class' => 'form-control integer-format', 
 												 'label' => false, 
 												 'required' => 'required']) ?>
 				</div>
@@ -54,7 +54,7 @@
 					 $this->Form->input ('password1', 
 												['id' => 'password1', 
 												 'value' => $employee ['password1'], 
-												 'class' => 'form-control', 
+												 'class' => 'form-control integer-format', 
 												 'label' => false, 
 												 'required' => 'required']) ?>
 				</div>
@@ -68,7 +68,7 @@
 					 $this->Form->input ('password2', 
 												['id' => 'password2', 
 												 'value' => $employee ['password2'], 
-												 'class' => 'form-control', 
+												 'class' => 'form-control integer-format', 
 												 'label' => false, 
 												 'required' => 'required']) ?>
 				</div>
@@ -88,8 +88,16 @@
 				</div>
 		  </div>
 
-		  <div class="text-center">
-				<button type="submit" class="btn btn-success">Save</button>
+		  <div class="row g-3 mt-3">
+				<div class="col-sm-9 d-grid text-center"></div>
+ 				<div class="col-sm-3 d-grid text-center">
+					 <button type="submit" class="btn btn-success" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
+				</div>
 		  </div>
+
 	 </div>
 </form>
+
+<script>
+ $(".integer-format").mask ("<?= __ ('integer_format') ?>");
+</script>

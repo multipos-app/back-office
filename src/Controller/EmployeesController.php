@@ -85,9 +85,17 @@ class EmployeesController extends PosAppController {
 							'profiles' => $profiles]);
     }
 
-    function edit ($id = 0) {
+    function edit ($id) {
 		  
         $employee = false;
+		  $employeesTable = TableRegistry::get ('Employees');
+		  
+        if (!empty ($this->request->getData ())) {
+
+				$this->update ($id, $this->request->getData (), $employeesTable);
+				return $this->redirect ('/employees');
+		  }
+		  
         if ($id == 0) {
 				
             $employee = ['id' => 0,
@@ -100,11 +108,9 @@ class EmployeesController extends PosAppController {
         }
         else {
             
-            $query = TableRegistry::get ('Employees')
-											 ->find ()
-											 ->where (['id' => $id]);
-            
-            $employee = $query->first ();
+            $employee = $employeesTable->find ()
+													->where (['id' => $id])
+													->first ();
         }
 		  
         $profiles = [null => 'Profile'];
@@ -130,50 +136,38 @@ class EmployeesController extends PosAppController {
 							 'html' => $html]);
     }
 
-    public function update ($id) {
+    public function update ($id, $employee, $employeesTable) {
 
         $status = -1;
         $employee = false;
-        
-        if (!empty ($this->request->getData ())) {
-            
-            $employeeTable = TableRegistry::get ('Employees');
+		  
+        if ($id > 0) {
 
-            if ($id > 0) {
-
-                $employee = $employeeTable
+            $employee = $employeesTable
                           ->find ()
                           ->where (['id' => $id])
                           ->first ();
-
-                if ($employee) {
-
-                    $employee ['username'] = $this->request->getData () ['username'];
-                    $employee ['password'] = md5 ($this->request->getData () ['password1']);
-                    $employee ['fname'] = strtoupper ($this->request->getData () ['fname']);
-                    $employee ['lname'] = strtoupper ($this->request->getData () ['lname']);
-                    $employee ['profile_id'] = $this->request->getData () ['profile_id'];
-                }
-            }
-            else  {
-                
-                $employee = $employeeTable->newEntity (['username' => $this->request->getData () ['username'],
-                                                        'password' => md5 ($this->request->getData () ['password1']),
-                                                        'fname' => strtoupper ($this->request->getData () ['fname']),
-                                                        'lname' => strtoupper ($this->request->getData () ['lname']),
-                                                        'profile_id' => $this->request->getData () ['profile_id']]);
-
-            }
-
-            if ($employee) {
-                
-                $this->save ('Employees', $employee);
-            }        
+				
+            $employee ['username'] = $this->request->getData () ['username'];
+            $employee ['password'] = md5 ($this->request->getData () ['password1']);
+            $employee ['fname'] = strtoupper ($this->request->getData () ['fname']);
+            $employee ['lname'] = strtoupper ($this->request->getData () ['lname']);
+            $employee ['profile_id'] = $this->request->getData () ['profile_id'];
         }
-        
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
-
+        else  {
+                
+            $employee = $employeesTable->newEntity (['username' => $this->request->getData () ['username'],
+                                                     'password' => md5 ($this->request->getData () ['password1']),
+                                                     'fname' => strtoupper ($this->request->getData () ['fname']),
+                                                     'lname' => strtoupper ($this->request->getData () ['lname']),
+                                                     'profile_id' => $this->request->getData () ['profile_id']]);
+				
+        }
+		  
+        if ($employee) {
+            
+            $this->save ('Employees', $employee);
+        } 
     }
 	 
     public function delete ($id) {

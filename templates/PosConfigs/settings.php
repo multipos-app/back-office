@@ -18,7 +18,7 @@
 		  
 		  <div class="row g-1 mt-4">
 				
-				<label for="price" class="col-sm-4 form-label"><?= $device ['desc'] ?></label>
+				<label for="" class="col-sm-4 form-label"><?= $device ['desc'] ?></label>
 				<div class="col-sm-6">
 					 
 					 <?=

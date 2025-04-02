@@ -1,14 +1,9 @@
-<style>
-
- .modal-content {
-
-	  width: 900px !important;
- }
- 
-</style>
 
 <div class="row g-1 mt-3 mb-3">
-	 <button class="btn btn-success col-sm-2" data-bs-toggle="modal" data-bs-target="#tax_modal" onclick="edit (0)"><?= __ ('Add tax group') ?></button>
+	 <div class="col-10"></div>
+	 <div class="col-2 d-grid text-center">
+		  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tax_modal" onclick="edit (0)"><?= __ ('Add tax') ?></button>
+	 </div>
 </div>
 
 <table class="table table-hover g-1 m-3">

@@ -121,18 +121,20 @@ $this->debug ($taxGroup);
 					 </tr>
 				</tbody>
 		  </table>
-		  
-		  <div class="text-center">
-				<button type="submit" class="btn btn-success">Save</button>
-		  </div>
+	 </div>
 
+	 <div class="row g-3 mt-3">
+		  <div class="col-sm-9 d-grid text-center"></div>
+ 		  <div class="col-sm-3 d-grid text-center">
+				<button type="submit" class="btn btn-success" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
+		  </div>
+	 </div>
+	 
 </form>
 
 <script>
 
 function addTax () {
-
-	  console.log ('add tax... ' + taxRows);
 	  
 	  $.ajax ({
 			url: "/tax-groups/add-tax/" + taxRows,

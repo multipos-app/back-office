@@ -12,7 +12,7 @@
 <table class="table table-hover">
 	 <thead align="center">
 		  <tr>
-				<th align="left"><?= __ ('Description') ?></th>
+				<th style="text-align:left"><?= __ ('Description') ?></th>
 				<th><?= __ ('Menus') ?></th>
 				<th><?= __ ('Settings') ?></th>
 				<th><?= __ ('Download') ?></th>

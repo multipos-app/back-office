@@ -95,7 +95,16 @@ $devices = [
 						'desc' => __ ('Keyboard/USB'),
 						'class' => 'cloud.multipos.pos.devices.KeyboardScanner',
 						'params' => []]]],
-	 
+	 'scales' =>
+		  ['desc' => __ ('Scales'),
+			'selected' => null,
+			'options' =>
+				 ['keyboard' =>
+					  ['name' => 'scales',
+						'desc' => __ ('Star scales'),
+						'class' => 'cloud.multipos.pos.devices.StarScales',
+						'params' => []]]],
+	 	 
 	 'payment' =>
 		  ['desc' => __ ('Payment'),
 			'selected' => null,

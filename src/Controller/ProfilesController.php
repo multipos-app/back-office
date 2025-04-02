@@ -33,14 +33,23 @@ class ProfilesController extends PosAppController {
 							'profiles' => $profiles]);
 	 }
 
-    function edit ($id = null) {
+    function edit ($id) {
 
+		  if (!empty ($this->request->getData ())) {
+				
+				$update = $this->update ($id, $this->request->getData ());
+				
+				$this->ajax (['status' => 0,
+								  'item' => $update]);
+				return;
+		  }
+		  
         $profileDesc = '';
         $permissions = [];
         $profiles = TableRegistry::get ('Profiles');
         
-        if ($id != null) {
-       
+        if ($id > 0) {
+				
             $profile = $profiles
                      ->find ()
                      ->where (['id' => $id])
@@ -56,17 +65,16 @@ class ProfilesController extends PosAppController {
                     $permissions [] = str_replace ('cloud.multipos.pos.controls.', '', $permission ['profile_class']);
                 }
             }
-            
-            $this->debug ($profile ['profile_desc']);
         }
         else {
-            $id = 0;
+            $profile = ['id' => 0,
+								'profile_desc' => ''];
         }
         
         $query = TableRegistry::get ('PosControlCategories')
-               ->find ()
-               ->where (['enabled' => 1])
-               ->contain (['PosControls']);
+										->find ()
+										->where (['enabled' => 1])
+										->contain (['PosControls']);
 
         $categoryID = 0;
         $categories = [];
@@ -78,15 +86,15 @@ class ProfilesController extends PosAppController {
             }
             
             $categories [$category ['id']] = $category->toArray ();
-                      
+            
             for ($i = 0; $i < count ($categories [$category ['id']] ['pos_controls']); $i ++) {
 
                 $categories [$category ['id']] ['pos_controls'] [$i] ['checked'] = 1;
-                    
+                
                 foreach ($permissions as $permission) {
-                        
+                    
                     if ($permission == $categories [$category ['id']] ['pos_controls'] [$i] ['class'])  {
-                            
+                        
                         $categories [$category ['id']] ['pos_controls'] [$i] ['checked'] = 0;
                     }
                 }
@@ -99,63 +107,48 @@ class ProfilesController extends PosAppController {
 							'categories' => $categories,
 							'permissions' => $permissions]);
     }
-  
-    public function update ($id) {
-        
-        $profiles = TableRegistry::get ('Profiles');
+	 
+    public function update ($id, $profile) {
+
+		  $permissions = $profile ['permissions'];
+        $profilesTable = TableRegistry::get ('Profiles');
         $status = -1;
-        
-        if (!empty ($this->request->getData ())) {
+		  
+        if ($id == 0) {
 
-            $this->debug ("id... " . $id);
-            $this->debug ($this->request->getData ());
+            $profile = $profilesTable->newEntity (['profile_desc' => strtoupper ($profile ['profile_desc'])]);
+            $profilesTable->save ($profile);
+            $id = $profile ['id'];
+        }
+        else {
 
-            if ($id == null) {
-
-                $profile = $profiles->newEntity (['profile_desc' => strtoupper ($this->request->getData () ['profile_desc'])]);
-                $profiles->save ($profile);
-                $id = $profile ['id'];
-            }
-            else {
-
-                $profile = $profiles
+            $profile = $profilesTable
                          ->find ()
                          ->where (['id' => $id])
                          ->first ();
-                
-                $profile ['profile_desc'] = strtoupper ($this->request->getData () ['profile_desc']);
-                $profiles->save ($profile);
-            }
-
-            if (isset ($this->request->getData () ['permissions'])) {  // any permissions?
-                
-                $profilePermissions = TableRegistry::get ('ProfilePermissions');
-
-                $id = intVal ($id);
-                $profilePermissions->deleteAll (['profile_id' => $id]);
-                
-                foreach ($this->request->getData () ['permissions'] as $c => $permission) {
-                    
-                    $profilePermission = $profilePermissions->newEntity (['profile_id' => $id,
-                                                                          'profile_class' => $permission]);
-                    $profilePermissions->save ($profilePermission);
-                }
-                
-                $batchEntriesTable = TableRegistry::get ('BatchEntries');
-                $batchEntry = $batchEntriesTable->newEntity (['business_unit_id' => $this->merchant ['bu_id'],
-																				  'update_table' => 'profiles',
-																				  'update_id' => $id,
-																				  'update_action' => 0,
-																				  'execution_time' => time ()]);
-                
-                $batchEntriesTable->save ($batchEntry);
-                $status = 0;
-            }
+            
+            $profile ['profile_desc'] = strtoupper ($profile ['profile_desc']);
+            $profilesTable->save ($profile);
         }
+		  
+        $profilePermissioinsTable = TableRegistry::get ('ProfilePermissions');
+		  
+        $id = intVal ($id);
+        $profilePermissioinsTable->deleteAll (['profile_id' => $id]);
         
-        $this->viewBuilder ()->setLayout ('ajax');
-        $this->set ('response', ['status' => $status]);
-
+        foreach ($permissions as $javaClass => $permission) {
+				
+				
+            if ($permission == 'off') {
+					 
+					 $this->debug ("permission... $javaClass $permission");
+					 
+					 $profilePermission = $profilePermissioinsTable->newEntity (['profile_id' => $id,
+																									 'profile_class' => $javaClass]);
+					 $profilePermissioinsTable->save ($profilePermission);
+				}
+        }
     }
 }
+
 ?>

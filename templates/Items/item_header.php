@@ -33,6 +33,18 @@
 </div>
 
 <div class="row g-1">
+	 <label for="item_desc" class="col-sm-3 form-label"><?= __ ('Image URL') ?></label>
+	 <div class="col-sm-9">
+		  <?=
+		  $this->input ('item_url',
+							 ['name' => 'item_url',
+							  'value' => isset ($item ['item_url']) ? $item ['item_url'] : '',
+							  'class' => 'form-control']);
+		  ?>
+	 </div>
+</div>
+
+<div class="row g-1">
  	 <div class="col-sm-12">
 		  <?=
 		  $this->Form->select ('department_id',

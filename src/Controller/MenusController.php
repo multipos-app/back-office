@@ -24,7 +24,12 @@ use App\Controller\PosAppController;
 require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 
 class MenusController extends PosAppController {
-    
+
+	 /**
+	 *
+	 *
+	 *
+	 **/
     public function menu ($configID, $menuName = null, $menuIndex = 0) {
 		  
         $posConfigTable = TableRegistry::get ('PosConfigs');
@@ -60,9 +65,20 @@ class MenusController extends PosAppController {
         $this-> set (['posConfig' => $posConfig,
 							 'menus' => $menus,
 							 'menuName' => $menuName,
-							 'menuIndex' => $menuIndex]);
+							 'menuIndex' => $menuIndex,
+							 'menuActions' => [null => __ ('Actions'),
+													 'menu_action_insert' => __ ('Insert submenu'),
+													 'menu_action_append' => __ ('Append submenu'),
+													 'menu_action_rename' => __ ('Rename'),
+													 'menu_action_resize' => __ ('Resize'),
+													 'menu_action_delete' => __ ('Delete')]]);
 	 }
 
+	 /**
+	 *
+	 *
+	 *
+	 **/
 	 public function update () {
 
 		  if (!empty ($this->request->getData ())) {
@@ -92,5 +108,152 @@ class MenusController extends PosAppController {
 				$this->save ('PosConfigs', $posConfig);
 				$this->ajax (['status' => 0]);
 		  }
+	 }
+	 
+	 /**
+	 *
+	 *
+	 *
+	 **/
+	 public function action ($action, $configID, $menuName, $menuIndex) {
+		  
+		  $posConfigsTable = TableRegistry::get ('PosConfigs');
+		  $posConfig = $posConfigsTable
+                   ->find ()
+                   ->where (['id' => $configID])
+                   ->first ();
+
+		  $config = json_decode ($posConfig ['config'], true);
+		  
+		  if (!empty ($this->request->getData ())) {
+
+				$update = $this->request->getData ();
+				
+				switch ($update ['action']) {
+
+					 case 'menu_action_insert':
+
+						  $index = $menuIndex > 0 ? $menuIndex - 1 : 0;
+						  
+						  $submenu = $this->submenu (strtoupper ($update ['menu_name']),
+															  '#555555',
+															  $update ['cols'],
+															  $update ['rows'] * $update ['cols']);
+						  						  						  						  
+						  array_splice ($config ['pos_menus'] [$menuName] ['horizontal_menus'], $index, 0, $submenu);
+						  break;
+						  
+					 case 'menu_action_append':
+						  
+						  $submenu = $this->submenu (strtoupper ($update ['menu_name']),
+															  '#555555',
+															  $update ['cols'],
+															  $update ['rows'] * $update ['cols']);
+						  						  						  						  
+						  array_splice ($config ['pos_menus'] [$menuName] ['horizontal_menus'], $menuIndex + 1, 0, $submenu);
+						  break;
+
+					 case 'menu_action_rename':
+						  
+						  $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['name'] = strtoupper ($update ['menu_name']);
+						  break;
+						  
+					 case 'menu_action_resize':
+
+						  $curSize = count ($config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons']);
+						  $newSize = intval ($update ['rows']) * intval ($update ['cols']);
+						  
+						  $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['width'] = $update ['cols'];
+
+						  if ($newSize > $curSize) {
+								
+								for ($i = 0; $i < ($newSize - $curSize); $i ++) {
+
+									 array_push ($config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons'], $this->empty ());
+								}
+						  }
+						  else {
+								
+								for ($i = 0; $i < ($curSize - $newSize); $i ++) {
+									 
+									 array_pop ($config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons']);
+								}
+						  }
+						  
+						  break;
+						  
+					 case 'menu_action_delete':
+						  break;
+				}
+				
+				$posConfig ['config'] = json_encode ($config);
+				$this->save ('PosConfigs', $posConfig);
+				
+				return $this->redirect ("/menus/menu/$configID/$menuName/$menuIndex");
+		  }
+
+		  $template = $action;
+		  
+		  switch ($action) {
+
+				case 'menu_action_insert':
+				case 'menu_action_append':
+					 
+					 $template = 'menu_action_submenu';
+					 break;
+		  }
+		  
+		  $actionsTitle = ['menu_action_insert' => __ ('Insert submenu'),
+								 'menu_action_append' => __ ('Append submenu'),
+								 'menu_action_rename' => __ ('Rename'),
+								 'menu_action_resize' => __ ('Resize'),
+								 'menu_action_delete' => __ ('Delete')];
+		  
+		  $this->set (['configID' => $configID,
+							'menuName' => $menuName,
+							'menuIndex' => $menuIndex,
+							'name' => $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['name'],
+		  					'action' => $action]);
+		  
+		  $builder = $this->viewBuilder ()
+								->setLayout ('ajax')
+								->disableAutoLayout ()
+								->setTemplatePath ('Menus')
+								->setTemplate ($template);
+
+		  $view = $builder->build ();
+		  $html = $view->render ();
+		  
+		  $this->ajax (['status' => 0,
+							 'title' => $actionsTitle [$action],
+							 'html' => $html]);
+	 }
+
+	 /**
+	 *
+	 *
+	 *
+	 **/
+	 private function submenu ($name, $color, $cols, $count) {
+		  
+		  $menu = ['type' => 'controls',
+					  'style' => 'outline',
+					  'name' => strtoupper ($name),
+					  'width' => $cols,
+					  'buttons' => []];
+	
+		  for ($i = 0; $i < $count; $i ++) {
+
+				$menu ['buttons'] [] = $this->empty ();;
+		  }
+
+		  return [$menu];
+	 }
+
+	 private function empty () {
+
+		  return ["text" => "",
+					 "class" => "Null",
+					 "color" => "transparent"];
 	 }
 }

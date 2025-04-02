@@ -31,8 +31,7 @@ $this->debug ('buttons null...');
 </div>
 
 <div class="row g-3 mt-3">
-	 <div class="col-sm-4 d-grid text-center"></div>
- 	 <div class="col-sm-4 d-grid text-center">
+ 	 <div class="col-sm-12 d-grid text-center">
 		  <button class="btn btn-primary" id="button_continue"><?= __ ('Continue') ?></button>
 	 </div>
 </div>

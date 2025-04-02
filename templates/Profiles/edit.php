@@ -12,7 +12,7 @@
  
 </style>
 
-<form id="profile_edit" name="profile_edit" method="post" action="/profiles/edit/<?= $profile ['id'] ?>">
+<form id="profile_form" name="profile_form" method="post" ">
 
 	 <div class="row g-1 m-3">
 		  <label for="profile_desc" class="col-sm-1 form-label"><?= __('Profile') ?></label>
@@ -32,8 +32,6 @@
 		  
 		  <?php
 		  foreach ($categories as $id => $category) {
-
-				$this->debug ("category... " . $category ['name'] . ' ' . count ($category ['pos_controls']));
 				
 				if (count ($category ['pos_controls']) == 0) continue;
 				
@@ -55,7 +53,8 @@
 				
 				<div class="form-check form-switch">
 					 
-					 <input type="checkbox" class="form-check-input" id="<?= $control ['class'] ?>" name="<?= $control ['class'] ?>"<?= $checked ?>>
+					 <input type="hidden" name="permissions[<?= $control ['class'] ?>]" value="off">
+					 <input type="checkbox" class="form-check-input profile-modify" id="<?= $control ['class'] ?>" name="permissions[<?= $control ['class'] ?>]"<?= $checked ?>>
 					 <label class="grid-label" for="<?= $control ['class'] ?>"><?= $control ['description'] ?></label>
 					 
 				</div>
@@ -64,11 +63,57 @@
 		  }
 		  }
 		  ?>
-
-		  <div class="text-center grid-span-all mt-3">
-				<button type="submit" class="btn btn-success">Save</button>
-		  </div>
 	 </div>
 	 
+	 <!-- save changes -->
+	 
+	 <div class="grid-span-all">
+		  <div class="row g-3 mt-5">
+				<div class="col-sm-9"></div>
+ 				<div class="col-sm-3 d-grid">
+					 <button type="submit" class="btn btn-secondary" id="save_profile"><?= __ ('Save changes') ?></button>
+				</div>
+		  </div>
+	 </div>
 
 </form>
+
+<script>
+
+ let formModified = false;
+ let profileID = <?= $profile ['id'] ?>;
+
+ $('form :input').change (function() {
+     formModified = true;
+ 	  $('#save_profile').removeClass ('btn-secondary');
+	  $('#save_profile').addClass ('btn-success');
+ });
+
+ window.onbeforeunload = function(event) {
+     if (formModified) {
+			return "Are you sure you want to leave? Changes you made may not be saved.";
+     }
+ };
+
+ $('#profile_form').submit (function (e) {
+	  
+	  e.preventDefault ();
+	  formModified = false;
+
+	  let data = new FormData (this);
+
+	  console.log (data);
+
+	  $.ajax ({url: `/profiles/edit/${profileID}`,
+				  type: 'POST',
+				  data: data,
+				  processData: false,
+				  contentType: false,
+				  success: function (data) {
+						
+						window.location = '/profiles';
+				  }
+		  });
+ });
+
+</script>

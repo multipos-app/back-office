@@ -29,7 +29,7 @@
 	 </div>
 
 	 <div class="col-md-12">
-		  <textarea class="form-control" name="message" id="contact_message" rows="6" placeholder="<?= __ ('What\'s on your mind?') ?>"></textarea>
+		  <textarea class="form-control" name="message" id="message" rows="6" placeholder="<?= __ ('What\'s on your mind?') ?>"></textarea>
 	 </div>
 	 
 	 <div class="col-md-12 text-center">

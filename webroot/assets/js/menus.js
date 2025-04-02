@@ -25,7 +25,6 @@ const menus = {
 		  $('#modal_title').html (title);
 		  $('#modal_content').html ('');
 		  $('#modal_content').html (content);
-
 	 },
 		  
 	 /**
@@ -53,7 +52,7 @@ const menus = {
 					  }
 					 });
 	 },
-
+	 
 	 /**
 	  *
 	  * draw the menu buttons
@@ -62,13 +61,21 @@ const menus = {
 	 
 	 render: function (menu) {
 
-		  let html = '';
+		  console.log (menu);
+		  
 		  let pos = 0;
-		  
-		  let width = $('#cols').val ();
-		  $('#button_grid').css('grid-template-columns', `repeat(${width}, 1fr)`);
-		  
+		  let width = curr.width;
+		  let html = '<table class="table button-menu"><tbody>';
+		  let row = '';
+		  		  
 		  $(menu).each (function (i, b) {
+				
+				console.log (`index... ${i}`);
+				
+				if ((i % width) == 0) {
+					 
+					 html += '<tr>';
+				}
 				
 				let text = '';
 				let bclass = 'empty-button';
@@ -80,18 +87,47 @@ const menus = {
 				
 				let color = $.inArray ('color', b) ? b.color : '#fff';
 				
-				html += `<div id="${pos}" ` +
-					 `class="${bclass}" ` +
+				html +=
+					 `<td id="b_${pos}" ` +
+					 `class="${bclass} button-drop menu-button"` +
 					 `style="background-color: ${color};" ` +
 					 `onclick="menus.select (${pos})" ` +
-					 `ondblclick="menus.button (${pos})" ` +
-					 '>' +
+					 `ondblclick="menus.button (${pos})">` +
 					 text +
-					 '</div>';
+					 '</td>';
+
+				if ((i % width) == (width - 1)) {
+					 
+					 html += '</tr>';
+				}
+				
 				pos ++;
 		  });
+
+		  html += '</tbody></table>';
 		  
 		  $('#button_grid').html (html);
+
+		  $(menu).each (function (i, b) {
+
+				var drop = $(`#b_${i}`);
+				drop.droppable ({accept: "*", scope: "drop"});
+
+				drop.on ('dragenter', function (e) {
+
+					 console.log ('dragenter... ');
+				});
+				
+				drop.droppable ({
+					 drop: function (event, ui) {
+						  
+						  console.log ();
+					 }
+				});
+		  });
+		  
+		  $("#draggable" ).draggable ();
+
 	 },
 	 
 	 /**
@@ -113,10 +149,11 @@ const menus = {
 
 	 button: function (p) {
 
-		  // if button class = Null... see buttons controller index... if button class == Null post position... to add () /buttons/add
+		  // if button class == Null post position... to add () /buttons/add
 
 		  console.log (curr.buttons [p]);
-		  
+		  menus.modified ();
+
 		  pos = p;
 		  data = {config_id: configID,
 					 menu_name: menuName,
@@ -132,14 +169,9 @@ const menus = {
 				success: function (data) {
 					 
 					 $('#modal_content').html ('');
-					 // var modal = new bootstrap.Modal (document.getElementById ("menus_modal"), {});
-					 // modal.hide ();
-					 
 					 data = JSON.parse (data);					 
 					 $('#modal_content').html (data.html);
-					 
 					 menus.modal.show ();
-					 // menus.modified ();
 				}
 		  });
 	 },
@@ -155,11 +187,11 @@ const menus = {
 
 		  if (selected >= 0) {
 				
-				$(`#${selected}`).removeClass ("select-button");
+				$(`#b_${selected}`).removeClass ("select-button");
 		  }
 		  
 		  selected = pos;
-		  $(`#${pos}`).addClass ("select-button");
+		  $(`#b_${pos}`).addClass ("select-button");
 
 		  console.log (curr.buttons [pos]);
 	 },
@@ -246,75 +278,6 @@ const menus = {
 
 	 /**
 	  *
-	  * Menu actions
-	  *
-	  */
-
-	 actions: function () {
-
-		  action = $('#menu_actions').val ();
-
-		  switch (action) {
-
-		  case 'add_before':
-		  case 'add_after':
-				
-				/* addMenu (c, menu, $('#' + c + '_action').val ());*/
-				break;
-				
-		  case 'rename':
-				
-				/* posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['name'] = $('#' + c + '_name').val ().toUpperCase ();*/
-				break;
-
-		  case 'resize':
-
-				curSize = curr.buttons.length;
-				newSize = $('#rows').val () * $('#cols').val ();
-				
-				if (newSize < curSize) {
-
-					 if (!confirm ('New size may remove some existing buttons.')) {
-						  
-						  return;
-					 }
-				}
-
-				curr.width = $('#cols').val ();
-				
-				if (newSize < curSize) {
-					 
-					 posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['buttons'].length = newSize;
-				}
-				else {
-					 
-	 				 for (i = 0; i < (newSize - curSize); i ++) {
-						  
-						  curr.buttons.push (empty);
-					 }
-				}
-				
-				menus.render (curr.buttons);
-				
-				break;
-				
-		  case 'delete':
-
-				/* if (confirm ('Are you sure you want to delete ' + posConfig.config ['pos_menus'] [c] ['horizontal_menus'] [menu] ['name'])) {
-					
-					posConfig.config ['pos_menus'] [c] ['horizontal_menus'].splice (menu, 1);
-					menu = 0;
-					}*/
-				break;
-		  }
-
-		  menus.modified ();
-		  menus.render (curr.buttons);
-		  $('#menu_actions').val (null);
-	 },
-
-	 /**
-	  *
 	  * mark menu as changed
 	  *
 	  **/
@@ -333,6 +296,7 @@ const menus = {
  *
  **/
 
+console.log (curr);
 menus.render (curr.buttons);
 $("body").bind ("keydown", menus.keyDown);
 
@@ -354,4 +318,22 @@ function rgbToHex (rgb) {
 	 return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 }
 
-console.log (`modal... ${menus.modal}`);
+/**
+ *
+ * modify the current menu
+ *
+ **/
+
+ $('#menu_actions').change (function () {
+				 
+	  $.ajax ({
+			url: `/menus/action/${$('#menu_actions').val ()}/${configID}/${menuName}/${menuIndex}`,
+			type: "GET",
+			success: function (data) {
+				 
+				 data = JSON.parse (data);
+				 $('#modal_title').html (data.title);
+				 $('#modal_content').html (data.html);
+			}
+	  });
+ });

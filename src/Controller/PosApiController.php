@@ -84,6 +84,60 @@ class PosApiController extends AppController {
         $batch ['update_count'] += 1;
         $batchTable->save ($batch);
 	 }
+	 
+    public function itemsJson () {
+		  
+        if (!empty ($this->request->getData ())) {
+
+				
+            $json = $this->request->getData ();
+				
+				$this->debug ($json);
+				
+				$this->dbconnect ($json ['dbname']);
+				
+            $departmentTable = TableRegistry::get ('Departments');
+            $itemsTable = TableRegistry::get ('Items');
+            $itemPricesTable = TableRegistry::get ('ItemPrices');
+            $invItemsTable = TableRegistry::get ('InvItems');
+
+            $departmentTable->deleteAll ([]);
+            $itemsTable->deleteAll ([]);
+            $itemPricesTable->deleteAll ([]);
+            $invItemsTable->deleteAll ([]);
+
+            foreach ($json ['departments'] as $d) {
+
+                $dept = $departmentTable->newEntity (['department_desc' => strtoupper ($d ['desc'])]);
+                $dept = $departmentTable->save ($dept);
+					 
+                $sku = $d ['start_sku'];
+					 
+                foreach ($d ['items'] as $i) {
+
+                    $item = $itemsTable->newEntity (['department_id' => $dept ['id'],
+                                                     'sku' => strval ($sku),
+                                                     'item_desc' => strtoupper ($i ['item_desc'])]);
+
+                    $item = $itemsTable->save ($item);
+
+                    $itemPrice = $itemPricesTable->newEntity (['item_id' => $item ['id'],
+																					'business_unit_id' => $json ['business_unit_id'],
+																					'price' => floatval ($i ['price']),
+                                                               'pricing' => '{"class":"standard","price":"'.floatval ($i ['price']).'","cost":"0.00"}']);
+						  
+                    $itemPrice = $itemPricesTable->save ($itemPrice);
+						  
+                    $invItem = $invItemsTable->newEntity (['item_id' => $item ['id'],
+ 																			  'business_unit_id' => $json ['business_unit_id']]);
+						  
+                    $invItemsTable->save ($invItem);
+ 						  $sku ++;
+               }
+            }
+        }
+		  exit;
+    }
 
  	 protected function notifyPOS ($merchantID) {
 		  

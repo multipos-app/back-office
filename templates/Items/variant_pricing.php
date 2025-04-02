@@ -1,5 +1,4 @@
 
-
 <form class="row g-1" id="<?= $item ['template']?>_edit">
  
 	 <input type="hidden" name="id" value="<?= $item ['id'] ?>">

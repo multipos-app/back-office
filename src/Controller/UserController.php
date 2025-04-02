@@ -143,6 +143,8 @@ class UserController extends AppController {
 		  
 		  if (!empty ($this->request->getData ())) {
 
+				$this->debug ($this->request->getData ());
+				
 				$contactsTable = TableRegistry::get ('MerchantContacts');
 				
 				$contact = $this->request->getData ();

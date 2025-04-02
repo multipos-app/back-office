@@ -1,5 +1,5 @@
 
-<form class="row g-1" id="<?= $item ['template']?>_edit">
+<form class="row g-1" id="<?= $item ['template']?>_edit" name="<?= $item ['template']?>_edit">
 	 
 	 <?php include ('item_header.php')  ?>
 
@@ -110,7 +110,6 @@
  
  $(".currency-format").mask ("#####0.00", {reverse: true});
  $(".integer-format").mask ("#######0");
-
  
  item = <?= json_encode ($item) ?>;
  linkItem = null;

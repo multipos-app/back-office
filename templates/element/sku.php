@@ -27,7 +27,8 @@ else {
 	 <div class="col-sm-5">
 		  <?=
 		  $this->Form->select ("auto_sku",
-									  [null => __ ('Create unique 5, 7 or 8 digit SKU'),
+									  [null => __ ('Create unique 4, 5, 7 or 8 digit SKU'),
+										4 => 4,
 										5 => 5,
 										7 => 7,
 										8 => 8],

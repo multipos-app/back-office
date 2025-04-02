@@ -93,9 +93,10 @@ class ItemsController extends PosAppController {
                ->find ()
 					->where ($where)
 					->join ($join)
+					->order (['sku asc'])
                ->contain (['ItemPrices', 'InvItems']);
         }
-		  		  
+		  
         $items = $this->paginate ($q);
 		  
         $departments = [null => __ ('Department')];
@@ -139,9 +140,11 @@ class ItemsController extends PosAppController {
     public function edit ($id, $pricing = 'standard') {
 
 		  $item = null;
+
+		  $this->debug ($this->request->getData ());
 		  
 		  if (!empty ($this->request->getData ())) {
-
+				
 				$update = $this->update ($id, $this->request->getData ());
 
 				$this->ajax (['status' => 0,
@@ -192,8 +195,7 @@ class ItemsController extends PosAppController {
 		  $buID = $this->merchant ['business_units'] [$this->merchant ['bu_index']];
 		  $buIndex = $this->merchant ['bu_index'];
         $query = TableRegistry::get ('TaxGroups')->find ()->contain (['Taxes']);
-        $taxGroups = [null => 'TAX',
-                      0 => __ ('Tax Exempt')];
+        $taxGroups = [0 => __ ('Tax Exempt')];
 		  
         foreach ($query as $taxGroup) {
             
@@ -262,7 +264,7 @@ class ItemsController extends PosAppController {
      */
     
     public function update ($id, $item) {
-
+		  
 		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 		  
 		  $itemsTable = TableRegistry::get ('Items');
@@ -338,9 +340,12 @@ class ItemsController extends PosAppController {
 						  $invItemsTable->save ($invItem);
 					 }
 				}
-
+				
+				// get an image
+				
+				$this->image ($item);
+				
 				$this->batch ($newItem ['id']);
-
 				return $newItem;
 		  }
 		  else {
@@ -458,7 +463,6 @@ class ItemsController extends PosAppController {
 				
 				if (isset ($item ['item_links']) && (count ($item ['item_links'])) > 0) {
 					 
-					 
 					 foreach ($item ['item_links'] as $itemLink) {
 
 						  $il = ['item_id' => $id,
@@ -469,6 +473,10 @@ class ItemsController extends PosAppController {
 						  $itemLinksTable->save ($link);
 					 }
 				}
+
+				// get an image
+				
+				$this->image ($item);
 
 				$this->batch ($item ['id']);
 				return $item;
@@ -484,9 +492,9 @@ class ItemsController extends PosAppController {
     public function disable ($id) {
         
         $status = 1;
-		        
+		  
         if ($id > 0) {
-		
+				
             TableRegistry::get ('Items')->updateAll (['enabled' => 0],
 																	  ['id' => $id]);
 				$this->batch ($id);
@@ -545,49 +553,6 @@ class ItemsController extends PosAppController {
         $this->set (['response' => $response]);
     }
 	 
-
-    function jsonImport () {
-		  
-        if (!empty ($this->request->getData ())) {
-				
-            $json = json_decode ($this->request->getData () ['json'], true);
-				
-            $departmentTable = TableRegistry::get ('Departments');
-            $itemsTable = TableRegistry::get ('Items');
-            $itemPricesTable = TableRegistry::get ('ItemPrices');
-
-            $departmentTable->deleteAll ([]);
-            $itemsTable->deleteAll ([]);
-            $itemPricesTable->deleteAll ([]);
-
-            foreach ($json as $d) {
-
-                $dept = $departmentTable->newEntity (['department_desc' => strtoupper ($d ['desc']),
-                                                      'department_no'  => $d ['department_no'],
-                                                      'department_type' => 2]);
-                $dept = $departmentTable->save ($dept);
-                $sku = $dept ['department_no'];
-                foreach ($d ['items'] as $i) {
-
-                    $sku ++;
-                    $item = $itemsTable->newEntity (['department_id' => $dept ['id'],
-                                                     'sku' => strval ($sku),
-                                                     'item_desc' => strtoupper ($i ['desc'])]);
-
-                    $item = $itemsTable->save ($item);
-
-                    $itemPrice = $itemPricesTable->newEntity (['item_id' => $item ['id'],
-                                                               'pricing' => '{"class":"standard","price":"'.floatval ($i ['price']).'","cost":"0.00"}']);
-						  
-                    $itemPrice = $itemPricesTable->save ($itemPrice);
-                }       
-
-            }
-				
-        }
-
-    }
-
     /**
      *
      * create linked item
@@ -691,7 +656,7 @@ class ItemsController extends PosAppController {
      **/
 
     private function batch ($id) {
-        				
+        
 		  $this->addBatch ('items', $id);
 		  $this->notifyPos ();
     }
@@ -902,6 +867,48 @@ class ItemsController extends PosAppController {
 
 		  $item ['template'] = 'variant_pricing';
 		  return $item;
-	 }	 
+	 }
+	 
+	 /**
+	  *
+	  * get and save an image
+	  *
+	  **/
+	 
+	 private function image ($item) {
+
+		  $this->debug ('image...');
+		  $this->debug ($item);
+		  
+	 	  if (isset ($item ['item_url']) && (strlen ($item ['item_url']) > 0)) {
+
+				$merchantID = $this->merchant ['merchant_id'];
+				$sku = $item ['sku'];
+				$tmpfname = tempnam ("/tmp", "img-");
+				$fp = fopen ($tmpfname, 'wb');
+				
+				$ch = curl_init ($item ['item_url']);
+				curl_setopt ($ch, CURLOPT_FILE, $fp);
+				curl_setopt ($ch, CURLOPT_HEADER, 0);
+				$result = curl_exec ($ch);
+				
+				$this->debug ("image load... $result");
+				
+				curl_close ($ch);
+				fclose ($fp);
+				
+				$dir = "/data/images/$merchantID/";
+				
+				if (!file_exists ($dir)) {
+					 
+					 mkdir ($dir, 0755, true);
+				}
+				
+				$cmd = "/usr/bin/convert $tmpfname -resize \"150x200!\" /data/images/$merchantID/$sku.png";
+				$result = exec ($cmd);
+				
+				$this->debug ("$cmd... $result");
+		  }
+	 }
 }
 ?>
