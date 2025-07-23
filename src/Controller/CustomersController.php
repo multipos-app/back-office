@@ -28,23 +28,36 @@ class CustomersController extends PosAppController {
     public function index (...$args) {
 
         $customers = [];
-        $q = null;
-        
-        if (count ($args) > 1) {                        
-            
-            $q = TableRegistry::get ('Customers')
-										->find ()
-										->where (['id' => $args [1]]);
-        }
-        else {
-            
-            $q = TableRegistry::get ('Customers')
-										->find ('all');
-        }
+        $where = [];
+        $q = false;
 
+		  if (count ($args) > 0) {
+            
+            switch ($args [0]) {
+                    
+					 case 'id':
+						  
+						  $where [] = ['id' => $args [1]];
+						  break;
+						  
+					 case 'search':
+						  
+						  $search = $args [1];
+                    $where [] = ['or' => ["fname like '$search%'",
+														"lname like '$search%'",
+														"phone like '%$search%'",
+														"email like '%$search%'"]];
+						  
+						  break;
+				}
+		  }
+
+		  $q = TableRegistry::get ('Customers')
+								  ->find ()
+								  ->where ($where);
+		  
         foreach ($this->paginate ($q) as $customer) {
             
-            $customer ['phone'] = $this->phoneFormat ($customer ['phone']);
             $customer ['last_update'] = date ('M d', strtotime ($customer ['last_update']));
 				$customers [] = $customer;
         }
@@ -79,7 +92,8 @@ class CustomersController extends PosAppController {
 								 'addr_2' => '',
 								 'city' => '',
 								 'state' => '',
-								 'postal_code' => ''];
+								 'postal_code' => '',
+								 'uuid' => $this->uuid ()];
         }
         else {
             
@@ -107,9 +121,9 @@ class CustomersController extends PosAppController {
     private function update ($id, $customer, $customersTable) {
 
         $status = -1;
-      				
+        
         if ($id > 0) {
-                
+            
             $customer = $customersTable->find ()
 													->where (['id' => $id])
 													->first ();
@@ -126,7 +140,7 @@ class CustomersController extends PosAppController {
                 $customer ['state'] = strtoupper ($this->request->getData () ['state']);
                 $customer ['postal_code'] = $this->request->getData () ['postal_code'];
 				}
-       }
+        }
         else {
 
             $customer = $customersTable->newEntity (['fname' => strtoupper ($this->request->getData () ['fname']),
@@ -137,7 +151,8 @@ class CustomersController extends PosAppController {
                                                      'addr_2' => strtoupper ($this->request->getData () ['addr_2']),
                                                      'city' => strtoupper ($this->request->getData () ['city']),
                                                      'state' => strtoupper ($this->request->getData () ['state']),
-                                                     'postal_code' => $this->request->getData () ['postal_code']]);
+                                                     'postal_code' => $this->request->getData () ['postal_code'],
+																	  'uuid' => $this->uuid ()]);
         }
         $this->save ('Customers', $customer);
     }
@@ -159,8 +174,6 @@ class CustomersController extends PosAppController {
             $batchEntryTable = TableRegistry::get ('BatchEntries');
             $batchEntry = $batchEntryTable->newEntity ($batchEntry);
             $batchEntryTable->save ($batchEntry);
-            
-            $this->Flash->success (__('The {0} customer has been deleted.', $customer->customerDesc));
             return $this->redirect (['action' => 'index']);
         }
     }
@@ -318,8 +331,8 @@ class CustomersController extends PosAppController {
 
 				
  				/* $customer ['name'] = strtoupper ($customer ['name']);*/
- 				$customer ['fname'] = strtoupper ($customer ['fname']);
- 				$customer ['lname'] = strtoupper ($customer ['lname']);
+ 				$customer ['fname'] = (isset ($customer ['fname'])) ? strtoupper ($customer ['fname']) : '';
+ 				$customer ['lname'] = (isset ($customer ['lname'])) ? strtoupper ($customer ['lname']) : '';
 
 				/* 
 				 * 				$customer ['addr_1'] = strtoupper ($customer ['addr_1']);

@@ -1,44 +1,76 @@
- <?php
 
-$this->debug ('buttons sale discount...');
 
-?>
-
-<input type="hidden" name="class" value="SaleDiscount">
-
-<div class="row mb-3">
-    <label for="params[receipt_text]" class="col-sm-4 col-form-label"><?= __ ('Discount description') ?></label>
-    <div class="col-sm-8">
-		  
-		  <?php 
-		  echo $this->input ('receipt_text',
-									['name' =>'params[receipt_text]',
-									 'value' => $button ['params'] ['receipt_text'],
-									 'class' => 'form-control',
-									 'placeholder' => '',
-									 'data-bs-toggle' => 'tooltip',
-									 'data-bs-placement' => 'top',
-									 'title' => __ ('Receipt text')]);
-		  
-		  ?>
-		  
-	 </div>
-</div>
-
-<div class="row mb-3">
-    <label for="params[percent]" class="col-sm-4 col-form-label"><?= __ ('Discount percent') ?></label>
-    <div class="col-sm-8">
-		  
-		  <?php 
-		  echo $this->input ('percent',
-									['name' => 'params[percent]',
-									 'value' => $button ['params'] ['percent'],
-									 'class' => 'form-control percent-format',
-									 'placeholder' => '0',
-									 'data-bs-toggle' => 'tooltip',
-									 'data-bs-placement' => 'top',
-									 'title' => __ ('Amount of discount as percent')]);
-		  
+<div class="row g-1 mt-3 ">
+	 <label for="recept_text" class="col-sm-3 form-label"><?= __ ('Receipt description') ?></label>
+	 <div class="col-sm-9">
+		  <?=
+		  $this->input ('receipt_text',
+							 ['name' => 'receipt_text',
+							  'id' => 'receipt_text',
+							  'class' => 'form-control']);
 		  ?>
 	 </div>
 </div>
+
+<div class="row g-1 mt-3">
+	 <label for="value_type" class="col-sm-3 form-label"><?= __ ('Discount value') ?></label>
+ 	 <div class="col-sm-9">
+		  <select id="discount_type" name="discount_type" class="form-select">
+				<option disabled selected></option> 
+				<option value="fixed">Fixed value</option>
+				<option value="prompt">Prompt cashier for value</option>
+		  </select>
+	 </div>
+</div>
+
+<div class="row g-1 mt-3">
+	 <label for="discount_percent" class="col-sm-3 form-label"><?= __ ('Percent') ?></label>
+	 <div class="col-sm-9">
+		  <?=
+		  $this->input ('discount_percent',
+							 ['name' =>'discount_percent',
+							  'id' => 'discount_percent',
+							  'class' => 'form-control percent-format',
+							  'dir' => 'rtl',
+							  'placeholder' => '0']);
+		  ?>
+	 </div>
+</div>
+
+<div class="row g-3 mt-3">
+	 <div class="col-sm-9 d-grid text-center"></div>
+ 	 <div class="col-sm-3 d-grid text-center">
+		  <button class="btn btn-success" id="button_complete" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
+	 </div>
+</div>
+
+<script>
+ 
+ $(".percent-format").mask ("##0");
+ 
+ if (isLocal) {
+
+	  let params = curr.buttons [pos].params;
+	  
+	  console.log ('local...');
+	  console.log (params);
+
+	  $('#receipt_text').val (params.receipt_text);
+	  $('#discount_type').val (params.discount_type);
+	  $('#discount_percent').val (params.percent);
+ }
+
+ $('#button_complete').click (function (e) {
+	  
+	  curr.buttons [pos] = {'class': 'SaleDiscountPercent', 
+									text: $('#text').val (),
+									color: curr.buttons [pos].color,
+									params: {receipt_text: $('#receipt_text').val (),
+												discount_type: $('#discount_type').val (),
+												percent: $('#discount_percent').val ()}};
+	  
+	  menus.render (curr.buttons);
+ });
+
+ 
+</script>

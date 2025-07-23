@@ -1,20 +1,14 @@
 
 <form class="row g-1" id="<?= $item ['template']?>_edit">
+	 
+	 <input type="hidden" name="id" value="<?= $item ['id'] ?>">
+	 <input type="hidden" name="item_price[class]" value="open">
+	 <input type="hidden" name="inv_item[package_quantity]" value="0">
+	 <input type="hidden" name="inv_item[on_hand_req]" value="0">
+	 <input type="hidden" name="inv_item[on_hand_count]" value="0">
 
 	 <?php include ('item_header.php')  ?>
-
- 	 <div class="row g-1">
- 		  <div class="col-sm-12">
-				<?=
-				$this->Form->select ('item_price[tax_group_id]',
-											$taxGroups,
-											['value' => $item ['item_price'] ['tax_group_id'],
-											 'class' => 'form-select',
-											 'label' => false,
-											 'required' => 'required'])
-				?>
-		  </div>
-	 </div>
+	 
 	 <div class="row g-1 mt-3">
 		  <div class="col-sm-12 text-center">
 				<h5><?= __ ('Inventory') ?></h5>

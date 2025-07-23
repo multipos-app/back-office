@@ -7,7 +7,8 @@ if (strlen ($sku) > 0) { ?>
 		  <?= $this->input ('sku',
 								  ['name' => 'sku',
 									'value' => $sku,
-									'class' => 'form-control'])
+									'class' => 'form-control',
+									'required' => 'required'])
 		  ?>
 	 </div>
 <?php
@@ -21,23 +22,23 @@ else {
 								  ['id' => 'sku',
 									'name' => 'sku',
 									'value' => $sku,
-									'class' => 'form-control'])
+									'class' => 'form-control',
+									'required' => 'required'])
 		  ?>
 	 </div>
 	 <div class="col-sm-5">
 		  <?=
-		  $this->Form->select ("auto_sku",
+		  $this->Form->select ("generate_sku",
 									  [null => __ ('Create unique 4, 5, 7 or 8 digit SKU'),
 										4 => 4,
 										5 => 5,
 										7 => 7,
 										8 => 8],
-									  ['id' => 'auto_sku',
+									  ['id' => 'generate_sku',
 										'value' => $item ['sku'],
 										'class' => 'form-select',
 										'label' => false])
 		  ?>
-	 </div>
 	 </div>
 <?php
 }
@@ -45,10 +46,10 @@ else {
 
 <script>
  
- $('#auto_sku').change (function () {
+ $('#generate_sku').change (function () {
 	  
 	  $.ajax ({
-			url: "/items/auto-sku/" + $('#auto_sku').val (),
+			url: "/items/sku/" + $('#generate_sku').val (),
 			type: "GET",
 			success: function (data) {
 				 

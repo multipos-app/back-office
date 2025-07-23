@@ -192,9 +192,9 @@ class SearchController extends PosAppController {
         $this->set (['response' => $response]);
     }
 
-    public function customers ($field, $search) {
+    public function customers ($search) {
 
-        $this->debug ("customers... $field $search");
+        $this->debug ("customers... $search");
         
         $this->viewBuilder ()->setLayout ('ajax');
         $response = [];
@@ -222,7 +222,7 @@ class SearchController extends PosAppController {
 					 
 					 foreach (['fname', 'lname', 'phone', 'email'] as $f) {
 
-						  if (strlen ($customer [$f])) {
+						  if ($customer [$f] && strlen ($customer [$f])) {
 
 								if ($f == 'phone') {
 									 

@@ -27,6 +27,14 @@ for ($day = 0; $day < 7; $day ++) {
 }
 ?>
 
+<div class="row g-1 m-3">
+	 
+	 <?php 
+	 echo $this->element ('period_controls', ['url' => '/hourly']);
+	 ?>
+	 
+</div>
+
 <table class="table table-hover">
 	 
 	 <thead align="right">

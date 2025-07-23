@@ -19,7 +19,8 @@ $this->debug ('buttons view item add...');
 </div>
 
 <div class="row g-3 mt-3">
- 	 <div class="col-sm-12 d-grid text-center">
+	 <div class="col-sm-9 d-grid text-center"></div>
+ 	 <div class="col-sm-3 d-grid text-center">
 		  <button class="btn btn-primary" id="button_continue"><?= __ ('Continue') ?></button>
 	 </div>
 </div>
@@ -35,19 +36,12 @@ $this->debug ('buttons view item add...');
 				 pos: <?= $pos ?>,
 				 item_opts: $('#item_opts').val ()};
 
-	  console.log ('add_item... /buttons/item-type/');
-	  console.log (data);
-
 	  $.ajax ({url: '/buttons/item-type/',
 				  type: 'POST',
 				  data: data,
 				  success: function (data) {
 						
 						data = JSON.parse (data);
-						
-						console.log ('item select... ');
-						console.log (data);
-
 						menus.setModal (data.text, data.html);
 				  }
 	  });

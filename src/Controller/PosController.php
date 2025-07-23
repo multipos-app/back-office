@@ -215,18 +215,17 @@ class PosController extends PosApiController {
                 
             default:
                 
-						  /* $t = $pendingTicketTable
-							*    ->find ()
-							*    ->where (['uuid' => $this->request->getData () ['ticket'] ['uuid']])
-							*    ->first ();
-							*             
-							* if ($t) {
-							*                 
-							*     $this->error ('pos controller duplicate ticket... ' . $this->request->getData () ['ticket'] ['pos_no'] . ' ' . $ticketNo, 'debug');
-							*     $this->jsonResponse (['status' => 0,
-							*                           'status_text' => 'duplicate ticket']);
-							*     return;
-							* }*/
+						  $t = $pendingTicketTable->find ()
+														  ->where (['uuid' => $this->request->getData () ['ticket'] ['uuid']])
+														  ->first ();
+						  
+						  if ($t) {
+								
+								$this->error ('pos controller duplicate ticket... ' . $this->request->getData () ['ticket'] ['pos_no'] . ' ' . $ticketNo, 'debug');
+								$this->jsonResponse (['status' => 0,
+															 'status_text' => 'duplicate ticket']);
+								return;
+						  }
             }
 
             $pt = ['business_unit_id' => $this->request->getData () ['ticket'] ['business_unit_id'],
@@ -501,7 +500,84 @@ class PosController extends PosApiController {
 		  
         $this->jsonResponse (['status' => 0]);
 	 }
+	 
+	 function updateTicket () {
+		  
+        $this->debug ('update ticket... ');
+		  if (!empty ($this->request->getData ())) {
 
+				$update = $this->request->getData ();
+            $this->debug ($update);
+				
+            $this->dbconnect ('m_' . $update ['merchant_id']);
+
+				switch ($update ['action']) {
+
+					 case 'clerk_update':
+						  
+						  TableRegistry::get ('Tickets')->updateAll (['clerk_id' => $update ['clerk_id']],
+																					['uuid' => $update ['uuid']]);
+						  break;
+				}		  
+		  }
+		  
+        $this->ajax (['status' => 0]);
+	 }
+	 
+	 function updateCustomer () {
+		  		  
+		  if (!empty ($this->request->getData ())) {
+
+				$merchantID = $this->request->getData () ['merchant_id'];
+				
+				$update = $this->request->getData () ['customer'];
+				
+            $this->dbconnect ('m_' . $this->request->getData () ['merchant_id']);
+				$customersTable = TableRegistry::get ('Customers');
+
+				$customer = $customersTable->find ()
+													->where (['uuid' => $update ['uuid']])
+													->first ();
+
+				if ($customer) {
+
+					 $customer ['fname'] = strtoupper ($update ['fname']);
+					 $customer ['lname'] = strtoupper ($update ['lname']);
+					 $customer ['email'] = strtolower ($update ['email']);
+					 $customer ['phone'] = $update ['phone'];
+					 $customer ['addr_1'] = strtoupper ($update ['addr_1']);
+					 $customer ['city'] = strtoupper ($update ['city']);
+					 $customer ['state'] = strtoupper ($update ['state']);
+					 $customer ['postal_code'] = strtoupper ($update ['postal_code']);
+
+					 $customersTable->save ($customer);
+				}
+				else {
+
+					 unset ($update ['id']);
+					 $customer = $customersTable->newEntity ($update);
+					 $customersTable->save ($customer);
+				}
+
+				$this->batch ('customers', $customer ['id']);
+		  }
+		  
+        $this->ajax (['status' => 0]);
+	 }
+	 
+	 function posConfig () {
+		  
+		  if (!empty ($this->request->getData ())) {
+				
+				$this->debug ($this->request->getData ());
+		  }
+		  else {
+
+				$this->debug ("pos info error...");
+		  }
+        $this->ajax (['status' => 0]);
+	 }
 }
+
 
 ?>

@@ -12,19 +12,6 @@
 
 	 <?php include ('item_header.php')  ?>
 
-	 <div class="row g-1">
- 		  <div class="col-sm-12">
-				<?=
-				$this->Form->select ('item_price[tax_group_id]',
-											$taxGroups,
-											['value' => $item ['item_price'] ['tax_group_id'],
-											 'class' => 'form-select',
-											 'label' => false,
-											 'required' => 'required'])
-				?>
-		  </div>
-	 </div>
-
 	 <div class="row g-1" id="variants_table"></div>
 	 
 	 <div class="row g-1">

@@ -8,7 +8,7 @@ $this->debug ('buttons null...');
 <div class="row g-3">
 	 
 	 <div class="col-sm-12">
-		  <select name="class" id="button_type" class="form-select" required="required">
+		  <select name="class" id="class" class="form-select" required="required">
 				
 				<option value="null"><?= __ ('Select type of button') ?></option>
 				
@@ -43,7 +43,7 @@ $this->debug ('buttons null...');
 				 menu_name: '<?= $menuName ?>',
 				 menu_index: <?= $menuIndex ?>,
 				 pos: <?= $pos ?>,
-				 button_type: $('#button_type').val ()};
+				 class: $('#class').val ()};
 	  
 	  $.ajax ({url: '/buttons/select-control/',
 				  type: 'POST',

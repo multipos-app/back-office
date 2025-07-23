@@ -1,78 +1,46 @@
 
-<style>
- 
- .button {
-
-	  height: 100px;
-	  width: 120px;
-	  font-size: 1.0em;
-	  resize: none;
-	  background-color: #679ACD;
- }
- 
- .color-grid {
-
-	  display: grid !important;
-     width: 100%;
-     grid-template-rows: auto;
-     grid-template-columns: repeat(8, 1fr);;
-	  grid-row-gap: 3px;
-	  grid-column-gap: 3px;
-	  padding: 3px;
- }
-
- textarea {
-
-	  font-size: 120%;
- }
- 
-</style>
-
 <?php
 $color = 'color: white; background-color:' . $button ['color'] . ';';
 ?>
 
 <script>
- colors = <?= json_encode ($colors) ?>
+ 
+ pos = <?= $pos ?>;
+ colors = <?= json_encode ($colors) ?>;
+ buttonClass = curr.buttons [pos].class;
+ isLocal = buttonClass == '<?= $button ['class'] ?>';
+ 
 </script>
-
-
-<input type="hidden" name="config_id" value="<?= $configID?>">
-<input type="hidden" name="menu_name" value="<?= $menuName?>">
-<input type="hidden" name="menu_index" value="<?= $menuIndex?>">
-<input type="hidden" name="pos" value="<?= $pos ?>">
-<input type="hidden" id="color" name="color" value="<?= $color ?>">
 
 <div class="row mt-3">
 	 
-	 <div class="col-sm-3">
+	 <div class="col-sm-4">
 		  <textarea id="text" name="text" class="button menu-button"><?= $button ['text'] ?></textarea>
 	 </div>
 
-	 <div class="col-sm-1">
+	 <!-- <div class="col-sm-1">
 
-		  <input type="color"
-					class="form-control form-control-color"
-					id="color_input"
-					name="color_input"
-					value="<?= $button ['color']?>"
-					title="Choose your color"
-					onchange="colorChange ()">
+			<input type="color"
+			class="form-control form-control-color"
+			id="color_input"
+			name="color_input"
+			value="<?= $button ['color']?>"
+			title="Choose your color"
+			onchange="colorChange ()">
 
-	 </div>
+			</div> -->
 	 
 	 <div class="col-sm-8">
 		  
 		  <div class="color-grid">
 				
 				<?php
-				for ($i = 0; $i < 16; $i ++) {
+				for ($i = 0; $i < count ($colors); $i ++) {
 				?>
-					 
 					 <div id="color_<?= $i ?>" class="form-control form-control-color" style="background: <?= $colors [$i] ?>;" onclick="selectColor (<?= $i ?>)"></div>
-					 
 				<?php
-				} ?>
+				}
+				?>
 		  </div>
 	 </div>
 </div>
@@ -86,9 +54,16 @@ include ("$detail.php");
 ?>
 
 <script>
+
+ // initialize common fields
+ 
+ $('#text').css ({'background-color': curr.buttons [pos].color});
+ $('#text').val (curr.buttons [pos].text);
  
  function colorChange () {
 	  
+	  curr.buttons [pos].color = $('#color_input').val ();
+
 	  $('#text').css ({'background-color': $('#color_input').val ()});
 	  $(`#${pos}`).css ({'background-color': $('#color_input').val ()});
 	  curr.buttons [pos].color = $('#color_input').val ();
@@ -98,6 +73,8 @@ include ("$detail.php");
  
  function selectColor (i) {
 	  
+	  curr.buttons [pos].color = colors [i];
+	  
 	  $('#text').css ({'background-color': colors [i]});
 	  $(`#${pos}`).css ({'background-color': colors [i]});
 	  curr.buttons [pos].color = colors [i];
@@ -105,12 +82,16 @@ include ("$detail.php");
 	  menus.modified ();
  }
  
- $('#text').change (function () {
+ $('#text').bind ('input propertychange', function() {
 
 	  let text = $(this).val ().toUpperCase ();
+	  
 	  curr.buttons [pos].text = text;
-	  $(`#${pos}`).html (text);
+	  $(`#b_${pos}`).html (text);
+	  $(this).val (text);
 	  menus.modified ();
+
+	  console.log (curr.buttons [pos]);
  });
 
 </script>

@@ -50,7 +50,7 @@
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
         <div class="container">
           <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+            <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center">
 
               <div class="d-flex justify-content-center py-4">
                 <a href="index.html" class="logo d-flex align-items-center w-auto">
@@ -120,6 +120,7 @@
 				<!-- Licensing information: https://bootstrapmade.com/license/ -->
 				<!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
 				Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+				<p class="mt-3">Cloud of Change patents 9,400,640 11,226,793 10,083,012 Patent Pending 18/626017</p>
 		  </div>
 	 </footer> <!-- End Footer -->
 

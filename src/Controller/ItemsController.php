@@ -38,16 +38,6 @@ class ItemsController extends PosAppController {
 		  $join = [];
         $q = false;
         $itemsTable = TableRegistry::get ('Items');
-
-		  $where []  =['enabled' => '1'];
-		  
-        /* if ($this->merchant ['bu_index'] > 0) {
-			  
-			  $join [] = ['table' => 'item_prices',
-			  'type' => 'right',
-			  'conditions' => ['item_prices.business_unit_id' => $this->merchant ['bu_id'],
-			  'Items.id = item_prices.item_id']];
-			  }*/
 		  
         if (count ($args) > 0) {
             
@@ -141,8 +131,6 @@ class ItemsController extends PosAppController {
 
 		  $item = null;
 
-		  $this->debug ($this->request->getData ());
-		  
 		  if (!empty ($this->request->getData ())) {
 				
 				$update = $this->update ($id, $this->request->getData ());
@@ -152,6 +140,7 @@ class ItemsController extends PosAppController {
 				return;
 		  }
 
+		  $editTitle = __ ('Add item');
 		  if ($id == 0) {
 
 				$item = $this->$pricing ();
@@ -169,6 +158,8 @@ class ItemsController extends PosAppController {
                 $this->log ('invalid item in edit... ' . $id, 'error');
                 return $this->redirect ('/items');
             }
+				
+				$editTitle = $item ['item_desc'];
 
 				if (count ($item ['item_links']) > 0) {
 
@@ -195,14 +186,15 @@ class ItemsController extends PosAppController {
 		  $buID = $this->merchant ['business_units'] [$this->merchant ['bu_index']];
 		  $buIndex = $this->merchant ['bu_index'];
         $query = TableRegistry::get ('TaxGroups')->find ()->contain (['Taxes']);
-        $taxGroups = [0 => __ ('Tax Exempt')];
+        $taxGroups = [null => __ ('Tax'),
+							 0 => __ ('Tax Exempt')];
 		  
         foreach ($query as $taxGroup) {
             
             $taxGroups [$taxGroup ['id']] = $taxGroup ['short_desc'];
         }
 		  
-        $departments = ['' => ''];
+        $departments = [null => __ ('Department')];
         $query = TableRegistry::get ('Departments')
 										->find ()
 										->order (['department_desc' => 'asc']);
@@ -237,6 +229,7 @@ class ItemsController extends PosAppController {
 								  '3' => __ ('3')];
 
  		  $this->set (['item' => $item,
+							'editTitle' => $editTitle,
 							'departments' => $departments,
 							'taxGroups' => $taxGroups,
 							'linkTypes' => $linkTypes,
@@ -345,7 +338,7 @@ class ItemsController extends PosAppController {
 				
 				$this->image ($item);
 				
-				$this->batch ($newItem ['id']);
+				$this->itemBatch ($newItem ['id'], 0);
 				return $newItem;
 		  }
 		  else {
@@ -411,23 +404,27 @@ class ItemsController extends PosAppController {
 				}
 				
 				$where = ['item_id' => $item ['id']];  // update all locations
-
+				
 				if ($this->merchant ['bu_index'] > 0) {  // update location only
 
 					 $where ['business_unit_id'] = $this->merchant ['bu_id'];
 				}
+				else if (count ($this->merchant ['business_units']) == 2) {
 
+					 // only one location add the bu id to the select
+					 
+					 $where ['business_unit_id'] = $this->merchant ['business_units'] [1] ['id'];
+				}
 				
 				$itemPricesTable->updateAll ($ip, $where);
 				
 				// update inventory only if a specific location is selected
-
-				if ($this->merchant ['bu_index'] > 0) {
-
+				
+				if (isset ($where ['business_unit_id'])) {
+					 
 					 $invItem = $invItemsTable->find ()
 													  ->where (["item_id = $id"])
-													  ->first ();
-					 
+													  ->first ();					 
 					 if ($invItem) {
 						  
 						  $invItemsTable->updateAll (['package_quantity' => $item ['inv_item'] ['package_quantity'],
@@ -437,7 +434,7 @@ class ItemsController extends PosAppController {
 															  [$where]);
 					 }
 					 else {
-
+						  
 						  // create the inventory items
 						  
 						  foreach ($this->merchant ['business_units'] as $bu) {
@@ -445,7 +442,7 @@ class ItemsController extends PosAppController {
 								if ($bu ['business_type'] == BU_LOCATION) {
 									 
 									 $invItem = ['item_id' => $id,
-													 'business_unit_id' => $bu ['id'],
+													 'business_unit_id' => $where ['business_unit_id'],
 													 'package_quantity' => $item ['inv_item'] ['package_quantity'],
 													 'on_hand_req' => $item ['inv_item'] ['on_hand_req'],
 													 'on_hand_count' => $item ['inv_item'] ['on_hand_count'],
@@ -478,7 +475,7 @@ class ItemsController extends PosAppController {
 				
 				$this->image ($item);
 
-				$this->batch ($item ['id']);
+				$this->itemBatch ($item ['id'], 0);
 				return $item;
         }
     }
@@ -486,6 +483,30 @@ class ItemsController extends PosAppController {
     /**
      *
      * delete an item
+     *
+     */
+    
+    public function delete ($id) {
+        
+        $status = 1;
+		  
+        if ($id > 0) {
+				
+				TableRegistry::get ('Items')->deleteAll (['id' => $id]);
+				TableRegistry::get ('ItemPrices')->deleteAll (['item_id' => $id]);
+				TableRegistry::get ('InvItems')->deleteAll (['item_id' => $id]);
+				TableRegistry::get ('ItemLinks')->deleteAll (['item_id' => $id]);
+
+				$this->itemBatch ($id, 1);
+				$status = 0;
+		  }
+		  
+		  $this->ajax (['status' => $status]);
+	 }
+
+	 /**
+     *
+     * disable an item
      *
      */
     
@@ -497,7 +518,7 @@ class ItemsController extends PosAppController {
 				
             TableRegistry::get ('Items')->updateAll (['enabled' => 0],
 																	  ['id' => $id]);
-				$this->batch ($id);
+				$this->itemBatch ($id, 0);
 				$status = 0;
 		  }
 		  
@@ -622,26 +643,33 @@ class ItemsController extends PosAppController {
     
 	 /**
      *
-     * create unique 5 digit sku
+     * create unique sku
      *
      **/
 	 
-    public function autoSku ($len) {
+    public function sku ($len) {
 
         $itemsTable = TableRegistry::get ('Items');
+		  $prefix = 'MP';
 		  
-		  $sku = str_pad ('', $len, '0');
+		  $sku = str_pad ('1', $len, '0');
+
+		  $len += strlen ($prefix);
 		  
         $item = $itemsTable
 			  ->find ()
-			  ->where (["length(sku) = $len"])
-			  ->order ('id desc')
+			  ->where (["sku like 'MP%'", "length(sku) = $len"])
+			  ->order ('sku desc')
 			  ->limit (1)
 			  ->first ();
-
+		  
 		  if ($item) {
 
-				$sku = strval (intval ($item ['sku']) + 1);
+				$sku = $prefix . strval (intval (substr ($item ['sku'], 2)) + 1);
+		  }
+		  else {
+				
+				$sku = $prefix . $sku;
 		  }
 		  
         $this->set (['response' => ['status' => 0,
@@ -655,11 +683,11 @@ class ItemsController extends PosAppController {
      *
      **/
 
-    private function batch ($id) {
-        
-		  $this->addBatch ('items', $id);
+    public function itemBatch ($id, $delete) {
+		  
+		  $this->addBatch ('items', $id, $delete ? 1 : 0);
 		  $this->notifyPos ();
-    }
+	 }
 	 
 	 /**
 	  *
@@ -687,13 +715,13 @@ class ItemsController extends PosAppController {
      *
      */
 
-    private function addBatch ($table, $id) {
+    private function addBatch ($table, $id, $action) {
 		  
         $batchEntriesTable = TableRegistry::get ('BatchEntries');
         $batchEntry = $batchEntriesTable->newEntity (['business_unit_id' => $this->merchant ['bu_id'],
                                                       'update_table' => $table,
                                                       'update_id' => $id,
-                                                      'update_action' => 0,
+                                                      'update_action' => $action,
                                                       'execution_time' => time ()]);
         $batchEntriesTable->save ($batchEntry);
     }
@@ -709,7 +737,7 @@ class ItemsController extends PosAppController {
 							'locked' => false,
 							'enabled' => true,
 							'item_price' => ['class' => 'standard',
-												  'tax_group_id' => 0,
+												  'tax_group_id' => null,
 												  'price' => '',
 												  'cost' => '',
 												  'pricing' => '{"price":"0.00","cost":"0.00"}'],
@@ -720,11 +748,22 @@ class ItemsController extends PosAppController {
 												'on_hand_count' => 0]];
 		  }
 		  else {
-				
+
 				$item ['item_price'] = $item ['item_prices'] [0];
- 				$item ['inv_item'] = $item ['inv_items'] [0];
 				unset ($item ['item_prices']);
-				unset ($item ['inv_items']);
+				
+				if (count ($item ['inv_items']) == 0) {
+
+					 $item ['inv_item'] = ['supplier_id' => 0,
+												  'package_quantity' => 0,
+												  'on_hand_req' => 0,
+												  'on_hand_count' => 0];
+				}
+				else {
+					 
+ 					 $item ['inv_item'] = $item ['inv_items'] [0];
+					 unset ($item ['inv_items']);
+				}
 		  }
 		  
 		  $item ['template'] = 'standard_pricing';
@@ -754,6 +793,7 @@ class ItemsController extends PosAppController {
 												'on_hand_count' => 0]];
 		  }
 		  else {
+				
 				$item ['item_price'] = $item ['item_prices'] [0];
 				$item ['item_price'] ['pricing'] = json_decode ($item ['item_price'] ['pricing'], true);
 				
@@ -877,9 +917,6 @@ class ItemsController extends PosAppController {
 	 
 	 private function image ($item) {
 
-		  $this->debug ('image...');
-		  $this->debug ($item);
-		  
 	 	  if (isset ($item ['item_url']) && (strlen ($item ['item_url']) > 0)) {
 
 				$merchantID = $this->merchant ['merchant_id'];
@@ -891,8 +928,6 @@ class ItemsController extends PosAppController {
 				curl_setopt ($ch, CURLOPT_FILE, $fp);
 				curl_setopt ($ch, CURLOPT_HEADER, 0);
 				$result = curl_exec ($ch);
-				
-				$this->debug ("image load... $result");
 				
 				curl_close ($ch);
 				fclose ($fp);
@@ -906,8 +941,64 @@ class ItemsController extends PosAppController {
 				
 				$cmd = "/usr/bin/convert $tmpfname -resize \"150x200!\" /data/images/$merchantID/$sku.png";
 				$result = exec ($cmd);
+		  }
+	 }
+
+	 function purge (...$args) {
+		  
+		  $tables = ['items' => TableRegistry::get ('Items'),
+						 'item_prices' =>TableRegistry::get ('ItemPrices'),
+						 'inv_items' => TableRegistry::get ('InvItems')];
+		  
+		  $where = null;
+		  
+		  switch ($args [0]) {
+
+				case 'department_id':
+
+					 $where = ["department_id = " . $args [1]];
+					 $items = $tables ['items']->find ()
+														->where ($where)
+					 // ->limit (10)
+														->order (['update_time desc'])
+														->all ();
+
+					 foreach ($items as $item) {
+						  
+						  $tables ['item_prices']->deleteAll (['item_id' => $item ['id']]);
+						  $tables ['inv_items']->deleteAll (['item_id' => $item ['id']]);
+						  $tables ['items']->deleteAll (['id' => $item ['id']]);
+					 }
+					 break;
+					 
+				case 'before':
+					 
+					 $where = ["update_time < '" . $args [1] . "'"];
+					 $items = $tables ['inv_items']->find ()
+															 ->where ($where)
+															 //->limit (10)
+															 ->order (['update_time desc'])
+															 ->all ();
+					 foreach ($items as $item) {
 				
-				$this->debug ("$cmd... $result");
+						  $tables ['item_prices']->deleteAll (['item_id' => $item ['item_id']]);
+						  $tables ['items']->deleteAll (['id' => $item ['item_id']]);
+						  $tables ['inv_items']->deleteAll (['id' => $item ['id']]);
+					 }
+					 break;
+		  }
+		  
+		  $items = $tables ['items']->find ()
+											 ->where ($where)
+											 // ->limit (10)
+											 ->order (['update_time desc'])
+											 ->all ();
+		  
+		  foreach ($items as $item) {
+				
+				$tables ['item_prices']->deleteAll (['item_id' => $item ['id']]);
+				$tables ['inv_items']->deleteAll (['item_id' => $item ['id']]);
+				$tables ['items']->deleteAll (['id' => $item ['id']]);
 		  }
 	 }
 }

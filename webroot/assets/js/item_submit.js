@@ -5,8 +5,6 @@ $(`#${pricing}`).submit (function (e) {
 	 e.preventDefault ();
 	 let data = new FormData (this);
 	 
-	 // data.item_links = links;
-	 
 	 $.ajax ({url: `/items/edit/${itemID}`,
 				 type: 'POST',
 				 data: data,
@@ -14,23 +12,26 @@ $(`#${pricing}`).submit (function (e) {
 				 contentType: false,
 				 success: function (data) {
 					  
-					  if ($("#menu_grid").length) {
+					  if ($("#button_grid").length) {
 
 							data = JSON.parse (data);
-							
+														
 							let color = rgbToHex ($('#text').css ('background-color'));
-							let b = {class: "Item",
-										text: data.item.item_desc,
-										params: {sku: data.item.sku},
-										color: color};
+							let loadImage = $('#item_url').val ().length > 0 ? "true": "false"
 							
-							curr.buttons [pos] = b;
+							curr.buttons [pos] = {class: "Item",
+														 text: $('#text').val (),  // get the text from the form
+														 params: {sku: data.item.sku},
+														 color: color,
+														 image: loadImage};
+							
 							menus.render (curr.buttons);
+							$('#menus_modal').modal ('hide');
+
 					  }
 					  else {
-
-							console.log (multipos.pathname);
-							window.location = multipos.pathname;	
+							
+							window.location = multipos.pathname;  // return to items list
 					  }
 				 }
 				});

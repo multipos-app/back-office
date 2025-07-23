@@ -1,29 +1,73 @@
 
-<div class="form-cell">
-	 <div id="menu_select" class="select grid-span-all"></div>
+<div class="row mt-3">
+	 <div class="col-sm-12 mt-3"">
+		  <?=
+		  $this->Form->select ('menus',
+									  $menus,
+									  ['name' => 'menus',
+										'id' => 'menus',
+										'value' => null,
+										'class' => 'form-select',
+										'label' => false,
+										'required' => 'required'])
+		  ?>
+	 </div>
+</div>
+
+<divclass="row mt-3">
+
+	 <div class="col-sm-12 mt-3" id="sub_menus" >
+		  <?=
+		  $this->Form->select ('sub_menu',
+									  [null => __ ('Sub-menu')],
+									  ['name' => 'sub_menu',
+										'id' => 'sub_menu',
+										'value' => null,
+										'class' => 'form-select',
+										'label' => false,
+										'required' => 'required'])
+		  ?>
+	 </div>
+</div>
+
+<div class="row g-3 mt-3">
+	 <div class="col-sm-9 d-grid text-center"></div>
+ 	 <div class="col-sm-3 d-grid text-center">
+		  <button class="btn btn-success" id="button_complete" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
+	 </div>
 </div>
 
 <script>
 
- html = 
- 	  '<select id="menus" class="custom_dropdown" onchange="menuSelect ()">' +
-	  '<option disabled>Select menu</option>';
+ var subMenus = <?= json_encode ($subMenus) ?>;
 
- for (i=0; i < posConfig.config.pos_menus [b.container].horizontal_menus.length; i ++) {
+ if (isLocal) {
 
-	  m = posConfig.config.pos_menus [b.container].horizontal_menus [i];
-	  html += '<option value=' + i + '>' + m ['name'] + '</option>';
+	  console.log ('local params... ');
+	  console.log (curr.buttons [pos].params);
  }
- 
- html += '</select>';
-	 
- $('#menu_select').html (html);
 
- function menuSelect () {
+ $('#menus').change (function (e) {
 
-  	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].class = 'Navigate';
-  	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].text = $('#button_desc').val ().toUpperCase ();
- 	  posConfig.config.pos_menus [container] ['horizontal_menus'] [menu].buttons [pos].params = {menu_index: $('#menus').val ()};
- }
- 
+	  $('#sub_menus').removeClass ('hide');
+	  $('#sub_menu').empty ();
+
+	  $('#sub_menu').append ($('<option>', {value:null, text: '<?= __ ("Sub-menu") ?>'}));
+	  $.each (subMenus [$('#menus').val ()], function(i, option) {
+
+			$('#sub_menu').append ($('<option>', {value:i, text: option}));
+	  });
+ });
+
+ $('#button_complete').click (function (e) {
+
+	  curr.buttons [pos] = {'class': 'Navigate', 
+									text: $('#text').val (),
+									color: curr.buttons [pos].color,
+									params: {menu: $('#menus').val (),
+												menu_index: $('#sub_menu').val ()}};
+	  
+	  menus.render (curr.buttons);
+ });
+
 </script>

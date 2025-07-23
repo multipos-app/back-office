@@ -17,6 +17,20 @@
 	 </div>
 	 
 	 <div class="row g-1 m-3">
+		  <label for="inventory" class="col-sm-4 form-label"><?= __('Inventory') ?></label>
+
+		  <?php
+		  
+		  $checked = '';
+		  if ($department ['inventory']) $checked = ' checked';
+		  ?>
+        <div class="col-sm-8 form-check form-switch">
+            <input name="inventory" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault"<?= $checked ?>>
+        </div>
+		  
+    </div>
+
+	 <div class="row g-1 m-3">
 		  <label for="is_negative" class="col-sm-4 form-label"><?= __('Is negative') ?></label>
 
 		  <?php
@@ -48,10 +62,28 @@
 		  </div>
 	 </div>
 
+	 <div class="row g-1 m-3">
+
+		  <label for="department_id" class="col-sm-4 form-label"><?= __('Parent department') ?></label>
+		  <div class="col-sm-8">
+				
+				<?= 
+				$this->Form->select ('department_id"',
+											$departments,
+											['name' => 'department_id', 
+											 'id' => 'department_id',
+											 'class' => 'form-select',
+											 'selected' => 0, 
+											 'value' => $department ['department_id'], 
+											 'label' => false])
+				?>
+		  </div>
+	 </div>
+
 	 <div class="row g-3 mt-3">
 		  <div class="col-sm-9 d-grid text-center"></div>
  		  <div class="col-sm-3 d-grid text-center">
-				<button type="submit" class="btn btn-succes" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
+				<button type="submit" class="btn btn-success" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
 		  </div>
 	 </div>
 	 

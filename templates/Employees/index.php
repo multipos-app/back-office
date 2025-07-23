@@ -12,7 +12,7 @@
 		  <tr>
 				<th><?= __ ('Name') ?></th>
 				<th><?= __ ('Employee Number') ?></th>
-				<th><?= __ ('Profile') ?></th>
+				<th style="text-align: right;"><?= __ ('Profile') ?></th>
 		  </tr>
 	 </thead>
 	 
@@ -33,7 +33,7 @@
 		  <tr role="button" data-bs-toggle="modal" data-bs-target="#employee_modal" onclick="edit (<?= $employee ['id'] ?>)">
 				<td><?= $employee ['fname'].' '.$employee ['lname'];?></td>
 				<td><?= $employee ['username'] ?></td>
-				<td><?= $profileDesc ?></td>
+				<td style="text-align: end;"><?= $profileDesc ?></td>
 				
 		  </tr>
 		  

@@ -86,12 +86,12 @@ class EmployeesController extends PosAppController {
     }
 
     function edit ($id) {
-		  
+
         $employee = false;
 		  $employeesTable = TableRegistry::get ('Employees');
 		  
         if (!empty ($this->request->getData ())) {
-
+				
 				$this->update ($id, $this->request->getData (), $employeesTable);
 				return $this->redirect ('/employees');
 		  }
@@ -139,8 +139,9 @@ class EmployeesController extends PosAppController {
     public function update ($id, $employee, $employeesTable) {
 
         $status = -1;
-        $employee = false;
 		  
+		  $this->debug ($employee);
+
         if ($id > 0) {
 
             $employee = $employeesTable

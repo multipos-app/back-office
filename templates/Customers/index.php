@@ -1,4 +1,21 @@
 
+<div class="row g-1 mt-3 mb-3">
+
+	 <div class="col-3 mt-3">
+		  <input type="text" class="form-control" id="customer_search" value="" placeholder="<?= __ ('Enter name, phone, email')?>">
+	 </div>
+	 
+	 <div class="col-1 mt-3 text-center">
+		  <i class="bx bx-search-alt icon-lg" onclick="search ()"></i>
+	 </div>
+
+	 <div class="col-6"></div>
+	 
+	 <div class="col-2 mt-3 d-grid text-center">
+		  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customer_modal" onclick="edit (0)"><?= __ ('Add customer') ?></button>
+	 </div>
+</div>
+
 <table class="table table-hover">
 	 <thead>
 		  <tr>
@@ -20,12 +37,12 @@
 	 
 	 foreach  ($customers as $customer) {
 
-		  $role = ' role="button" data-bs-toggle="modal" data-bs-target="#customer_modal" onclick="edit (' . $customer ['id'] . ')"';
 	 ?>
-		  <tr>				
-				<td<?= $role ?>><?= $customer ['email'] ?></td>
-				<td<?= $role ?>><?= $customer ['fname'] . ' ' . $customer ['lname'] ?></td>
-				<td<?= $role ?>><?= $customer ['phone'] ?></td>
+		  <tr role="button" data-bs-toggle="modal" data-bs-target="#customer_modal" onclick="edit (<?= $customer ['id'] ?>)">
+				
+				<td><?= $customer ['email'] ?></td>
+				<td><?= $customer ['fname'] . ' ' . $customer ['lname'] ?></td>
+				<td><span class="phone-format"><?= $customer ['phone'] ?></span></td>
 				<td><?= $customer ['last_update'] ?></td>
 				<td align="right"><?= $customer ['total_visits'] ?></td>
 				<td align="right"><?= $customer ['total_sales'] ?></td>
@@ -71,7 +88,7 @@
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="item_desc" class="modal-title"><?= __ ('Customer edit') ?></h5>
+                <h5 id="customer_desc" class="modal-title"><?= __ ('Customer edit') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="modal_content" class="modal-body">
@@ -95,6 +112,37 @@
             }
         });
  }
+ 
+ function search () {
+	  
+	  window.location = '/customers/index/search/' + $('#customer_search').val ()
+ }
+
+ $('#customer_search').typeahead ({
+	  
+     source: function (query, result) {
+
+			console.log (`cust search... ${query}`);
+			
+			$.ajax ({
+             url: "/search/customers/" + query,
+             type: "GET",
+             success: function (data) {
+
+					  data = JSON.parse (data);
+					  
+					  result ($.map (data, function (customer) {
+							
+							return customer
+                 }));
+             }
+			});
+     },
+	  updater: function (customer) {
+			
+			window.location = '/customers/index/id/' + customer.id;
+	  }
+ });
  
  $(".phone-format").mask ("<?= __ ('phone_format') ?>", {});
  $(".postal-code-format").mask ("<?= __ ('postal_code_format') ?>", {});

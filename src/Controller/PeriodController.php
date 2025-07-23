@@ -23,6 +23,7 @@ class PeriodController extends PosAppController {
     public $len;
     public $periodDateFormat = 'D n/j';
 	 public $periods = false;
+	 public $tims = false;
 	 public $currPeriod;
 	 public $conditions = [];
 	 public $join = [];
@@ -33,15 +34,10 @@ class PeriodController extends PosAppController {
     }
 
     public function getPeriods ($startDate = null, $type = 'weekly', $clear = true) {
-
+		  
         $this->periods = [];
-		  $utcOffset = $this->tzOffset ($this->tz ());
-
-		  if (($this->merchant ['merchant_id'] == 8) && ($this->merchant ['timezone'] == 'America/New_York')) {
-
-				$utcOffset ++;
-		  }
-
+		  $utcOffset = $this->utcOffsets [$this->tz ()];
+		  
         switch ($type) {
 
 				case 'weekly':
@@ -99,7 +95,7 @@ class PeriodController extends PosAppController {
 					 break;
 					 
         }
-    }
+	 }
 
 	 public function today () {
 
@@ -119,6 +115,5 @@ class PeriodController extends PosAppController {
 				}
 		  }
 		  $this->getPeriods ();
-	 }
-	 
+	 }	 
 }

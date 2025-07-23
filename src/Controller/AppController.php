@@ -70,7 +70,9 @@ class AppController extends Controller
             
         default:
 
-            $this->log ("log type unkown... " . gettype ($obj));
+					 $this->log ("log type unkown... " . gettype ($obj));
+					 $e = new Exception ();
+					 $this->error (e->getTraceAsString ());
         }
     }
 	 

@@ -47,6 +47,14 @@ $format = function ($type, $totalCol) {
 
 ?>
 
+<div class="row g-1 m-3">
+	 
+	 <?php 
+	 echo $this->element ('period_controls', ['url' => '/dashboard']);
+	 ?>
+	 
+</div>
+
 <table class="table table-hover">
     <thead align="right">
 		  <tr>

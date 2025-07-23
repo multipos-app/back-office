@@ -92,7 +92,7 @@ class ProfilesController extends PosAppController {
                 $categories [$category ['id']] ['pos_controls'] [$i] ['checked'] = 1;
                 
                 foreach ($permissions as $permission) {
-                    
+						  
                     if ($permission == $categories [$category ['id']] ['pos_controls'] [$i] ['class'])  {
                         
                         $categories [$category ['id']] ['pos_controls'] [$i] ['checked'] = 0;
@@ -100,7 +100,7 @@ class ProfilesController extends PosAppController {
                 }
             }
         }
-
+		  
 		  $this->set (['profile' => $profile,
 							'profileDesc' => $profileDesc,
 							'categoryID' => $categoryID,
@@ -140,9 +140,7 @@ class ProfilesController extends PosAppController {
 				
 				
             if ($permission == 'off') {
-					 
-					 $this->debug ("permission... $javaClass $permission");
-					 
+					 					 
 					 $profilePermission = $profilePermissioinsTable->newEntity (['profile_id' => $id,
 																									 'profile_class' => $javaClass]);
 					 $profilePermissioinsTable->save ($profilePermission);

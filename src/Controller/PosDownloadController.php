@@ -47,13 +47,14 @@ class PosDownloadController extends PosApiController {
                        'currencies' => 'Currencies', 
                        'currency_denoms' => 'CurrencyDenoms',
                        'suppliers' => 'Suppliers',
-                       'pos_messages' => 'PosMessages'];
+                       'pos_messages' => 'PosMessages',
+                       'pos_images' => 'PosImages'];
 
     public function index () {
 
 		  $post = $this->request->getData ();
 		  $post ['remote'] = $_SERVER ['HTTP_X_FORWARDED_FOR'];
-		  
+		  		  
 		  $buID = $this->request->getData () ['business_unit_id'];
         
         if (!isset ($this->request->getData ()  ['merchant_id'])) {
@@ -62,13 +63,20 @@ class PosDownloadController extends PosApiController {
             $this->jsonResponse (['status' => 1]);
             return;      
         }
-        
+
+		  if ($this->request->getData ()  ['merchant_id'] == 0) {
+				
+				$this->jsonResponse (['status' => 1, 'status_text' => 'merchant_not_set']);
+				exit;
+		  }
+
         $this->dbconnect ('m_' . $this->request->getData ()  ['merchant_id']);
 		          
-        $limit = 25;
+        $limit = 50;
 
-        $where = ['id > ' . $this->request->getData ()  ['update_id']];
-		  
+        $where = "id > " . $this->request->getData ()  ['update_id'];		  
+		  $where = [$where];
+
         $query = TableRegistry::get ('BatchEntries')
 										->find ()
 										->select (['id',
@@ -83,14 +91,16 @@ class PosDownloadController extends PosApiController {
         $total = $query->count ();
         $updates = [];
 		  
+		  
+
         foreach ($query as $update) {
 
-            $update = $update->toArray ();				
+            $update = $update->toArray ();
 				$where = ['id' => $update ['update_id']];
 				
 				unset ($update ['update_time']);
 				unset ($update ['execution_time']);
-            
+            				
 				switch ($update ['update_action']) {
 						  
 					 case 0:
@@ -155,9 +165,8 @@ class PosDownloadController extends PosApiController {
 													 
 												case 'departments':
 													 
-													 unset ($entity ['pricing']);
 													 $entity ['tax_group_id'] = 0;
-													 $entity ['update_time'] = "'".date ('Y-m-d H:i:s')."'";
+													 $entity ['update_time'] = "'".date ('Y-m-d H:i:s')."'";													 
 													 break;
 
 												case 'addons':
@@ -260,7 +269,7 @@ class PosDownloadController extends PosApiController {
 		  $response = ['count' => count ($updates),
 							'total' => $total,
 							'updates' => $updates];
-		  
+
 		  $this->jsonResponse ($response);
 	 }
 

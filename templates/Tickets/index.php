@@ -1,7 +1,8 @@
 
-<div class="row">
-	 <div class="col-4">
-		  <i class="bx bx-search-alt icon-lg" data-bs-toggle="modal" data-bs-target="#modal_search"></i>
+<div class="row g-1 m-3">
+	 <div class="col-md-11"></div>
+	 <div class="col-md-1 text-center">
+		  <i class="bx bx-filter-alt icon-lg" data-bs-toggle="modal" data-bs-target="#modal_search"></i>
 	 </div>
 </div>
 
@@ -185,7 +186,7 @@
 
 <div class="modal fade" id="ticket_modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <div class="modal-header">
                 <h5 id="item_desc" class="modal-title"><?= __ ('Ticket detail') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

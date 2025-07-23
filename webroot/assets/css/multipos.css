@@ -13,6 +13,13 @@
 	 cursor: pointer;
 }
 
+.icon-warn {
+
+	 color: #8F2703;
+	 font-size: 150%;
+	 cursor: pointer;
+}
+
 .grid-span-all {
 	 grid-column: 1/-1;
 }
@@ -134,4 +141,9 @@ nav .pagination {
 .pagination-sm > li:last-child > span {
 	 border-top-right-radius: 3px;
 	 border-bottom-right-radius: 3px;
+}
+
+.modal-large {
+
+	 width: 700px;
 }

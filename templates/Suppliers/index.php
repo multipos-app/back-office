@@ -1,4 +1,12 @@
 
+
+<div class="row g-1 mt-3 mb-3">
+	 <div class="col-10"></div>
+	 <div class="col-2 d-grid text-center">
+		  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#supplier_modal" onclick="edit (0)"><?= __ ('Add supplier') ?></button>
+	 </div>
+</div>
+
 <table class="table table-hover">
 	 <thead>
 		  <tr>
@@ -19,8 +27,8 @@
 				<tr role="button" data-bs-toggle="modal" data-bs-target="#supplier_modal" onclick="edit (<?= $supplier ['id'] ?>)">				
 					 <td></td>
 					 <td><?= $supplier ['supplier_name'] ?></td>
-					 <td><?= $supplier ['contact1'] ?></td>
-					 <td><?php echo $supplier ['phone1']  ?></td>
+					 <td><?= $supplier ['contact'] ?></td>
+					 <td><span class="phone-format"><?php echo $supplier ['phone_1']  ?></span></td>
 				</tr>
 		  <?php
 		  }
@@ -55,6 +63,8 @@
 				 $('#modal_content').html (data.html)
             }
         });
-	 }
+ }
+ 
+ $(".phone-format").mask ("<?= __ ('phone_format') ?>", {});
 
 </script>

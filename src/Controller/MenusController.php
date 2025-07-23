@@ -30,17 +30,61 @@ class MenusController extends PosAppController {
 	 *
 	 *
 	 **/
-    public function menu ($configID, $menuName = null, $menuIndex = 0) {
+    // public function index ($configID, $menuName, $menuIndex) {
 		  
-        $posConfigTable = TableRegistry::get ('PosConfigs');
-        $posConfig = $posConfigTable
+	 function index (...$args) {
+		  
+		  $configID = 0;
+		  $menuName = null;
+		  $menuIndex = 0;
+		  $posConfig = null;
+		  
+		  switch (count ($args)) {
+					 
+				case 3:
+					 
+					 $configID = array_shift ($args);
+					 $menuName = array_shift ($args);
+					 $menuIndex = array_shift ($args);
+					 break;
+
+				case 2:
+					 
+					 $configID = array_shift ($args);
+					 $menuName = array_shift ($args);
+					 break;
+				 
+				case 1:
+					 
+					 $configID = array_shift ($args);
+					 break;
+
+				default:
+					 
+		  			 $this->error ("menus index bad params...");
+					 return $this->redirect ('pos-configs');
+		  }
+
+		  if ($configID > 0) {
+				
+				$posConfigTable = TableRegistry::get ('PosConfigs');
+				$posConfig = $posConfigTable
                    ->find ()
                    ->where (['id' => $configID])
                    ->first ();
-        
-        $posConfig = $posConfig->toArray ();
-        $posConfig ['config'] = json_decode ($posConfig ['config'], true);
-		  
+		  }
+
+		  if ($posConfig) {
+	 
+					 $posConfig = $posConfig->toArray ();
+					 $posConfig ['config'] = json_decode ($posConfig ['config'], true);
+		  }
+		  else {
+				
+				$this->error ("menus index invalid config id... $configID");
+				return $this->redirect ('pos-configs');	
+		  }
+				
 		  $menus = [];
 
 		  if ($menuName == null) {
@@ -61,19 +105,80 @@ class MenusController extends PosAppController {
 
 				$menus [] = $menu ['name'];
 		  }
-
-        $this-> set (['posConfig' => $posConfig,
+		  
+		  $controls = TableRegistry::get ('PosControlCategories')
+											->find ()
+											->contain (['PosControls'])
+											->all ();
+		  
+        $this-> set (['controls' => $controls,
+							 'posConfig' => $posConfig,
 							 'menus' => $menus,
 							 'menuName' => $menuName,
 							 'menuIndex' => $menuIndex,
-							 'menuActions' => [null => __ ('Actions'),
+							 'menuActions' => ['' => __ ('Actions'),
 													 'menu_action_insert' => __ ('Insert submenu'),
 													 'menu_action_append' => __ ('Append submenu'),
-													 'menu_action_rename' => __ ('Rename'),
 													 'menu_action_resize' => __ ('Resize'),
+													 'menu_action_settings' => __ ('Settings'),
 													 'menu_action_delete' => __ ('Delete')]]);
 	 }
 
+	 /**
+	 *
+	 *
+	 *
+	 **/
+    /* public function menu ($configID, $menuName = null, $menuIndex = 0) {
+		 
+	  *     $posConfigTable = TableRegistry::get ('PosConfigs');
+	  *     $posConfig = $posConfigTable
+	  *                ->find ()
+	  *                ->where (['id' => $configID])
+	  *                ->first ();
+	  *     
+	  *     $posConfig = $posConfig->toArray ();
+	  *     $posConfig ['config'] = json_decode ($posConfig ['config'], true);
+		 
+		 $menus = [];
+
+		 if ($menuName == null) {
+		 
+		 // get the name of the first menu
+		 
+		 foreach ($posConfig ['config'] ['pos_menus'] as $key => $value) {
+		 
+		 if (!$menuName) {
+		 
+		 $menuName = $key;
+		 break;
+		 }
+		 }
+		 }
+
+		 foreach ($posConfig ['config'] ['pos_menus'] [$menuName] ['horizontal_menus'] as $menu) {
+
+		 $menus [] = $menu ['name'];
+		 }
+		 
+		 $controls = TableRegistry::get ('PosControlCategories')
+		 ->find ()
+		 ->contain (['PosControls'])
+		 ->all ();
+		 
+	  *     $this-> set (['controls' => $controls,
+		 'posConfig' => $posConfig,
+		 'menus' => $menus,
+		 'menuName' => $menuName,
+		 'menuIndex' => $menuIndex,
+		 'menuActions' => [null => __ ('Actions'),
+		 'menu_action_insert' => __ ('Insert submenu'),
+		 'menu_action_append' => __ ('Append submenu'),
+		 'menu_action_resize' => __ ('Resize'),
+		 'menu_action_settings' => __ ('Settings'),
+		 'menu_action_delete' => __ ('Delete')]]);
+		 }
+	  */
 	 /**
 	 *
 	 *
@@ -116,6 +221,8 @@ class MenusController extends PosAppController {
 	 *
 	 **/
 	 public function action ($action, $configID, $menuName, $menuIndex) {
+
+		  $this->debug ("menu actions... $action, $configID, $menuName, $menuIndex");
 		  
 		  $posConfigsTable = TableRegistry::get ('PosConfigs');
 		  $posConfig = $posConfigsTable
@@ -153,9 +260,11 @@ class MenusController extends PosAppController {
 						  array_splice ($config ['pos_menus'] [$menuName] ['horizontal_menus'], $menuIndex + 1, 0, $submenu);
 						  break;
 
-					 case 'menu_action_rename':
+					 case 'menu_action_settings':
 						  
 						  $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['name'] = strtoupper ($update ['menu_name']);
+						  $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['color'] = $update ['tab_color'];
+						  $config ['pos_menus'] [$menuName] ['tabs'] = $update ['menu_tabs'] == 'on';						  
 						  break;
 						  
 					 case 'menu_action_resize':
@@ -183,16 +292,19 @@ class MenusController extends PosAppController {
 						  break;
 						  
 					 case 'menu_action_delete':
+						  
+						  array_splice ($config ['pos_menus'] [$menuName] ['horizontal_menus'], $menuIndex, 1);
 						  break;
 				}
 				
 				$posConfig ['config'] = json_encode ($config);
 				$this->save ('PosConfigs', $posConfig);
 				
-				return $this->redirect ("/menus/menu/$configID/$menuName/$menuIndex");
+				return $this->redirect ("/menus/index/$configID/$menuName/0");
 		  }
 
 		  $template = $action;
+		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'colors.php';
 		  
 		  switch ($action) {
 
@@ -205,14 +317,16 @@ class MenusController extends PosAppController {
 		  
 		  $actionsTitle = ['menu_action_insert' => __ ('Insert submenu'),
 								 'menu_action_append' => __ ('Append submenu'),
-								 'menu_action_rename' => __ ('Rename'),
 								 'menu_action_resize' => __ ('Resize'),
+								 'menu_action_settings' => __ ('Settings'),
 								 'menu_action_delete' => __ ('Delete')];
 		  
 		  $this->set (['configID' => $configID,
 							'menuName' => $menuName,
 							'menuIndex' => $menuIndex,
 							'name' => $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['name'],
+							'defaultColor' => $defaultColor,
+							'colors' => $colors,
 		  					'action' => $action]);
 		  
 		  $builder = $this->viewBuilder ()

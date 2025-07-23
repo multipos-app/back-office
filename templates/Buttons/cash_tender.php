@@ -1,18 +1,11 @@
 
-<input type="hidden" name="class" value="CashTender">
-<input type="hidden" name="params[tender_id]" value="1">
-<input type="hidden" name="config_id" value="<?= $configID?>">
-<input type="hidden" name="menu_name" value="<?= $menuName?>">
-<input type="hidden" name="menu_index" value="<?= $menuIndex?>">
-<input type="hidden" name="pos" value="<?= $pos ?>">
-
 <div class="row mt-3">
 	 <div class="col-sm-12 mt-3"">
 		  <?=
-		  $this->Form->select ('params[value]',
+		  $this->Form->select ('cash_params',
 									  $tenderOpts,
 									  ['id' => 'cash_params',
-										'value' => $tenderValue,
+										'value' => '',
 										'class' => 'form-select',
 										'label' => false,
 										'required' => 'required'])
@@ -21,24 +14,27 @@
 </div>
 
 <div class="row g-3 mt-3">
-	 <div class="col-sm-4 d-grid text-center"></div>
- 	 <div class="col-sm-4 d-grid text-center">
+	 <div class="col-sm-9 d-grid text-center"></div>
+ 	 <div class="col-sm-3 d-grid text-center">
 		  <button class="btn btn-success" id="button_complete" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
 	 </div>
 </div>
 
 <script>
  
- curr.buttons [pos].class = 'CashTender';
- curr.buttons [pos].params = {value: null};
-
- $('#cash_params').change (function (e) {
+ if (isLocal) {
 	  
-	  curr.buttons [pos].params = {value: $('#cash_params').val ()};
- });
-
+	  $('#cash_params').val (curr.buttons [pos].params.value);
+ }
+ 
  $('#button_complete').click (function (e) {
 
+	  curr.buttons [pos] = {'class': 'CashTender', 
+									text: $('#text').val (),
+									color: curr.buttons [pos].color,
+									params: {value: $('#cash_params').val ()}};
+	  
+	  menus.render (curr.buttons);
  });
 
 </script>

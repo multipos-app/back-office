@@ -379,7 +379,9 @@ class BusinessUnitsController extends PosAppController {
                        1 => __ ('Full, all store data'),
                        2 => __ ('Employees'),
                        3 => __ ('Menus and configuration'),
-                       5 => __ ('Customers')];
+                       5 => __ ('Customers'),
+                       6 => __ ('Images'),
+                       7 => __ ('Items')];
 
 		  $this->set (['batches' => $batches,
 							'batchTypes' => $batchTypes]);
@@ -407,17 +409,19 @@ class BusinessUnitsController extends PosAppController {
         $status = -1;
 
         if (!empty ($this->request->getData ())) {
+
+				$this->debug ('cancel batch... ');
+				$this->debug ($this->request->getData ());
+				
 				
             $batchEntriesTable = TableRegistry::get ('BatchEntries');
             $batchesTable = TableRegistry::get ('Batches');
 				
 				foreach ($this->request->getData () as $batch => $value) {
                 
-                $batchID = intVal (substr ($batch, 1));  // id looks like '_123'
-					 
+                $batchID = intVal ($batch);
                 $batchEntriesTable->deleteAll (['batch_id' => $batchID]);
 					 $batchesTable->deleteAll (['id' => $batchID]);
-                
             }
         }
 		  

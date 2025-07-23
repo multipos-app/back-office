@@ -155,11 +155,14 @@
 					 </tr>
 					 
 					 <?php
+					 
 					 $balance = $ticket ['total'];
 					 
 					 foreach ($ticket ['ticket_tenders'] as $tt) {
+
+						  $this->debug ($tt);
 						  
-						  $balance -= floatval ($tt ['tendered_amount']) + floatval ($tt ['returned_amount']);
+						  $balance -= floatval ($tt ['tendered_amount']) - floatval ($tt ['returned_amount']);
 						  $balance = round ($balance, 2);
 						  
 						  $tenderType = __ ('Unknown');

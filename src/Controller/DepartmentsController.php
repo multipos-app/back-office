@@ -37,8 +37,10 @@ class DepartmentsController extends PosAppController {
                                   2 => __ ('Menu'),
                                   3 => __ ('Bank'),
                                   4 => __ ('Deposit'),
-                                  5 => __ ('Other'),
-                                  6 => __ ('Labor')];
+                                  5 => __ ('Modifiers'),
+                                  6 => __ ('Labor'),
+                                  7 => __ ('Redeem'),
+                                  8 => __ ('Payout')];
     }
 
     public function index (...$params) {
@@ -65,28 +67,43 @@ class DepartmentsController extends PosAppController {
 
 				$department = ['id' => 0,
 									'department_desc' => '',
-									'department_no' => 0,
+									'department_id' => 0,
 									'department_type' => 1,
 									'locked' => false,
 									'department_order' => 0,
 									'is_negative' => false,
-									'pricing' => null];      
+									'params' => null,
+									'inventory' => 0];      
 		  }
 		  else {
 				
-				$query = TableRegistry::get ('Departments')
-											 ->find ()
-											 ->where (['id' => $id]);
-				
-				$department = $query->first ();
+				$department = $departmentsTable->find ()
+														 ->where (['id' => $id])
+														 ->first ();
 		  }
+
+		  // get parent department list
 		  
+		  $departments = [null => __ ('Parent department')];
+        $query = TableRegistry::get ('Departments')
+										->find ()
+										->where (["id != $id"])
+										->order (['department_desc' => 'asc']);
+        
+        foreach ($query as $d) {
+            
+            $departments [$d ['id']] = $d ['department_desc'];
+        }
+		  		  
 		  $departmentTypes = $this->departmentTypes;
 		  
  		  $this->set (['department' => $department,
+							'departments' => $departments,
 							'departmentTypes' => $departmentTypes,
 							'isNegative' => [0 => __ ('No'),
-												  1 => __ ('Yes')]]);
+												  1 => __ ('Yes')],
+							'inventory' => [0 => __ ('No'),
+												 1 => __ ('Yes')]]);
 		  
  		  $builder = $this->viewBuilder ()
 								->setLayout ('ajax')
@@ -103,23 +120,26 @@ class DepartmentsController extends PosAppController {
     }
     
     private function update ($id, $department, $departmentsTable) {
-
+		  
         $department ['department_desc'] = strtoupper ($department ['department_desc']);
         
         if ($id == 0) {
 
 				$department ['department_desc'] = strtoupper ($department ['department_desc']);
 			   $department = $departmentsTable->newEntity ($department);
-				$departmentsTable->save ($department);
+				$this->save ('departments', $department);
 		  }
 		  else {
 
 				$isNegative = isset ($department ['is_negative']) ? 1 : 0;
+				$inventory = isset ($department ['inventory']) ? 1 : 0;
 				
             $departmentsTable->updateAll (['department_desc' => strtoupper ($department ['department_desc']),
 														 'department_type' => intval ($department ['department_type']),
-														 'is_negative' => $isNegative],
+														 'is_negative' => $isNegative,
+														 'inventory' => $inventory],
 														['id' => $id]);
+				$this->batch ('departments', $id);
         }
 	 }
 	 

@@ -10,8 +10,7 @@ class PosControlCategoriesTable extends MerchantsTable {
     public function initialize (array $config): void {
         
         $this->setTable ('pos_control_categories')
-             ->hasMany ('PosControls')
-             ->setConditions(['enabled' => 1]);
+             ->hasMany ('PosControls');
     }
 }
 

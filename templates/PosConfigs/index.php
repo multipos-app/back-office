@@ -1,8 +1,8 @@
 
 
 <div class="row g-1 mt-3 mb-3">
-	 <div class="col-10"></div>
-	 <div class="col-2 d-grid text-center">
+	 <div class="col-9"></div>
+	 <div class="col-3 d-grid text-center">
 		  <button id="templates" class="btn btn-primary"
 					 data-bs-toggle="modal" data-bs-target="#pos_config_modal"
 					 onclick="modal (0, 'templates')"><?= __ ('Add POS configuration') ?></button>
@@ -36,14 +36,14 @@
 						  <?= $config ['config_desc'] ?>
 					 </td>
 					 <td align="center">
-						  <a href="/menus/menu/<?= $config ['id'] ?>">
+						  <a href="/menus/index/<?= $config ['id'] ?>">
 								<i class="bx bx-menu icon-lg"></i>
 						  </a>
 					 </td>
 					 </td>
 					 <td align="center">
 						  <div class="icon">
-								<a data-bs-toggle="modal" data-bs-target="#pos_config_modal" onclick="modal (<?= $config ['id']?>, 'settings')"><i class="bx bxs-wrench icon-lg"></i></a>
+								<a data-bs-toggle="modal" data-bs-target="#pos_config_modal" onclick="modal (<?= $config ['id']?>, 'settings', '<?= __ ('POS configuration settings') ?>')"><i class="bx bxs-wrench icon-lg"></i></a>
 						  </div>
 					 </td>
 					 <td align="center">
@@ -53,13 +53,13 @@
 					 </td>
 					 <td align="center">
 						  <div class="icon" data-bs-toggle="modal" data-bs-target="#pos_config_modal">
-								<i class="bx bx-cloud-upload icon-lg" onclick="modal (<?= $config ['id']?>, 'upload')"></i>
+								<i class="bx bx-cloud-upload icon-lg" onclick="modal (<?= $config ['id']?>, 'upload', '<?= __ ('Upload POS configuration') ?>')"></i>
 						  </div>
 					 </td>
 					 <td align="center">
 						  <div class="icon">
 						  <div class="icon" data-bs-toggle="modal" data-bs-target="#pos_config_modal">
-								<i class="bx bx-copy icon-lg" onclick="modal (<?= $config ['id']?>, 'clone')"></i>
+								<i class="bx bx-copy icon-lg" onclick="modal (<?= $config ['id']?>, 'clone', '<?= __ ('Duplicate this configuration') ?>')"></i>
 						  </div>
 					 </td>
 					 <td align="center">
@@ -76,9 +76,11 @@
 
 <div class="modal fade" id="pos_config_modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content" style="width:700px;">
             <div class="modal-header">
-					 <div id="modal_header"></div>
+					 <div id="modal_header">
+						  <h5 id="modal_title" class="modal-title"></h5>
+					 </div>
 					 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				
@@ -113,9 +115,7 @@
  	  $('#import_button').addClass ('btn-success');
  }
  
-  function modal (configID, action) {
-
-	  console.log (`modal... ${configID} ${action}`);
+  function modal (configID, action, title) {
 	  
 	  $.ajax ({
          url: `/pos-configs/${action}/` + configID,
@@ -124,6 +124,7 @@
 
 				 data = JSON.parse (data);				 
 				 $('#pos_config_content').html (data.html);
+				 $('#modal_title').html (title);
          }
      });
   }

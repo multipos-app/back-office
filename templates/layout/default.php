@@ -38,9 +38,12 @@
 
 		  <!-- Vendor CSS Files -->
 
-		  <link href="/assets/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
-		  <link href="/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-		  <link href="/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+		  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+				  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css"
+				  integrity="sha512-pVCM5+SN2+qwj36KonHToF2p1oIvoU3bsqxphdOIWMYmgr4ZqD3t5DjKvvetKhXGc/ZG5REYTT6ltKfExEei/Q=="
+				  crossorigin="anonymous"
+				  referrerpolicy="no-referrer" />
 
 		  <!-- Template Main CSS File -->
 
@@ -56,7 +59,11 @@
 		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> 
 		  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.13.4/jquery.mask.min.js"></script>	  
 		  <script src="/assets/js/typeahead.js"></script>
-		  <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css"
+				  integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g=="
+				  crossorigin="anonymous"
+				  referrerpolicy="no-referrer" />
+		  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 
 	 </head>
 
@@ -65,7 +72,7 @@
 		  <!-- ======= Header ======= -->
 		  <header id="header" class="header fixed-top d-flex align-items-center">
 
-		<div class="d-flex align-items-center justify-content-between">
+				<div class="d-flex align-items-center justify-content-between">
 					 <a href="index.html" class="logo d-flex align-items-center">
 						  <span class="d-none d-lg-block">
 								<?php 
@@ -99,6 +106,11 @@
 								?>
 								
 						  </li>
+						  <li class="nav-item dropdown">
+								<a class="nav-link nav-icon" href="<?= $merchant ['merchant_id'] ?>" data-bs-toggle="dropdown">
+									 <i class="bx bx-question-mark"></i>
+									 <span class="badge bg-primary badge-number"></span>
+								</a><!-- End Notification Icon -->
 						  
 						  <li class="nav-item dropdown">
 								<a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
@@ -159,13 +171,39 @@
 								</a>
 						  </li>
 						  
+						  <?php
+						  if ($merchant ['category'] == 'laundry') {
+						  ?>
+								<li class="nav-item">
+									 <a class="nav-link collapsed" href="/labor">
+										  <i class="bx bx-body"></i>
+										  <span><?= __ ('Labor') ?></span>
+									 </a>
+								</li>
+						  <?php
+						  }
+						  ?>
+
 						  <li class="nav-item">
 								<a class="nav-link collapsed" href="/tickets">
 									 <i class="bx bxs-receipt"></i>
 									 <span><?= __ ('Transactions') ?></span>
 								</a>
 						  </li>
-						  
+
+						  <?php
+						  if ($merchant ['category'] == 'pull-tabs') {
+						  ?>
+								<li class="nav-item">
+									 <a class="nav-link collapsed" href="/inventory">
+										  <i class="bx bx-bar-chart"></i>
+										  <span><?= __ ('Inventory') ?></span>
+									 </a>
+								</li>
+						  <?php
+						  }
+						  ?>
+
 						  <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
 								<i class="bx bxs-business"></i><span><?= __ ('Store Ops') ?></span><i class="bi bi-chevron-down ms-auto"></i>
 						  </a>
@@ -207,6 +245,11 @@
 									 </a>
 								</li>
 								<li>
+									 <a href="/import">
+										  <i class="bi bi-circle"></i><span><?= __ ('Import') ?></span>
+									 </a>
+								</li>
+								<li>
 									 <a href="/business-units/receipts">
 										  <i class="bi bi-circle"></i><span><?= __ ('Receipts') ?></span>
 									 </a>
@@ -224,7 +267,7 @@
 					 <li class="nav-item">
 						  <a class="nav-link collapsed" href="/business-units/batches">
 								<i class="bx bxs-cloud-download"></i>
-								<span><?= __ ('Batches') ?></span>
+								<span><?= __ ('Downloads') ?></span>
 						  </a>
 					 </li>
 					 

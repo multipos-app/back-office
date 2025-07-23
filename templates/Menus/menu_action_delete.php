@@ -1,34 +1,23 @@
-
-<style>
-
- input {
-	  cursor: pointer;
- }
- label {
-	  cursor: pointer;
- }
  
 </style>
-
-<!-- menu action form -->
 
 <form id="menu_actions" method="post" action="/menus/action/menu_action_delete/<?= $configID ?>/<?= $menuName ?>/<?= $menuIndex ?>">
 	 
 	 <input type="hidden" name="action" value="menu_action_delete">
-	 <input type="hidden" name="confirm_delete" value="off">
+	 
+	 <div class="row mt-3">
 
-	 <div class="row m-3">
-
- 		  <div class="col-sm-10 form-check form-switch" style="cursor: pointer;">
-				
-				<input type="checkbox" class="form-check-input profile-modify" name="confirm_delete" id="confirm_delete">
-				<label for="confirm_delete" form-label"><?= __ ('Please confirm, delete menu ') ?>"<?= $name ?>"</label>	 
-			
+		  <div class="row mt-3">
+				<div class="col-sm-12 text-left">
+					 <?= __ ('Delete menu')?>&nbsp;"<?= $name ?>"?
+				</div>
 		  </div>
-		  
 	 </div>
 		  
-	 <?php include ('menu_actions_footer.php'); ?>
-
-</form>
-
+	 <div class="row mt-3">
+		  <div class="col-sm-9 d-grid text-center"></div>
+ 		  <div class="col-sm-3 d-grid text-center">
+				<button type="submit" id="menu_delete" class="btn btn-danger"><?= __ ('Delete') ?></button>
+		  </div>
+	 </div>
+</div>

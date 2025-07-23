@@ -33,9 +33,13 @@ class ButtonsController extends PosAppController {
 	 
     function index (...$args) {
 
+		  include ROOT . DS . 'src' . DS  . 'Controller' . DS . 'colors_oasis.php';
+		  
         if (!empty ($this->request->getData ())) {
 
 				$button = $this->request->getData ();
+
+				$this->debug ($button);
 				
 				$configID = $button ['config_id'];
 				$menuName = $button ['menu_name'];
@@ -48,102 +52,119 @@ class ButtonsController extends PosAppController {
 							'menuIndex' => $menuIndex,
 							'pos' => $pos,
 							'detail' => 'empty',
-							'colors' => $this->colors ()];
-
+							'colors' => $colors];
 				
-				if ($button ['class'] == 'Null') {
-					 
-					 // start a new button, prompt with list of available controls
-				 
-					 $template = 'control_select';
-					 $controls = TableRegistry::get ('PosControlCategories')
-													  ->find ()
-													  ->contain (['PosControls'])
-													  ->where (['enabled' => 1])
-													  ->all ();
-					 
-					 $data ['controls'] = $controls;
+				$posConfig = TableRegistry::get ('PosConfigs')
+												  ->find ()
+												  ->where (['id' => $configID])
+												  ->first ();
+				if (!$posConfig) {
+
+					 $this->error ("config not found... $configID");
+					 return $this->redirect ('/pos-configs');
+				}
+				
+				// decode the config
+				
+				$config = json_decode ($posConfig ['config'], true);
+				
+				// default outher template
+				
+				$template = 'index';
+				
+				$configButton = $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons'] [$pos];
+				
+				if ($configButton ['class'] == 'Null') {
+
+					 $data ['button'] = ['class' => $button ['class'],
+												'color' => $defaultColor,
+												'text' => ''];
 				}
 				else {
-
-					 // edit an existing button
 					 
-					 $posConfig = TableRegistry::get ('PosConfigs')
-														->find ()
-														->where (['id' => $configID])
-														->first ();
-				
-					 if (!empty ($button)) {
-						  
-						  if (isset ($button ['class'])) {
-								
-								$class = $this->javaClassToTemplate ($this->request->getData ('class'));
-						  }
-					 }
-					 
-					 if ($posConfig) {
-						  
-						  // decode the config
-						  
-						  $config = json_decode ($posConfig ['config'], true);
-						  
-						  // start view setup
-						  
-						  $template = 'index';
-						  $params = [];
-						  $button = $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons'] [$pos];
-						  $data ['button'] = $button;
-						  
-						  // use the config class to get the view temlate
-
-						  switch ($button ['class']) {
-
-								case 'CashTender':
-								
-									 $data ['tenderOpts'] = [null => __ ('Select tender amount'),
-																	 '-1' => __ ('Amount of sale'),
-																	 '0' => __ ('Round up'),
-																	 '500' => __ ('$5'),
-																	 '1000' => __ ('$10'),
-																	 '2000' => __ ('$20'),
-																	 '5000' => __ ('$50')];
-									 
-									 $data ['tenderValue'] = $button ['params'] ['value'];
-									 $data ['detail'] = $this-> javaClassToTemplate ($button ['class']);
-
-									 break;
-									 
-								case 'Item':
-								case 'DefaultItem':
-									 									 
-									 $data ['item'] = TableRegistry::get ('Items')
-																			 ->find ()
-																			 ->where (['sku' => $button ['params'] ['sku']])
-																			 ->first ();
-									 
-									 $data ['detail'] = $this-> javaClassToTemplate ($button ['class']);
-									 break;
-									 
-								case 'EpxTender':
-									 $data ['detail'] = 'epx_tender';
-									 break;
-									 
-								default:
-									 
-									 $data ['detail'] = 'no_params';
-									 break;
-						  }
-					 }
-					 else {
-
-						  $this->error ('buttons index, invalid config...');
-						  $this->ajax (['status' => 2]);
-						  return;
-					 }
+					 $data ['button'] = $configButton;
 				}
+		
+				// use the config class to get inner template
 
-				// detail used in button index view
-								
+				$data ['detail'] = $this-> javaClassToTemplate ($data ['button'] ['class']);
+				
+				switch ($data ['button'] ['class']) {
+
+					 case 'CashTender':
+						  
+						  $data ['tenderOpts'] = [null => __ ('Select tender amount'),
+														  '-1' => __ ('Amount of sale'),
+														  '0' => __ ('Round up'),
+														  '500' => __ ('$5'),
+														  '1000' => __ ('$10'),
+														  '2000' => __ ('$20'),
+														  '5000' => __ ('$50')];
+						  
+						  if (!isset ($data ['button'] ['params'])) {
+
+								$data ['button'] ['params'] = ['value' => null];
+						  }
+						  break;
+						  
+					 case 'Item':
+					 case 'DefaultItem':
+
+						  if (!isset ($data ['button'] ['params'])) {
+
+								// prompt for existing item or item pricing type
+						  
+								$this->set (['itemOpts' => [null => __ ('Use existing item or create new item?'),
+																	 'existing' => __ ('Existing item'),
+																	 'standard' => __ ('Standard pricing, one price per item'),
+																	 'variant' => __ ('Variant pricing (size, color...)'),
+																	 'open' => __ ('Open/enter price, prompt for price'),
+																	 'metric' => __ ('Price by volume/weight, prompt for value')]]);
+								$template = 'item_select';
+						  }
+						  else {
+																
+								$data ['item'] = TableRegistry::get ('Items')
+																		->find ()
+																		->where (['sku' => $data ['button'] ['params'] ['sku']])
+																		->first ();
+						  }
+						  break;
+						  
+					 case 'Navigate':
+
+						  $this->debug ($data ['button']);
+						  
+						  $menus = [null => __ ('Select a menu')];
+						  $subMenus = [null => __ ('Select a sub-menu')];
+
+						  foreach ($config ['pos_menus'] as $mn => $m) {
+
+								$menus [$mn] = $m ['menu_description'];
+
+								foreach ($m ['horizontal_menus'] as $subMenu) {
+
+									 $subMenus [$mn] [] = $subMenu ['name'];
+								}
+						  }
+						  
+						  $this->set (['menus' => $menus,
+											'subMenus' => $subMenus]);
+						  
+						  break;
+						  
+					 case 'ItemMarkdownPercent':
+					 case 'ItemMarkdownAmount':
+					 case 'SaleDiscount':
+						  
+						  break;
+						  
+					 default:
+						  
+						  $data ['detail'] = 'no_params';
+						  break;
+				}	
+
 				$this->set ($data);
 				
 				$builder = $this->viewBuilder ()
@@ -155,8 +176,7 @@ class ButtonsController extends PosAppController {
 				$html = $view->render ();
 				
 				$this->ajax (['status' => 0,
-								  'html' => $html,
-								  'params' => $params]);
+								  'html' => $html]);
 				return;
 		  }
 		  
@@ -166,56 +186,13 @@ class ButtonsController extends PosAppController {
 	 
 	 /**
 	  *
-	  * update a button
-	  *
-	  **/
-	 
-    function update () {
-
-		  $status = 1;
-		  		  
-		  if (!empty ($this->request->getData ())) {
-
-				$update = $this->request->getData ();
-				
-				$configID = $this->request->getData () ['config_id'];
-				$menuName = $this->request->getData () ['menu_name'];
-				$menuIndex = $this->request->getData () ['menu_index'];
-				$pos = $this->request->getData () ['pos'];
-
-				$posConfigsTable = TableRegistry::get ('PosConfigs');
-				$posConfig = $posConfigsTable
-												  ->find ()
-												  ->where (['id' => $configID])
-												  ->first ();
-				
-				$config = json_decode ($posConfig ['config'], true);
-				$button = $config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons'] [$pos];
-				
-				$button ['text'] = strtoupper ($update ['text']);
-				$button ['color'] = $update ['color'];
-				$button ['class'] = $update ['class'];
-				$button ['params'] = $update ['params'];
-				
-				$config ['pos_menus'] [$menuName] ['horizontal_menus'] [$menuIndex] ['buttons'] [$pos] = $button;
-				$posConfig ['config'] = json_encode ($config);
-
-				$posConfigsTable->save ($posConfig);
-
-				$status = 0;
-		  }
-		  
-		  $this->ajax (['status' => $status]);
-	 }
-
-	 /**
-	  *
 	  * post select button control
 	  *
 	  **/
 	 
     function selectControlTemplate () {
-
+		  
+		  include ROOT . DS . 'src' . DS  . 'Controller' . DS . 'colors_oasis.php';
 		  if (!empty ($this->request->getData ())) {
 				
 				$button = $this->request->getData ();
@@ -223,12 +200,13 @@ class ButtonsController extends PosAppController {
 				$data = ['configID' => $button ['config_id'],
 							'menuName' => $button ['menu_name'],
 							'menuIndex' => $button ['menu_index'],
-							'pos' => $button ['pos']];
-				
+							'pos' => $button ['pos'],
+							'colors' => $colors];
+
 				$html = '';
 				$template = 'index';
 				
-				switch ($button ['button_type']) {
+				switch ($button ['class']) {
 						  
 					 case 'Item':
 					 case 'DefaultItem':
@@ -256,22 +234,27 @@ class ButtonsController extends PosAppController {
 														  '5000' => __ ('$50')];
 						  
 						  $data ['tenderValue'] = null;
-						  $data ['detail'] = $this->javaClassToTemplate ($button ['button_type']);
+						  $data ['detail'] = $this->javaClassToTemplate ($button ['class']);
 						  $data ['button'] = ['class' => 'CashTender',
 													 'text' => '',
-													 'color' => $this->defaultColor ()];
+													 'color' => $defaultColor];
+						  break;
 						  
-						  $data ['colors'] = $this->colors ();
+					 case 'ItemMarkdownAmount':
+					 case 'ItemMarkdownPercent':
+						  
+						  $data ['detail'] = $this->javaClassToTemplate ($button ['class']);
+						  $data ['button'] = ['class' => $button ['class'],
+													 'text' => $button ['button_text'],
+													 'color' => $defaultColor];
 						  break;
 						  
 					 default:
 						  
 						  $data ['detail'] = 'no_params';
-						  $data ['button'] = ['class' => $button ['button_type'],
+						  $data ['button'] = ['class' => $button ['class'],
 													 'text' => $button ['button_text'],
-													 'color' => $this->defaultColor ()];
-						  
-						  $data ['colors'] = $this->colors ();
+													 'color' => $defaultColor];
 				}
 				
 				$this->set ($data);
@@ -302,6 +285,7 @@ class ButtonsController extends PosAppController {
 		  
 		  if (!empty ($this->request->getData ())) {
 				
+				include ROOT . DS . 'src' . DS  . 'Controller' . DS . 'colors_oasis.php';
 				$template = '';
 				$html = '';
 				$button = $this->request->getData ();
@@ -310,7 +294,7 @@ class ButtonsController extends PosAppController {
 							'menuName' => $button ['menu_name'],
 							'menuIndex' => $button ['menu_index'],
 							'pos' => $button ['pos'],
-							'colors' => $this->colors ()];
+							'colors' => $colors];
 				
 				switch ($button ['item_opts']) {
 
@@ -322,12 +306,12 @@ class ButtonsController extends PosAppController {
 						  
 					 default:
 						  
-						  $data = array_merge ($data, ['button' => ['class' => 'Null', 'text' => '', 'color' => $this->defaultColor ()],
-																 'colors' => $this->colors (),
+						  $data = array_merge ($data, ['button' => ['class' => 'Null', 'text' => '', 'color' => $defaultColor],
+																 'colors' => $colors,
 																 'detail' => 'item',
 																 'item' => ['id' => 0,
 																				'item_template' => $button ['item_opts']]]);
-								
+						  
 						  $template = 'index';
 						  $this->set ($data);
 						  break;
@@ -341,12 +325,12 @@ class ButtonsController extends PosAppController {
 				
 				$view = $builder->build ();
 				$html = $view->render ();
-								
+				
 				$this->ajax (['status' => 0,
 								  'html' => $html]);
 		  }
 		  else {
-					$this->ajax (['status' => 1]);
+				$this->ajax (['status' => 1]);
 		  }
 	 }
 
@@ -391,34 +375,4 @@ class ButtonsController extends PosAppController {
 
 		  return $tmp;
 	 }
-
-	 private function colors () {
-		  
-		  return ['#006482',
-					 '#0172BB',
-					 '#018380',
-					 '#026851',
-					 '#0A0A0A',
-					 '#0E4E93',
-					 '#111E6C',
-					 '#1A3A46',
-					 '#264E3A',
-					 '#2C262D',
-					 '#2E183D',
-					 '#3062A5',
-					 '#512D55',
-					 '#679ACD',
-					 '#696969',
-					 '#8C0306',
-					 '#007002',
-					 '#21512D',
-					 '#42008A',
-					 '#B2005B',
-					 '#7F4F4F',
-					 '#6161CD',
-					 '#520100',
-					 '#8F2703'];
-	 }
-
-	 private function defaultColor () { return '#006482'; }
 }

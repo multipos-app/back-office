@@ -1,35 +1,42 @@
 
+<style>
+
+.form-check .form-check-input {
+	 float: right;
+ }
+ 
+</style>
+
 <form method="post" action="/business-units/create-batch">
 
 	 <div class="row g-1">
 
-		  <div class="select col-sm-2">
+		  <div class="col-sm-8 mt-3"></div>
+		  <div class="col-sm-2 mt-3">
 				<?php echo $this->Form->select ('batch_type', $batchTypes, ['class' => 'form-select', 'label' => false]); ?>	
 		  </div>
 		  
-		  <div class="form-cell col-sm-2 text-center">
-				<button type="submit" class="btn btn-primary btn-block"><?= __ ('Create batch'); ?></button>
+		  <div class="col-sm-2 mt-3">
+				<button type="submit" class="btn btn-primary btn-block w-100"><?= __ ('Create batch'); ?></button>
 		  </div>
 		  
 	 </div>
 
 </form>
 
+<form method="post" action="/business-units/cancel-batches">
 <table class="table table-hover table_sm mt-3">
 	 <thead>
 		  <tr>
-				<th><?= __ ('Description') ?></th>
 				<th><?= __ ('Type') ?></th>
-				<th><?= __ ('Execute'); ?></th>
-				<th><?= __ ('# in bath'); ?></th>
-				<th style="text-align: end;"><a id="select_all" class="btn btn-success btn-block"><?= __ ('Select all') ?></a></th>
-				<th></th>
+				<th><?= __ ('Execute') ?></th>
+				<th style="text-align:end;"><?= __ ('# in bath') ?></th>
+				<th style="text-align:end;"><?= __ ('Select') ?></th>
 		  </tr>
 	 </thead>
 
 	 <tbody>
 
-		  <form method="post" action="/business-units/cancel-batches">
 		  <?php
 	 
 		  foreach  ($batches as $batch) {
@@ -37,29 +44,31 @@
 				$type = $batchTypes [$batch ['batch_type']];
 		  ?>
 				<tr>
-					 <td><?= $batch ['batch_desc'] ?></td>
 					 <td><?= $type ?></td>
 					 <td><?= $batch ['submit_date'] ?></td>
-					 <td><?= $batch ['update_count'] ?></td>
-					 <td class="text-end">
-						  <input type="checkbox" name="_<?= $batch ['id']?>" id="_<?= $batch ['id']?>" type="checkbox" onchange="javascript:batchSelect (this);">
+					 <td class="text-end"><?= $batch ['update_count'] ?></td>
+					 <td>
+						  <span class="form-check form-switch w-100 text-center">
+								<input type="checkbox" class="form-check-input" id="<?= $batch ['id']?>" name="<?= $batch ['id'] ?>" onchange="batchSelect (this)">
+						  </span>
 					 </td>
 				</tr>
 		  <?php
 		  }
 		  ?>
-		  <tr>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td class="text-end">
-					 <button type="submit" class="btn btn-secondary btn-block" id="cancel_batches"><?= __ ('Cancel selected batches') ?></button>
-				</td>
-		  </tr>
-		  </form>
 	 </tbody>
 </table>
+
+<div class="row g-1">
+	 
+	 <div class="col-sm-7 mt-3"></div>
+	 <div class="col-sm-3 mt-3">
+		  <button type="submit" class="btn btn-secondary w-100" id="cancel_batches"><?= __ ('Cancel selected batches') ?></button>
+	 </div>
+	 <div class="col-sm-2 mt-3">
+		  <a id="select_all" class="btn btn-primary w-100"><?= __ ('Select all') ?></a>
+	 </div>
+</form>
 
 <script type="text/javascript">
 

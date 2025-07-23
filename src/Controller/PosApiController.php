@@ -25,7 +25,16 @@ use \DateTimeZone;
 require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 
 class PosApiController extends AppController {
-
+	 
+	 private $utcOffsets = ['America/New_York' => 5,
+									'America/Chicago' => 6,
+									'America/Denver' => 7,
+									'America/Los_Angeles' => 8,
+									'America/Anchorage' => 9,
+									'HST' => 10,
+									'Europe/London' => 0,
+									'Europe/Copenhagen' => 23];
+	 
     public function dbconnect ($dbname) {
 		  
         ConnectionManager::drop ('default');
@@ -139,6 +148,15 @@ class PosApiController extends AppController {
 		  exit;
     }
 
+	 function posLog () {
+		  
+		  if (!empty ($this->request->getData ())) {
+	
+            $this->debug ($this->request->getData ());
+		  }
+        $this->ajax (['status' => 0]);
+	 }
+
  	 protected function notifyPOS ($merchantID) {
 		  
 		  $exec = 'mosquitto_pub -h localhost ' .
@@ -148,7 +166,7 @@ class PosApiController extends AppController {
 		  shell_exec ($exec);
 	 }
 	 
-	 protected function message ($merchantID) {
+	 public function message ($merchantID) {
 
 		  $response = ['status' => 1];
 		  if (!empty ($this->request->getData ())) {
@@ -170,7 +188,9 @@ class PosApiController extends AppController {
 
 
 				$exec = 'mosquitto_pub -h localhost -t ' . "multipos/$merchantID" . ' -m \'{"method": "download"}\'';
-				shell_exec ($exec);
+				$result = shell_exec ($exec);
+
+				$this->debug ("pos message... $exec $result");
 		  }
 
 		  $this->jsonResponse ($response);
@@ -190,15 +210,9 @@ class PosApiController extends AppController {
 	 }
 	 
     protected function tzOffset ($tz) {
-        
-        $originDateTimezone = new DateTimeZone ('UTC');
-        $targetDateTimezone = new DateTimeZone ($tz);
-        $originDateTime = new DateTime ("now", $originDateTimezone);
-        $targetDateTime = new DateTime ("now", $targetDateTimezone);
-        $offset = $originDateTimezone->getOffset ($originDateTime) - $targetDateTimezone->getOffset ($targetDateTime);
-		  
-        return intVal ($offset / 60 / 60);
-    }
+
+		  return $this->utcOffsets [$tz];
+	 }
 }
 
 

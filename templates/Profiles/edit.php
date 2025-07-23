@@ -15,16 +15,21 @@
 <form id="profile_form" name="profile_form" method="post" ">
 
 	 <div class="row g-1 m-3">
-		  <label for="profile_desc" class="col-sm-1 form-label"><?= __('Profile') ?></label>
-		  <div class="col-sm-2">
+								
+		  <label for="item_desc" class="col-sm-2 form-label pt-2"><?= __ ('Profile name') ?></label>
+		  <div class="col-sm-4">
+				<?= $this->Form->input ('profile_desc', 
+												['name' => 'profile_desc', 
+												 'value' => $profile ['profile_desc'], 
+												 'class' => 'form-control', 
+												 'label' => false, 
+												 'required' => 'required']) ?>
+		  </div>
 
-				<?= 
-				$this->Form->input ('profile_desc', 
-										  ['id' => 'profile_desc', 
-											'value' => $profile ['profile_desc'], 
-											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+		  <div class="col-sm-4"></div>
+		  <div class="col-sm-2 p-3 form-check form-switch">
+				<label class="form-label" for="select_all"><?= __ ('Select/de-select all')  ?></label>
+				<input type="checkbox" class="form-check-input" id="select_all" name="select_all">
 		  </div>
 	 </div>
 
@@ -36,33 +41,32 @@
 				if (count ($category ['pos_controls']) == 0) continue;
 				
 		  ?>
-				<div class="grid-span-all text-center mt-3"><h5><?= $category ['name'] ?></h5></div>
+				<div class="grid-span-all text-center m-3"><h5><?= $category ['name'] ?></h5></div>
 				
 				<?php
 				foreach ($category ['pos_controls'] as $control) {
 					 
-					 if ($control ['approval'] == 1) {
+					 $this->debug ($control);
+					 $checked = '';
+
+					 if ($control ['checked'] == 1) {
 						  
 						  $checked = ' checked';
-						  if (in_array ($control ['class'], $permissions)) {
-								
-								$checked = '';
-						  }
 					 }
 				?>
-				
-				<div class="form-check form-switch">
 					 
-					 <input type="hidden" name="permissions[<?= $control ['class'] ?>]" value="off">
-					 <input type="checkbox" class="form-check-input profile-modify" id="<?= $control ['class'] ?>" name="permissions[<?= $control ['class'] ?>]"<?= $checked ?>>
-					 <label class="grid-label" for="<?= $control ['class'] ?>"><?= $control ['description'] ?></label>
+					 <div class="form-check form-switch">
+						  
+						  <input type="hidden" name="permissions[<?= $control ['class'] ?>]" value="off">
+						  <input type="checkbox" class="form-check-input profile-modify" id="<?= $control ['class'] ?>" name="permissions[<?= $control ['class'] ?>]"<?= $checked ?>>
+						  <label class="grid-label" for="<?= $control ['class'] ?>"><?= $control ['description'] ?></label>
+						  
+					 </div>
 					 
-				</div>
-				
-		  <?php
-		  }
-		  }
-		  ?>
+				<?php
+				}
+				}
+				?>
 	 </div>
 	 
 	 <!-- save changes -->
@@ -90,7 +94,9 @@
  });
 
  window.onbeforeunload = function(event) {
+
      if (formModified) {
+
 			return "Are you sure you want to leave? Changes you made may not be saved.";
      }
  };
@@ -113,7 +119,19 @@
 						
 						window.location = '/profiles';
 				  }
-		  });
+	  });
  });
+
+$('#select_all').change (function (e) {
+
+    if ($('#select_all').is (':checked')) {
+
+		  $('input:checkbox').prop ('checked', true);
+	 }
+	  else {
+
+		  $('input:checkbox').prop ('checked', false);
+	  }
+});
 
 </script>

@@ -1,6 +1,6 @@
 
 
-<form id="customer_edit" name="customer_edit" method="post" action="/customers/edit/<?= $customer ['id'] ?>">
+<form id="customer_edit" name="customer_edit" method="post" action="/customers/edit/<?= $customer ['id'] ?>" class="needs-validation">
 
 	 <div class="row g-1 m-3">
 		  <label for="fname" class="col-sm-4 form-label"><?= __('First name') ?></label>
@@ -11,8 +11,8 @@
 										  ['id' => 'fname', 
 											'value' => $customer ['fname'], 
 											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false])
+				?>
 		  </div>
 	 </div>
 	 
@@ -25,8 +25,7 @@
 										  ['id' => 'lname', 
 											'value' => $customer ['lname'], 
 											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
@@ -39,23 +38,25 @@
 										  ['id' => 'email', 
 											'value' => $customer ['email'], 
 											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
 
 	 <div class="row g-1 m-3">
 		  <label for="phone" class="col-sm-4 form-label"><?= __('Phone') ?></label>
-		  <div class="col-sm-8">
+		  <div class="col-sm-8 input-group">
 				
 				<?= 
 				$this->Form->input ('phone', 
 										  ['id' => 'phone', 
 											'value' => $customer ['phone'], 
-											'class' => 'form-control phone-format', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'class' => 'form-control phone-format has-validation',
+											'required' => 'required',
+											'label' => false]) ?>
+				<div class="invalid-feedback">
+					 At least last 4 digits of phone number required.
+            </div>
 		  </div>
 	 </div>
 	 
@@ -68,8 +69,7 @@
 										  ['id' => 'addr_1', 
 											'value' => $customer ['addr_1'], 
 											'class' => 'form-control', 
-											'label' => false,
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
@@ -95,8 +95,7 @@
 										  ['id' => 'city', 
 											'value' => $customer ['city'], 
 											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
@@ -125,15 +124,16 @@
 										  ['id' => 'postal_code', 
 											'value' => $customer ['postal_code'], 
 											'class' => 'form-control postal-code-format', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 	 
-	 <div class="text-center g-1 mt-3">
-		  <button type="submit" class="btn btn-success">Save</button>
+	 <div class="row g-3 mt-3">
+		  <div class="col-sm-9 d-grid text-center"></div>
+ 		  <div class="col-sm-3 d-grid text-center">
+				<button type="submit" class="btn btn-success"><?= __ ('Save') ?></button>
+		  </div>
 	 </div>
-
 </form>
 
 <script>
@@ -142,3 +142,4 @@
  $(".postal-code-format").mask ("<?= __ ('postal_code_format') ?>", {});
  
 </script>
+<script src="/assets/js/form_validate.js"></script>

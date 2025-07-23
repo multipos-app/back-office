@@ -36,10 +36,6 @@ $this->debug ('buttons item search...');
      },
 	  updater: function (item) {
 
-			console.log (`existing item... ${configID} ${menuName} ${menuIndex} ${pos}`);
-			console.log (item);
-			console.log (curr.buttons [pos]);
-
 			curr.buttons [pos] = {class: "Item", color: "#555555", text: item.name};
 			menus.render (curr.buttons);
 
@@ -48,9 +44,6 @@ $this->debug ('buttons item search...');
 					  menu_index: <?= $menuIndex ?>,
 					  pos: <?= $pos ?>,
 					  button: {class: "Item", color: "#555555", text: item.name, params: {sku: item.item.sku}}};
-			
-			console.log ('add_item... /buttons/item-add/');
-			console.log (data);
 			
 			$.ajax ({url: '/buttons/item-add/',
 						type: 'POST',

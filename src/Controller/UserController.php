@@ -22,15 +22,15 @@ require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 class UserController extends AppController {
 	 
 	 private $merchant;
-    public $utcOffsets = ['America/New_York' => 5,
-                          'America/Chicago' => 6,
-                          'America/Denver' => 7,
-                          'America/Los_Angeles' => 8,
-                          'America/Anchorage' => 9,
-                          'HST' => 10,
-                          'Europe/London' => 0,
-								  'Europe/Copenhagen' => 23];
-	 
+	 private $utcOffsets = ['America/New_York' => 5,
+									'America/Chicago' => 6,
+									'America/Denver' => 7,
+									'America/Los_Angeles' => 8,
+									'America/Anchorage' => 9,
+									'HST' => 10,
+									'Europe/London' => 0,
+									'Europe/Copenhagen' => 23];
+	  
 	 public function index () {
 		  
 		  if (isset ($_SERVER ["HTTP_USER_AGENT"]) && str_starts_with ($_SERVER ["HTTP_USER_AGENT"], "ELB-HealthChecker")) {

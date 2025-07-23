@@ -128,6 +128,8 @@ class PosConfigsController extends PosAppController {
 					 $settings ['options'] [] = $option->toArray ();
 				}
 
+				$pos = $settings ['devices'] ['pos'] ['options'];
+				
 				foreach ($devices as $name => $device) {
 					 
 					 $settings ['devices'] [$name] = ['name' => $name,
@@ -141,13 +143,20 @@ class PosConfigsController extends PosAppController {
 					 }
 				}
 				
+				$this->debug ($config ['devices']);
+				
 				foreach ($config ['devices'] as $name => $device) {
+
+					 $this->debug ("init device... $name");
+					 $this->debug ($device);
 					 
 					 $settings ['devices'] [$name] ['selected'] = $device ['name'];
 				}
 				
 				$this->set (['posConfigID' => $id,
-								 'settings' => $settings]);
+								 'title' => __ ('POS settings'),
+								 'settings' => $settings,
+								 'pos' => $pos]);
 				
  				$builder = $this->viewBuilder ()
 									 ->setLayout ('ajax')
@@ -224,6 +233,7 @@ class PosConfigsController extends PosAppController {
 		  $html = $view->render ();
 		  
 		  $this->ajax (['status' => 0,
+							 'title' => __ ('POS configuration upload'),
 							 'html' => $html]);
 	 }
 
@@ -275,7 +285,7 @@ class PosConfigsController extends PosAppController {
 	 private function update ($id, $settings, $posConfigsTable) {
 		  		  
 		  require ROOT . DS . 'src' . DS  . 'Controller' . DS . 'devices.php';
-
+		  
 		  $options = $settings ['options'];
 		  $posConfigsTable = TableRegistry::get ('PosConfigs');
 		  $posConfig = $posConfigsTable
@@ -292,9 +302,11 @@ class PosConfigsController extends PosAppController {
 
 				if (strlen ($settings ['devices'] [$deviceType]) > 0) {
 
+					 $this->debug ($settings ['devices'] [$deviceType]);
+					 $this->debug ($devices [$deviceType]);
+					 
 					 $config ['devices'] [$deviceType] = $device ['options'] [$settings ['devices'] [$deviceType]];
 				}
-					 
 		  }
 		  		  
 		  foreach ($settings ['options'] as $key => $val) {

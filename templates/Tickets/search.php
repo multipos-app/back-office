@@ -92,5 +92,3 @@
 </div>
 	 
 </div>
-
-<?= $this->Html->script (['Tickets/search']); ?>

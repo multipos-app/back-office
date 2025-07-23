@@ -12,6 +12,7 @@
 				<th><?= $this->Paginator->sort ('department_desc', __ ('Department')) ?></th>
 				<th><?= __ ('Type'); ?></th>
 				<th class="text-center"><?= __ ('Negative/Deposits'); ?></th>
+				<th class="text-center"><?= __ ('Inventory'); ?></th>
 				<th></th>
 		  </tr>
 	 </thead>
@@ -22,6 +23,7 @@
 				
 				$departmentType = $departmentTypes [$department ['department_type']];
 				$isNegative = $department ['is_negative'] ? __('Yes') : __ ('No');
+				$inventory = $department ['inventory'] ? __('Yes') : __ ('No');
 				$action = '';
 				$locked = '';
 				if ($department ['locked']) {
@@ -33,6 +35,7 @@
 				<td><?= $department ['department_desc'] ?></td>
 				<td><?= $departmentType ?></td>
 				<td align="center"><?= $isNegative ?></td?>
+				<td align="center"><?= $inventory ?></td?>
 				<td align="right"><?= $locked ?></td>
 		  </tr>
 <?php

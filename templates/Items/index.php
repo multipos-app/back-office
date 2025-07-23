@@ -15,7 +15,7 @@
 
 <div class="row search-grid">
 	 
-	 <div >
+	 <div>
 		  <input type="text" class="form-control" id="item_search" value="" placeholder="<?= __ ('Search, SKU, description')?>">
 	 </div>
 	 
@@ -76,6 +76,7 @@
 				<th style="text-align: end;"><?= __ ('Price'); ?></th>
 				<th style="text-align: end;"><?= __ ('Cost'); ?></th>
 				<th style="text-align: end;"><?= __ ('Inventory'); ?></th>
+				<th style="text-align: end;"><?= __ ('Disabled'); ?></th>
 				<th></th>
 		  </tr>
 	 </thead>
@@ -162,9 +163,9 @@
 
 								$price = $this->moneyFormat ($price);
 								$cost = $this->moneyFormat ($cost);
-
 								$onHandCount = $item ['inv_items'] [0] ['on_hand_count'] < 0 ? 0 : $item ['inv_items'] [0] ['on_hand_count'];
-								
+								$disabled = $item ['enabled'] ? '' : '<i class="bx bxs-error-circle icon-warn"></i>'; 
+
 								$supplierID = 0;
 								if ($item ['inv_items'] [0] ['supplier_id'] > 0) {
 
@@ -175,7 +176,8 @@
 									 '<td>' . $suppliers [$supplierID] . '</td>' .
 									 '<td style="text-align: end;">'.$price.'</td>' .
 									 '<td style="text-align: end;">' . $cost . '</td>' .
-									 '<td style="text-align: end;">' . $onHandCount . '</td>';
+									 '<td style="text-align: end;">' . $onHandCount . '</td>' .
+									 '<td style="text-align: end;">' . $disabled . '</td>';
 
 								echo $html;
 								break;
@@ -231,9 +233,9 @@
 
 <div class="modal fade" id="item_modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <div class="modal-header">
-                <h5 id="item_desc" class="modal-title"><?= __ ('Edit item') ?></h5>
+                <h5 id="modal_title"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="modal_content" class="modal-body">

@@ -168,7 +168,6 @@ class HourlyController extends PeriodController {
 							'len' => $this->len,
 							'periods' => $this->periods,
 							'hourly' => $hourly,
-							/* 'snap' => true,*/
 							'dow' => $this->dow ()]);
 	 }
 }

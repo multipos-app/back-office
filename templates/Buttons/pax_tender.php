@@ -29,8 +29,8 @@
 </div>
 
 <div class="row g-3 mt-3">
-	 <div class="col-sm-4 d-grid text-center"></div>
- 	 <div class="col-sm-4 d-grid text-center">
+	 <div class="col-sm-9 d-grid text-center"></div>
+ 	 <div class="col-sm-3 d-grid text-center">
 		  <button class="btn btn-success" id="button_complete" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
 	 </div>
 </div>

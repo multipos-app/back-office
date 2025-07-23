@@ -1,15 +1,9 @@
 
-<?php
-
-$this->debug ('buttons null...');
-
-?>
-
 
 <div class="row g-3">
 	 
 	 <div class="col-sm-12">
-		  <select name="class" id="button_type" class="form-select" required="required">
+		  <select name="class" id="class" class="form-select" required="required">
 				
 				<option value="null"><?= __ ('Select type of button') ?></option>
 				
@@ -45,19 +39,15 @@ $this->debug ('buttons null...');
 				 menu_name: '<?= $menuName ?>',
 				 menu_index: <?= $menuIndex ?>,
 				 pos: <?= $pos ?>,
-				 button_type: $('#button_type').val (),
-				 button_text: $("#button_type option:selected").text ()};
+				 class: $('#class').val (),
+				 button_text: $("#class option:selected").text ()};
 			
 	  $.ajax ({url: '/buttons/select-control-template/',
 				  type: 'POST',
-				  data: data,
+				  data: data,x
 				  success: function (data) {
 
 						data = JSON.parse (data);
-						
-						console.log ('select control... ');
-						console.log (data);
-						
 						menus.setModal (data.text, data.html);
 				  }
 	  });

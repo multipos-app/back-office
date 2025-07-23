@@ -21,6 +21,7 @@ use Cake\I18n\I18n;
 use Cake\Datasource\ConnectionManager;
 
 class DashboardController extends PeriodController {
+	 
 
     public $totals;
     public $date;
@@ -37,9 +38,9 @@ class DashboardController extends PeriodController {
         $summaryType = 1;
         $this->periodType = 'weekly';
         $this->year = '';
-        
+		        
 		  while (count ($args) > 0) {
-				
+								
 				$key = array_shift ($args);
 				$val = array_shift ($args);
 
@@ -74,7 +75,7 @@ class DashboardController extends PeriodController {
         $len = count ($this->periods);
         
         // initialize report rows
-		  
+		  		  
         $this->totals = ['sales' => ['total' => array_fill (0, $len + 1, 0),
                                      'net' => array_fill (0, $len + 1, 0),
                                      'tax' => array_fill (0, $len + 1, 0),
@@ -300,71 +301,70 @@ class DashboardController extends PeriodController {
             $end = $period ['end'];
             $ticketsTable = TableRegistry::get ('Tickets');
 
-				$where = ["start_time between '$start' and '$end'",
-                      "total != 0",
-                      "ticket_type in (0, 3, 8, 11)"];
+				/* $where = ["start_time between '$start' and '$end'",
+				 *           "total != 0",
+				 *           "ticket_type in (0, 3, 8, 11)"];
 
-				if ($this->merchant ['bu_index'] > 0) {
+					if ($this->merchant ['bu_index'] > 0) {
 
-					 $where [] = "business_unit_id = " .  $this->merchant ['bu_id'];
-				}
-				
-				$count = $ticketsTable
-                   ->find ()
-                   ->where ($where)
-						 ->count ();
-				
-            if ($count > 0) {
-					 
-                $this->totals ['sales'] ['customer_count'] [$col] += $count;
-                $this->totals ['sales'] ['customer_count'] [$len] += $count;
-            }
-				
-            if ($this->totals ['sales'] ['customer_count'] [$col] > 0) {
-                
-                $this->totals ['sales'] ['avg_sale'] [$col] = $this->totals ['sales'] ['total'] [$col] / $this->totals ['sales'] ['customer_count'] [$col];
-                $this->totals ['sales'] ['avg_sale'] [$len] = $this->totals ['sales'] ['total'] [$len] / $this->totals ['sales'] ['customer_count'] [$len];
-            }
-
+					$where [] = "business_unit_id = " .  $this->merchant ['bu_id'];
+					}
+					
+					$count = $ticketsTable->find ()
+					->where ($where)
+					->count ();
+					
+					if ($count > 0) {
+					
+					$this->totals ['sales'] ['customer_count'] [$col] += $count;
+					$this->totals ['sales'] ['customer_count'] [$len] += $count;
+					}
+					
+					if ($this->totals ['sales'] ['customer_count'] [$col] > 0) {
+					
+					$this->totals ['sales'] ['avg_sale'] [$col] = $this->totals ['sales'] ['total'] [$col] / $this->totals ['sales'] ['customer_count'] [$col];
+					$this->totals ['sales'] ['avg_sale'] [$len] = $this->totals ['sales'] ['total'] [$len] / $this->totals ['sales'] ['customer_count'] [$len];
+					}
+				 */
             /**
              * No Sale/open drawer
              */
 
-				$where = ["start_time between '$start' and '$end'",
-                      "ticket_type = 2"];
-				
-				if ($this->merchant ['bu_index'] > 0) {
+				/* $where = ["start_time between '$start' and '$end'",
+				 *           "ticket_type = 2"];
+					
+					if ($this->merchant ['bu_index'] > 0) {
 
-					 $where [] = ["business_unit_id" => $this->merchant ['bu_id']];
-				}
+					$where [] = ["business_unit_id" => $this->merchant ['bu_id']];
+					}
 
-            $noSales = $ticketsTable
-                   ->find ()
-                   ->where ($where)
-						 ->count ();
-				
-            if ($noSales > 0) {
-					 
-                $this->totals ['sales'] ['no_sales'] [$col] += $noSales;
-                $this->totals ['sales'] ['no_sales'] [$len] += $noSales;
-            }
+				 * $noSales = $ticketsTable
+				 *        ->find ()
+				 *        ->where ($where)
+					->count ();
+					
+				 * if ($noSales > 0) {
+					
+				 *     $this->totals ['sales'] ['no_sales'] [$col] += $noSales;
+				 *     $this->totals ['sales'] ['no_sales'] [$len] += $noSales;
+				 * }
 
-				$where = ["start_time between '$start' and '$end'",
-							 "tip > 0"];
+					$where = ["start_time between '$start' and '$end'",
+					"tip > 0"];
 
-				if ($this->merchant ['bu_index'] > 0) {
+					if ($this->merchant ['bu_index'] > 0) {
 
-					 $where [] = ["business_unit_id" => $this->merchant ['bu_id']];
-				}
-				
-				$tips = $ticketsTable->find ()
-											->where ($where);
-				
-				foreach ($tips as $t) {
-					 
-					 $this->totals ['sales'] ['tips'] [$col] += $t ['tip'];
-					 $this->totals ['sales'] ['tips'] [$len] += $t ['tip'];
-				}
+					$where [] = ["business_unit_id" => $this->merchant ['bu_id']];
+					}
+					
+					$tips = $ticketsTable->find ()
+					->where ($where);
+					
+					foreach ($tips as $t) {
+					
+					$this->totals ['sales'] ['tips'] [$col] += $t ['tip'];
+					$this->totals ['sales'] ['tips'] [$len] += $t ['tip'];
+					}*/
 				
             $col ++;
 				

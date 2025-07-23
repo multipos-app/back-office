@@ -42,27 +42,27 @@ class AppView extends View
     public function initialize(): void { }
 
 	 // public function input ($id, $val, $icon, $class, $click, $placeholder) {
-        
+    
     public function input ($icon, $args) {
 		  
 		  $html =
 				'<div class="grid-cell input-group-grid">' .
 				'<div class="grid-cell grid-cell-left grid-cell-middle">' .
 				'<i class="fa ' . $icon . ' fa-med"></i>' .
-                '</div>' .
+            '</div>' .
 				'<div class="grid-cell grid-cell-left">' .
-                '<input type="text"';
+            '<input type="text"';
 
-          foreach ($args as $key => $val) {
+        foreach ($args as $key => $val) {
 
-              $html .= ' ' . $key . '="' . $val . '"';
-          }
-          
-          $html .=
+            $html .= ' ' . $key . '="' . $val . '"';
+        }
+        
+        $html .=
 				'>' .
 				'</div>' .
 				'</div>';
-          
+        
 		  return $html;
 	 }
 
@@ -76,21 +76,20 @@ class AppView extends View
         
         switch (gettype ($obj)) {
 
-        case 'array':
-        case 'object':
+				case 'array':
+				case 'object':
 
-            $this->log (json_encode ($obj, JSON_PRETTY_PRINT), 'debug');
-            break;
+					 $this->log (json_encode ($obj, JSON_PRETTY_PRINT), 'debug');
+					 break;
 
-         case 'string':
+				case 'string':
 
-            $this->log ($obj, 'debug');
-            break;
-            
-        default:
+					 $this->log ($obj, 'debug');
+					 break;
+					 
+				default:
 
-            $this->log ("log type unkown... " . gettype ($obj));
+					 $this->log ("log type unkown... " . gettype ($obj));
         }
     }
-
 }

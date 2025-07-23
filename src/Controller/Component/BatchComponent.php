@@ -36,7 +36,7 @@ class BatchComponent extends Component {
                    ['model' => 'Profiles',
                     'contain'=> ['ProfilePermissions']],
                    ['model' => 'Items'],
-                   ['model' => 'ItemLinks'],
+                   ['model' => 'PosImages'],
                    ['model' => 'Suppliers'],
                    ['model' => 'Tenders'],
                    ['model' => 'Currencies',
@@ -68,6 +68,7 @@ class BatchComponent extends Component {
 									['model' => 'Profiles',
 									 'contain'=> ['ProfilePermissions']],
 									['model' => 'Suppliers'],
+									['model' => 'PosImages'],
 									['model' => 'Tenders'],
 									['model' => 'Currencies',
 									 'contain' => ['CurrencyDenoms']],
@@ -78,7 +79,17 @@ class BatchComponent extends Component {
 						  
 					 $models = [['model' => 'Customers']];
 					 break;
-        }
+					 
+				case 6:
+						  
+					 $models = [['model' => 'PosImages']];
+					 break;
+					 
+				case 7:
+						  
+					 $models = [['model' => 'Items']];
+					 break;
+		  }
 
 		  // $this->getController->debug ($models);
 		  

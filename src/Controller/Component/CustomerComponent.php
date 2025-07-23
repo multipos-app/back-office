@@ -14,26 +14,34 @@ use Cake\ORM\TableRegistry;
 class CustomerComponent extends Component {
 	 
     public function update ($update, $ticket, $controller) {
-		  
-		  $customerID = $update ['id'];
-		  
-		  $customersTable = TableRegistry::get ('Customers');
-		  
-		  if ($customerID == 0) {
 
+		  $customerID = 0;
+		  $customer = null;
+		  $addCustomer = isset ($update ['add_customer']);
+		  $customersTable = TableRegistry::get ('Customers');
+
+		  $controller->debug ($update);
+		  
+		  if ($addCustomer) {
+
+				unset ($update ['add_customer']);
 				$customer = $customersTable->newEntity ($update);
 		  }
 		  else {
 
 				$customer = $customersTable->find ()
-													->where (['id' => $customerID])
+													->where (['uuid' => $update ['uuid']])
 													->first ();
-				
-				foreach (['fname', 'lname', 'phone', 'email', 'addr_1', 'city', 'state', 'postal_code', 'pin', 'uuid'] as $field) {
 
-					 if (isset ($update [$field]) && (strlen ($update [$field]) > 0)) {
+				if ($customer) {
+					 
+					 $customerID = $customer ['id'];
+					 foreach (['fname', 'lname', 'phone', 'email', 'addr_1', 'city', 'state', 'postal_code', 'pin'] as $field) {
 						  
-						  $customer [$field] = $update [$field];
+						  if (isset ($update [$field]) && (strlen ($update [$field]) > 0)) {
+								
+								$customer [$field] = $update [$field];
+						  }
 					 }
 				}
 		  }
@@ -48,7 +56,7 @@ class CustomerComponent extends Component {
 
 		  $customersTable->save ($customer);
 		  		  
-		  if ($customerID == 0) {
+		  if ($addCustomer) {
 
 				$customerID = $customersTable->find ()  // retrieve the last insert
 													  ->select (['id'])
@@ -56,7 +64,7 @@ class CustomerComponent extends Component {
 													  ->first ()
 													  ->id;
 				
-				// new customer was created add the id to the ticket
+				// new customer was created, add the id to the ticket
 				
 				TableRegistry::get ('Tickets')
 								 ->updateAll (['customer_id' => $customer ['id']],

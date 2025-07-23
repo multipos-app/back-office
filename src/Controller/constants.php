@@ -37,6 +37,9 @@ define ("OPEN_AMOUNT", 21);
 define ("MANAGER_OVERRIDE", 22);
 define ("ORDER_ITEMS", 23);
 define ("REFUND", 24);
+define ("WEIGHT_ITEMS", 25);
+define ("REDEEM", 26);
+define ("PAYOUT", 27);
 
 define ("DISCOUNTS", 101);
 define ("VOID_ITEMS", 102);
@@ -54,14 +57,16 @@ define ("REFUNDED", 7);
 define ("REVERSED", 8);
 define ("RECALLED", 9);
 
-define ("EXCHANGE_ITEM", 1);
+// item state
 
 define ("TICKET_ITEM_STANDARD", 0);
 define ("TICKET_ITEM_VOID_ITEM", 1);
 define ("TICKET_ITEM_COMP_ITEM", 2);
-define ("TICKET_ITEM_RETURN_ITEM", 3);
-define ("TICKET_ITEM_SERVICE_CHARGE", 4);
-define ("TICKET_ITEM_MODIFIER", 5);
+define ("TICKET_ITEM_REFUND_ITEM", 3);
+define ("TICKET_ITEM_GIFT_CARD", 4);
+define ("TICKET_ITEM_WEIGHT", 5);
+define ("TICKET_ITEM_REDEEM", 6);
+define ("TICKET_ITEM_PAYOUT", 7);
 
 // department types
 
@@ -71,11 +76,12 @@ define ("BANK_DEPARTMENT",  3);
 define ("DEPOSIT_DEPARTMENT",  4);
 define ("OTHER_DEPARTMENT",  5);
 define ("LABOR_DEPARTMENT", 6);
+define ("REDEEM_DEPARTMENT", 7);
+define ("PAYOUT_DEPARTMENT", 8);
 
-define ("ONE_DAY", 24 * 60 * 60);
-define ("ONE_HOUR", 60 * 60);
-define ("ONE_WEEK", 7 * 24 * 60 * 60);
-
+define ("ONE_HOUR", intVal (60 * 60));
+define ("ONE_DAY", intVal (24 * ONE_HOUR));
+define ("ONE_WEEK", intVal (7 * ONE_DAY));
 define ("BU_CORP", 1);
 define ("BU_LOCATION", 2);
 define ("BU_REGION", 3);

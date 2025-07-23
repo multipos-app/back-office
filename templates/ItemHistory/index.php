@@ -1,4 +1,12 @@
 
+<div class="row g-1 m-3">
+	 
+	 <?php 
+	 echo $this->element ('period_controls', ['url' => '/item-history']);
+	 ?>
+	 
+</div>
+
 <table class="table table-hover">
 	 
 	 <thead align="right">
@@ -34,7 +42,7 @@
 		  $grandTotals [] = ['amount' => 0.0, 'quantity' => 0];
 
 		  foreach ($departments as $department) {
-
+				
 				echo '<tr><td colspan="9" align="center"><h5>' . $department ['department_desc'] . '</h5></td></tr>';
 				
 				foreach ($department ['items'] as $item) {

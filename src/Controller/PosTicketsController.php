@@ -30,10 +30,7 @@ class PosTicketsController extends PosApiController {
 
     public $ticket;
     public $ticketID;
-    public $ticketDetail = ['ticket_items' => 'TicketItems',
-                            'ticket_item_addons' => 'TicketItemAddons',
-                            'ticket_taxes' => 'TicketTaxes',
-                            'ticket_tenders' => 'TicketTenders'];
+    public $tables = ['items' => 'Items'];
 
     public $bu = null;
     public $bus = null;
@@ -128,22 +125,26 @@ class PosTicketsController extends PosApiController {
                     $customer = $ticket ['customer'];
                     unset ($ticket ['customer']);  // so it isn't created in cascade save
                 }
-                
+
+					 // remove the POS id's before save
+					 
                 foreach (['ticket_items', 'ticket_tenders'] as $table) {
-                    
-                    if (isset ($ticket [$table])) {
+						  
+						  if (isset ($ticket [$table])) {
 								
-                        foreach ($ticket [$table] as &$t) {
-                            
-                            unset ($t ['id']);
-                            
-                            if (isset ($t ['data_capture']) && is_array ($t ['data_capture'])) {
-                                
-                                $t ['data_capture'] = json_encode ($t ['data_capture']);
-                            }
-                        }
-                    }
-                }
+								foreach ($ticket [$table] as &$t) {
+									 
+									 unset ($t ['id']);
+
+									 // re-encode data capture elements before save
+									 
+									 if (isset ($t ['data_capture']) && is_array ($t ['data_capture'])) {
+										  
+										  $t ['data_capture'] = json_encode ($t ['data_capture']);
+									 }
+								}
+						  }
+					 }
 
                 if (isset ($ticket ['aux_receipts'])) {
 
@@ -181,16 +182,8 @@ class PosTicketsController extends PosApiController {
 					 
                 $this->ticket = $ticket;
             }
-				
-            $this->initTotals ();
-				
-            switch ($ticket ['state']) {
 
-					 case SUSPEND:
-
-						  // $ticket = $this->merge ($ticket);
-						  break;
-            }
+            $this->initTotals ();  // totals setup
             
             $ticketType = $ticket ['ticket_type'];
             
@@ -202,8 +195,11 @@ class PosTicketsController extends PosApiController {
 					 case SALE_NONTAX:
 					 case CREDIT_REFUND:
 					 case CREDIT_REVERSE:
+					 case WEIGHT_ITEMS:
+					 case REDEEM:
+					 case PAYOUT:
 
-						  // handle ticket sub-components
+						  // handle ticket components
 						  
 						  foreach (['ticket_items', 'ticket_taxes', 'ticket_tenders'] as $t) {
 								
@@ -280,269 +276,91 @@ class PosTicketsController extends PosApiController {
 	 
     private function ticket_items ($reverse) {
         
-        $invItems = TableRegistry::get ('InvItems');
         $buID = $this->ticket ['business_unit_id'];
 
         foreach ($this->ticket ['ticket_items'] as $ti) {
-
-            if ($ti ['complete']) {
-
-                continue;
-            }
             
-            // Inventory
+ 				/**
+				 *
+				 * sales summary totals for items
+				 *
+				 */
+
+				$this->itemTotals ($ti);
+
+				/**
+				 *
+				 * inventory
+				 *
+				 */
+
+ 				$this->inventory ($ti, $buID);
 				
-            $invItem = $invItems
-                     ->find ()
-                     ->where (['item_id' => $ti ['item_id'],
-                               'business_unit_id' => $buID])
-                     ->first ();
+				/* $invItem = $invItems->find ()
+					->where (['item_id' => $ti ['item_id'],
+					'business_unit_id' => $buID])
+					->first ();
 
-            if ($invItem && ($invItem ['supplier_id'] > 0)) {
+					if ($invItem && ($invItem ['supplier_id'] > 0)) {
+					
+					switch ($this->ticket ['ticket_type']) {
 
-                $invItem ['on_hand_quantity'] -= $ti ['quantity'];
-                $invItem ['on_hand_count'] -= $ti ['quantity'];
+					case WEIGHT_ITEMS:
+					
+					$invItem ['on_hand_count'] = $ti ['quantity'];
+					break;
+					
+					default:
+
+					$invItem ['on_hand_quantity'] -= $ti ['quantity'];
+					}
+
+				 *     if ($invItems->save ($invItem)) {
+
+				 *         if ($invItem ['on_hand_quantity'] < $invItem ['on_hand_req']) {
+
+				 *             $msg = __ ('Low stock warning: ') . $ti ['sku'] . ' ' . $ti ['item_desc'] . ', ' . __ ('on hand quantity') . ' ' . $invItem ['on_hand_quantity'];
+
+				 *             $this->message ($invItem ['business_unit_id'], $msg);
+				 *         }
+				 *     }
+				 *     else {
+					
+				 *         $this->log ('inv update failed... ', 'error');
+				 *         $this->log ($ti, 'error');
+				 *     }
+				 * }
+				 */
+				/**
+				 *
+				 * data capture element
+				 *
+				 */
+				
+				if (($ti ['data_capture'] != null) && (strlen ($ti ['data_capture']) > 0)) {
 					 
-                if ($invItems->save ($invItem)) {
-
-                    if ($invItem ['on_hand_quantity'] < $invItem ['on_hand_req']) {
-
-                        $msg = __ ('Low stock warning: ') . $ti ['sku'] . ' ' . $ti ['item_desc'] . ', ' . __ ('on hand quantity') . ' ' . $invItem ['on_hand_quantity'];
-
-                        $this->message ($invItem ['business_unit_id'], $msg);
-                    }
-                }
-                else {
-						  
-                    $this->log ('inv update failed... ', 'error');
-                    $this->log ($ti, 'error');
-                }
-            }
-
-            // sum for each business unit (store, corp...)
-
-            foreach ($this->bus as $businessUnit) {
+					 $this->dataCapture ($ti);
 					 
-                $bu = $businessUnit ['id'];
-                $summaryType = 0;
-                foreach ($businessUnit ['total_times'] as $totalTime) {
+					 $dc = json_decode ($ti ['data_capture'], true);
 
-                    $total = false;
-                    $discounts = 0;
-
-                    if (isset ($ti ['ticket_item_addons'])) {
-								
-                        $table = TableRegistry::get ('SalesExceptionTotals');
-								
-                        foreach ($ti ['ticket_item_addons'] as $tia) {
-									 
-                            $discounts += $tia ['addon_amount'] * $tia ['addon_quantity'];
-									 
-                            $query = $table->find ()->where (['business_unit_id' => $bu,
-                                                              'summary_type' => $summaryType,
-                                                              "start_time = '$totalTime'",
-                                                              'exception_key' => 'discounts']);
-									 
-									 
-                            if ($total = $query->first ()) {
-										  
-                                if ($reverse) {
-                                    
-                                    $total ['quantity'] -= $ti ['quantity'];
-                                    $total ['amount'] -= $discounts;
-                                }
-                                else {
-                                    
-                                    $total ['quantity'] += $ti ['quantity'];
-                                    $total ['amount'] += $discounts;
-                                }
-                            }
-                            else {
-										  
-                                $total = $table->newEntity (['business_unit_id' => $bu,
-                                                             'pos_id' => $this->posNo,
-                                                             'start_time' => $totalTime,
-                                                             'amount' => $discounts,
-                                                             'quantity' => $tia ['addon_quantity'],
-                                                             'exception_key' => 'discounts',
-                                                             'exception_desc' => $tia ['addon_description'],
-                                                             'summary_type' => $summaryType]);
-                            }
-									 
-                            $table->save ($total);
-                        }
-                    }
+					 if ($dc) {
 						  
-                    $table = TableRegistry::get ('SalesDepartmentTotals');
-                    $query = $table->find ()->where (['business_unit_id' => $bu,
-                                                      'summary_type' => $summaryType,
-                                                      "start_time = '$totalTime'",
-                                                      'department_id' => $ti ['department_id']]);
-                    switch ($ti ['state']) {
+						  if (isset ($dc ['actions'])) {
 
-								case TICKET_ITEM_STANDARD:
-								case TICKET_ITEM_RETURN_ITEM:
-									 
-									 if ($total = $query->first ()) {
-										  
-										  if ($reverse) {
+								foreach ($dc ['actions'] as $action) {
 
-												$total ['quantity'] -= $ti ['quantity'];
-												$total ['amount'] -= $ti ['amount'] * $ti ['quantity'] + $discounts;
-										  }
-										  else {
-												
-												$total ['quantity'] += $ti ['quantity'];
-												$total ['amount'] += $ti ['amount'] * $ti ['quantity'] + $discounts;
-										  }
-									 }
-									 else {
-										  
-										  $total = $table->newEntity (['business_unit_id' => $bu,
-																				 'pos_id' => $this->posNo,
-																				 'start_time' => $totalTime,
-																				 'amount' => ($ti ['amount'] * $ti ['quantity'] + $discounts),
-																				 'quantity' => $ti ['quantity'],
-																				 'department_id' => $ti ['department_id'],
-																				 'summary_type' => $summaryType]);
-									 }
-									 
-									 $table->save ($total);
+									 switch ($action ['action']) {
 
-									 $table = TableRegistry::get ('SalesItemTotals');
-									 $query = $table->find ()->where (['business_unit_id' => $bu,
-																				  'summary_type' => $summaryType,
-																				  "start_time = '$totalTime'",
-																				  'sales_item_key' => $ti ['sku']]);
+										  case 'update':
 
-									 if ($total = $query->first ()) {
-
-										  if ($reverse) {
-												
-												$total ['quantity'] -= $ti ['quantity'];
-												$total ['amount'] -= $ti ['amount'] * $ti ['quantity'];
-										  }
-										  else {
-												
-												$total ['quantity'] += $ti ['quantity'];
-												$total ['amount'] += $ti ['amount'] * $ti ['quantity'];
-										  }
-									 }
-									 else {
-										  
-										  $total = $table->newEntity (['business_unit_id' => $bu,
-																				 'pos_id' => $this->posNo,
-																				 'start_time' => $totalTime,
-																				 'amount' => $ti ['amount'] * $ti ['quantity'],
-																				 'quantity' => $ti ['quantity'],
-																				 'sales_item_key' => $ti ['sku'],
-																				 'sales_item_desc' => $ti ['item_desc'],
-																				 'department_id' => $ti ['department_id'],
-																				 'tax_group' => $ti ['tax_group_id'],
-																				 'summary_type' => $summaryType]);
-									 }
-									 
-									 $table->save ($total);
-									 
-									 // do tax/nontax
-
-									 $salesKey = $ti ['tax_exempt'] == 1 ? 'NON_TAXABLE' : 'TAXABLE';
-
-									 $amount = $ti ['amount'] * $ti ['quantity'];
-									 
-									 if (isset ($ti ['ticket_item_addons']) && (count ($ti ['ticket_item_addons'])) > 0) {
-
-										  foreach ($ti ['ticket_item_addons'] as $tia) {
-
-												$amount += $tia ['addon_amount'] * $tia ['addon_quantity'];
-										  }
-									 }
-									 
-									 $totals = TableRegistry::get ('SalesTotals');
-									 
-									 $query = $totals->find ()->where (['business_unit_id' => $bu,
-																					'summary_type' => $summaryType,
-																					"start_time = '$totalTime'",
-																					'sales_key' => $salesKey]);
-									 
-									 if ($total = $query->first ()) {
-										  
-										  if ($reverse) {
-												
-												$total ['quantity'] -= $ti ['quantity'];
-												$total ['amount'] -= $amount;
-										  }
-										  else {
-                                    
-												$total ['quantity'] += $ti ['quantity'];
-												$total ['amount'] += $amount;
-										  }
-									 }
-									 else {
-										  
-										  $total = $totals->newEntity (['business_unit_id' => $bu,
-																				  'pos_id' => $this->posNo,
-																				  'start_time' => $totalTime,
-																				  'amount' => $amount,
-																				  'quantity' => $ti ['quantity'],
-																				  'sales_key' => $salesKey,
-																				  'sales_desc' => $salesKey,
-																				  'summary_type' => $summaryType]);
-									 }
-									 
-									 $totals->save ($total);
-                    }
-
-                    $exceptionKey = '';
-                    switch ($ti ['state']) {
-
-								case TICKET_ITEM_RETURN_ITEM:
-								case TICKET_ITEM_VOID_ITEM:
-
-									 $exceptionKey = '';
-									 switch ($ti ['state']) {
-
-										  case TICKET_ITEM_RETURN_ITEM:
-
-												$exceptionKey = 'return_items';
-												break;
-												
-										  case TICKET_ITEM_VOID_ITEM:
-
-												$exceptionKey = 'void_items';
+												TableRegistry::get ($this->tables [$action ['table']])->updateAll ($action ['updates'],
+																																		 ['id' => $action ['id']]);
 												break;
 									 }
-									 
-									 $table = TableRegistry::get ('SalesExceptionTotals');
-									 $query =$table->find ()->where (['business_unit_id' => $bu,
-																				 'summary_type' => $summaryType,
-																				 "start_time = '$totalTime'",
-																				 'exception_key' => $exceptionKey]);
-									 
-									 if ($total = $query->first ()) {
-										  
-										  $total ['amount'] += $ti ['amount'];
-										  $total ['quantity'] += $ti ['quantity'];
-										  
-									 }
-									 else {
-										  
-										  $total = $table->newEntity (['business_unit_id' => $bu,
-																				 'pos_id' => $this->posNo,
-																				 'start_time' => $totalTime,
-																				 'amount' => $ti ['amount'],
-																				 'quantity' => $ti ['quantity'],
-																				 'exception_key' => $exceptionKey,
-																				 'exception_desc' => $exceptionKey,
-																				 'summary_type' => $summaryType]);
-									 }
-                            
-									 $table->save ($total);
-                    }
-						  
-                    $summaryType ++;
-                }
-            }
+								}	 
+						  }
+					 }
+				}
         }
     }
 
@@ -552,7 +370,7 @@ class PosTicketsController extends PosApiController {
 	  *
 	  */
 	 
-     private function ticket_taxes ($reverse) {
+    private function ticket_taxes ($reverse) {
         
         if (!isset ($this->ticket ['ticket_taxes'])) return;
 		  
@@ -604,16 +422,11 @@ class PosTicketsController extends PosApiController {
 	  *
 	  */
 	 
-     private function ticket_tenders ($reverse) {
+    private function ticket_tenders ($reverse) {
         
         if (!isset ($this->ticket ['ticket_tenders'])) return;
 		  
         foreach ($this->ticket ['ticket_tenders'] as $tt) {
-				
-            if ($tt ['complete']) {
-
-                continue;
-            }
             
             foreach ($this->bus as $businessUnit) {
                 
@@ -661,7 +474,7 @@ class PosTicketsController extends PosApiController {
                                                      'sales_desc' => $tt ['tender_type'],
                                                      'summary_type' => $summaryType]);
                     }
-						  						  
+						  
                     $table->save ($total);
                     $summaryType ++;
                 }
@@ -675,7 +488,7 @@ class PosTicketsController extends PosApiController {
 	  *
 	  */
 	 
-     private function saleException ($ticket) {
+    private function saleException ($ticket) {
 
         $saleException = '';
         
@@ -814,7 +627,7 @@ class PosTicketsController extends PosApiController {
             $this->bus [] = $bu->toArray ();
         }
     }
-   
+    
     /**
 	  *
      * save the session
@@ -883,4 +696,295 @@ class PosTicketsController extends PosApiController {
         }
 		  
     }
+
+	 /**
+	  *
+	  * sum the item totals
+	  *
+	  */
+	 
+	 private function itemTotals ($ti, $reverse = false) {
+
+        // sum for each business unit (store, corp...)
+
+		  if ($ti ['metric_type'] == TICKET_ITEM_WEIGHT) {  // dont add these to totals
+
+				return;
+		  }
+		  
+		  foreach ($this->bus as $businessUnit) {
+				
+				$bu = $businessUnit ['id'];
+				
+				$summaryType = 0;
+				foreach ($businessUnit ['total_times'] as $totalTime) {
+
+					 $total = false;
+					 $discounts = 0;
+
+					 if (isset ($ti ['ticket_item_addons'])) {
+						  
+						  $table = TableRegistry::get ('SalesExceptionTotals');
+						  
+						  foreach ($ti ['ticket_item_addons'] as $tia) {
+								
+								$discounts += $tia ['addon_amount'] * $tia ['addon_quantity'];
+								
+								$query = $table->find ()->where (['business_unit_id' => $bu,
+																			 'summary_type' => $summaryType,
+																			 "start_time = '$totalTime'",
+																			 'exception_key' => 'discounts']);
+								
+								
+								if ($total = $query->first ()) {
+									 
+									 if ($reverse) {
+										  
+										  $total ['quantity'] -= $ti ['quantity'];
+										  $total ['amount'] -= $discounts;
+									 }
+									 else {
+										  
+										  $total ['quantity'] += $ti ['quantity'];
+										  $total ['amount'] += $discounts;
+									 }
+								}
+								else {
+									 
+									 $total = $table->newEntity (['business_unit_id' => $bu,
+																			'pos_id' => $this->posNo,
+																			'start_time' => $totalTime,
+																			'amount' => $discounts,
+																			'quantity' => $tia ['addon_quantity'],
+																			'exception_key' => 'discounts',
+																			'exception_desc' => $tia ['addon_description'],
+																			'summary_type' => $summaryType]);
+								}
+								
+								$table->save ($total);
+						  }
+					 }
+					 
+					 $table = TableRegistry::get ('SalesDepartmentTotals');
+					 $query = $table->find ()->where (['business_unit_id' => $bu,
+																  'summary_type' => $summaryType,
+																  "start_time = '$totalTime'",
+																  'department_id' => $ti ['department_id']]);
+					 switch ($ti ['state']) {
+
+						  case TICKET_ITEM_STANDARD:
+						  case TICKET_ITEM_REFUND_ITEM:
+						  case TICKET_ITEM_REDEEM:
+						  case TICKET_ITEM_PAYOUT:
+								
+								if ($total = $query->first ()) {
+									 
+									 if ($reverse) {
+
+										  $total ['quantity'] -= $ti ['quantity'];
+										  $total ['amount'] -= $ti ['amount'] * $ti ['quantity'] + $discounts;
+									 }
+									 else {
+										  
+										  $total ['quantity'] += $ti ['quantity'];
+										  $total ['amount'] += $ti ['amount'] * $ti ['quantity'] + $discounts;
+									 }
+								}
+								else {
+									 
+									 $total = $table->newEntity (['business_unit_id' => $bu,
+																			'pos_id' => $this->posNo,
+																			'start_time' => $totalTime,
+																			'amount' => ($ti ['amount'] * $ti ['quantity'] + $discounts),
+																			'quantity' => $ti ['quantity'],
+																			'department_id' => $ti ['department_id'],
+																			'summary_type' => $summaryType]);
+								}
+								
+								$table->save ($total);
+
+								$table = TableRegistry::get ('SalesItemTotals');
+								$query = $table->find ()->where (['business_unit_id' => $bu,
+																			 'summary_type' => $summaryType,
+																			 "start_time = '$totalTime'",
+																			 'sales_item_key' => $ti ['sku']]);
+
+								if ($total = $query->first ()) {
+
+									 if ($reverse) {
+										  
+										  $total ['quantity'] -= $ti ['quantity'];
+										  $total ['amount'] -= $ti ['amount'] * $ti ['quantity'];
+									 }
+									 else {
+										  
+										  $total ['quantity'] += $ti ['quantity'];
+										  $total ['amount'] += $ti ['amount'] * $ti ['quantity'];
+									 }
+								}
+								else {
+									 
+									 $total = $table->newEntity (['business_unit_id' => $bu,
+																			'pos_id' => $this->posNo,
+																			'start_time' => $totalTime,
+																			'amount' => $ti ['amount'] * $ti ['quantity'],
+																			'quantity' => $ti ['quantity'],
+																			'sales_item_key' => $ti ['sku'],
+																			'sales_item_desc' => $ti ['item_desc'],
+																			'department_id' => $ti ['department_id'],
+																			'tax_group' => $ti ['tax_group_id'],
+																			'summary_type' => $summaryType]);
+								}
+
+								// save total
+								
+								$table->save ($total);
+								
+								// do tax/nontax
+
+								$salesKey = $ti ['tax_exempt'] == 1 ? 'NON_TAXABLE' : 'TAXABLE';
+
+								$amount = $ti ['amount'] * $ti ['quantity'];
+								
+								if (isset ($ti ['ticket_item_addons']) && (count ($ti ['ticket_item_addons'])) > 0) {
+
+									 foreach ($ti ['ticket_item_addons'] as $tia) {
+
+										  $amount += $tia ['addon_amount'] * $tia ['addon_quantity'];
+									 }
+								}
+								
+								$totals = TableRegistry::get ('SalesTotals');
+								
+								$query = $totals->find ()->where (['business_unit_id' => $bu,
+																			  'summary_type' => $summaryType,
+																			  "start_time = '$totalTime'",
+																			  'sales_key' => $salesKey]);
+								
+								if ($total = $query->first ()) {
+									 
+									 if ($reverse) {
+										  
+										  $total ['quantity'] -= $ti ['quantity'];
+										  $total ['amount'] -= $amount;
+									 }
+									 else {
+										  
+										  $total ['quantity'] += $ti ['quantity'];
+										  $total ['amount'] += $amount;
+									 }
+								}
+								else {
+									 
+									 $total = $totals->newEntity (['business_unit_id' => $bu,
+																			 'pos_id' => $this->posNo,
+																			 'start_time' => $totalTime,
+																			 'amount' => $amount,
+																			 'quantity' => $ti ['quantity'],
+																			 'sales_key' => $salesKey,
+																			 'sales_desc' => $salesKey,
+																			 'summary_type' => $summaryType]);
+								}
+								
+								$totals->save ($total);
+					 }
+
+					 $exceptionKey = '';
+					 switch ($ti ['state']) {
+
+						  case TICKET_ITEM_REFUND_ITEM:
+						  case TICKET_ITEM_VOID_ITEM:
+
+								$exceptionKey = '';
+								switch ($ti ['state']) {
+
+									 case TICKET_ITEM_REFUND_ITEM:
+
+										  $exceptionKey = 'return_items';
+										  break;
+										  
+									 case TICKET_ITEM_VOID_ITEM:
+
+										  $exceptionKey = 'void_items';
+										  break;
+								}
+								
+								$table = TableRegistry::get ('SalesExceptionTotals');
+								$query =$table->find ()->where (['business_unit_id' => $bu,
+																			'summary_type' => $summaryType,
+																			"start_time = '$totalTime'",
+																			'exception_key' => $exceptionKey]);
+								
+								if ($total = $query->first ()) {
+									 
+									 $total ['amount'] += $ti ['amount'];
+									 $total ['quantity'] += $ti ['quantity'];
+									 
+								}
+								else {
+									 
+									 $total = $table->newEntity (['business_unit_id' => $bu,
+																			'pos_id' => $this->posNo,
+																			'start_time' => $totalTime,
+																			'amount' => $ti ['amount'],
+																			'quantity' => $ti ['quantity'],
+																			'exception_key' => $exceptionKey,
+																			'exception_desc' => $exceptionKey,
+																			'summary_type' => $summaryType]);
+								}
+								
+								$table->save ($total);
+					 }
+
+					 $summaryType ++;
+				}
+		  }
+	 }
+	 
+    /**
+	  *
+     * update inventory
+	  *
+     */
+
+	 private function inventory ($ti, $buID) {
+
+        $invItems = TableRegistry::get ('InvItems');
+	 	  $invItem = $invItems->find ()
+									 ->where (['item_id' => $ti ['item_id'],
+												  'business_unit_id' => $buID])
+									 ->first ();
+
+		  
+		  if ($invItem) {
+				
+				switch ($this->ticket ['ticket_type']) {
+						  
+					 case WEIGHT_ITEMS:
+						  
+						  $invItem ['on_hand_quantity'] = $ti ['quantity'];
+						  $invItem ['on_hand_count'] = $ti ['quantity'];
+						  break;
+						  
+					 default:
+
+						  $invItem ['on_hand_quantity'] -= $ti ['quantity'];
+				}
+
+            if ($invItems->save ($invItem)) {
+
+                if ($invItem ['on_hand_quantity'] < $invItem ['on_hand_req']) {
+
+                    $msg = __ ('Low stock warning: ') . $ti ['sku'] . ' ' . $ti ['item_desc'] . ', ' . __ ('on hand quantity') . ' ' . $invItem ['on_hand_quantity'];
+
+                    $this->message ($invItem ['business_unit_id'], $msg);
+                }
+            }
+            else {
+					 
+                $this->log ('inv update failed... ', 'error');
+                $this->log ($ti, 'error');
+            }
+        }
+	 }
 }

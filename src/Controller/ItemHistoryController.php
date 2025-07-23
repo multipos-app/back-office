@@ -130,23 +130,12 @@ class ItemHIstoryController extends PeriodController {
 				
             $col ++;
         }
-        
-        $depts = [null => __ ('Department')];
-        $query = TableRegistry::get ('Departments')
-										->find ()
-										->order (['department_desc' => 'asc']);
-        
-        foreach ($query as $d) {
-            
-            $depts [$d ['id']] = $d ['department_desc'];
-        }
 		  
 		  $this->set (['prev' => $startDate - ONE_WEEK,
 							'next' => $startDate + ONE_WEEK,
 							'len' => $this->len,
 							'periods' => $this->periods,
-							'departments' => $this->departments,
-							'depts' => $depts]);
+							'departments' => $this->departments]);
     }
 }
 ?>

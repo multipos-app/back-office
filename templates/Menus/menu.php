@@ -1,6 +1,8 @@
 
 <?php
 
+$this->debug ($controls);
+
 $menu = $posConfig ['config'] ['pos_menus'] [$menuName];
 $configID = $posConfig ['id'];
 $numButtons = count ($menu ['horizontal_menus'] [$menuIndex] ['buttons']);

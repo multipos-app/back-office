@@ -59,7 +59,15 @@ class PosAppController extends AppController {
     public $tenderSearch;
     public $ticketStatus;
     public $limit = 25;
-
+	 
+	 public $utcOffsets = ['America/New_York' => 5,
+								  'America/Chicago' => 6,
+								  'America/Denver' => 7,
+								  'America/Los_Angeles' => 8,
+								  'America/Anchorage' => 9,
+								  'HST' => 10,
+								  'Europe/London' => 0,
+								  'Europe/Copenhagen' => 23];
     /**
      *
      * initialize, check if logged in setup merchant info
@@ -87,7 +95,10 @@ class PosAppController extends AppController {
                               RETURN_SALE => __ ('RETURN'),
                               VOID_ITEMS => __ ('VOID ITEMS'),
                               SALE_NONTAX => __ ('NON TAX'),
-                              REFUND => __ ('REFUND')];
+                              REFUND => __ ('REFUND'),
+                              WEIGHT_ITEMS => __ ('TICKET WEIGHTS'),
+                              REDEEM => __ ('PULL TAB REDEEM'),
+                              PAYOUT => __ ('PULL TAB PAYOUT')];
 
         $this->ticketTypeMap = ['void_sales' => VOID,
                                 'no_sales' => NO_SALE,
@@ -294,13 +305,7 @@ class PosAppController extends AppController {
 	 
     protected function tzOffset ($tz) {
 		  
-        $originDateTimezone = new DateTimeZone ('UTC');
-        $targetDateTimezone = new DateTimeZone ($tz);
-        $originDateTime = new DateTime ("now", $originDateTimezone);
-        $targetDateTime = new DateTime ("now", $targetDateTimezone);
-        $offset = $originDateTimezone->getOffset ($originDateTime) - $targetDateTimezone->getOffset ($targetDateTime);
-		  
-        return intVal ($offset / 60 / 60);
+      return utcOffsets ($tz);
     }
 	 
     public function dow ($t = null) {
@@ -310,7 +315,7 @@ class PosAppController extends AppController {
 				$t = strtotime ($t);
 		  }
 
-		  $t -= $this->tzOffset ($this->merchant ['timezone']) * ONE_HOUR;
+		  $t -= $this->utcOffsets [$this->merchant ['timezone']] * ONE_HOUR;
 		  
         if ($t) {
             return date ("w", $t);
@@ -396,6 +401,7 @@ class PosAppController extends AppController {
         date_default_timezone_set ('UTC');
         return date ('Y-m-d H:i:s', time ());
     }
+	 
 	 /**
      *
      * Generic save, add entry in bo_updates for the POS
@@ -450,6 +456,26 @@ class PosAppController extends AppController {
 		  
         return $res;
     }
+	 /**
+     *
+     * Generic save, add entry in bo_updates for the POS
+     *
+     */
+	 
+	 public function batch ($table, $id) {
+        
+        $batchEntry = ['business_unit_id' => $this->merchant ['bu_id'],
+                       'update_table' => $table,
+                       'update_id' => $id,
+                       'update_action' => 0,
+                       'execution_time' => time ()];
+        
+        $batchEntriesTable = TableRegistry::get ('BatchEntries');
+        $batchEntry = $batchEntriesTable->newEntity ($batchEntry);
+        $batchEntriesTable->save ($batchEntry);
+
+		  $this->notifyPos ();  // send an mttq message
+	 }
 	 
 	 /**
      *

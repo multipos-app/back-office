@@ -1,5 +1,5 @@
 
-<form id="supplier_edit" name="supplier_edit" method="post" action="/suppliers/edit/<?= $supplier ['id'] ?>">
+<form class="row g-1" id="supplier_edit" name="supplier_edit" method="post" action="/suppliers/edit/<?= $supplier ['id'] ?>">
 
 	 <div class="row g-1 m-3">
 		  <label for="fname" class="col-sm-4 form-label"><?= __('Supplier name') ?></label>
@@ -20,12 +20,11 @@
 		  <div class="col-sm-8">
 				
 				<?= 
-				$this->Form->input ('contact1', 
-										  ['id' => 'contact1', 
-											'value' => $supplier ['contact1'], 
+				$this->Form->input ('contact', 
+										  ['id' => 'contact', 
+											'value' => $supplier ['contact'], 
 											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
@@ -38,20 +37,19 @@
 										  ['id' => 'email', 
 											'value' => $supplier ['email'], 
 											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
 
 	 <div class="row g-1 m-3">
-		  <label for="phone" class="col-sm-4 form-label"><?= __('Phone') ?></label>
+		  <label for="phone_1" class="col-sm-4 form-label"><?= __('Phone') ?></label>
 		  <div class="col-sm-8">
 				
 				<?= 
-				$this->Form->input ('phone', 
-										  ['id' => 'phone', 
-											'value' => $supplier ['phone'], 
+				$this->Form->input ('phone_1', 
+										  ['id' => 'phone_1', 
+											'value' => $supplier ['phone_1'], 
 											'class' => 'form-control phone-format', 
 											'label' => false, 
 											'required' => 'required']) ?>
@@ -59,27 +57,26 @@
 	 </div>
 	 
 	 <div class="row g-1 m-3">
-		  <label for="addr1" class="col-sm-4 form-label"><?= __('Address') ?></label>
-		  
+		  <label for="phone_2" class="col-sm-4 form-label"><?= __('Fax') ?></label>
 		  <div class="col-sm-8">
+				
 				<?= 
-				$this->Form->input ('addr1', 
-										  ['id' => 'addr1', 
-											'value' => $supplier ['addr1'], 
+				$this->Form->input ('phone_2', 
+										  ['id' => 'phone_2', 
+											'value' => $supplier ['phone_2'], 
 											'class' => 'form-control phone-format', 
-											'label' => false,
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
 	 <div class="row g-1 m-3">
-		  <label for="addr2" class="col-sm-4 form-label"><?= __('Address 2') ?></label>
+		  <label for="addr_1" class="col-sm-4 form-label"><?= __('Address') ?></label>
 		  
 		  <div class="col-sm-8">
 				<?= 
-				$this->Form->input ('addr2', 
-										  ['id' => 'addr2', 
-											'value' => $supplier ['addr2'], 
+				$this->Form->input ('addr_1', 
+										  ['id' => 'addr_1', 
+											'value' => $supplier ['addr_1'], 
 											'class' => 'form-control', 
 											'label' => false]) ?>
 		  </div>
@@ -94,8 +91,7 @@
 										  ['id' => 'city', 
 											'value' => $supplier ['city'], 
 											'class' => 'form-control', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 
@@ -124,15 +120,17 @@
 										  ['id' => 'postal_code', 
 											'value' => $supplier ['postal_code'], 
 											'class' => 'form-control postal-code-format', 
-											'label' => false, 
-											'required' => 'required']) ?>
+											'label' => false]) ?>
 		  </div>
 	 </div>
 	 
-	 <div class="text-center">
-		  <button type="submit" class="btn btn-success">Save</button>
+	 <div class="row g-3 mt-3">
+		  <div class="col-sm-9 d-grid text-center"></div>
+ 		  <div class="col-sm-3 d-grid text-center">
+				<button type="submit" class="btn btn-success" data-bs-dismiss="modal"><?= __ ('Save') ?></button>
+		  </div>
 	 </div>
-
+	 
 </form>
 
 <script>
