@@ -89,9 +89,9 @@ $devices = [
 					  ['name' => 'elo_cd',
 						'desc' => __ ('ELO LCD Display'),
 						'class' => 'cloud.multipos.pos.devices.EloCustomerDisplay'],
-				  'android_display' => ['name' => 'android_display',
-												'desc' => __ ('Generic tablet'),
-												'class' => 'cloud.multipos.pos.views.CustomerFacingDisplay']]],
+				  'android_customer_display' => ['name' => 'android_customer_display',
+															'desc' => __ ('Android customer display'),
+															'class' => 'cloud.multipos.pos.views.CustomerFacingDisplay']]],
 	 
 	 'scanner' =>
 		  ['desc' => __ ('Barcode scaner'),

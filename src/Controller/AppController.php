@@ -18,6 +18,7 @@ namespace App\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Event\EventInterface;
+use Cake\Datasource\ConnectionManager;
 
 /**
  * Application Controller
@@ -50,6 +51,21 @@ class AppController extends Controller
          * see https://book.cakephp.org/4/en/controllers/components/form-protection.html
          */
         //$this->loadComponent('FormProtection');
+    }
+	 
+	 protected function dbconnect ($dbname) {
+		  
+        ConnectionManager::drop ('default');
+        ConnectionManager::setConfig ('default', ['className' => 'Cake\Database\Connection',
+                                                  'driver' => 'Cake\Database\Driver\Mysql',
+                                                  'persistent' => false,
+                                                  'host' => 'localhost',
+                                                  'username' => 'vr',
+                                                  'database' => $dbname,
+                                                  'encoding' => 'utf8',
+                                                  'timezone' => 'UTC',
+                                                  'cacheMetadata' => true,
+        ]);
     }
 	 
     public function debug ($obj) {

@@ -18,6 +18,8 @@ $titles = ['total' => ['text' => 'gross', 'type' => 'currency', 'link' => 'perio
            'other' => ['text' => 'other', 'type' => 'currency', 'link' => 'tender_desc/other'],
            'gift_cards' => ['text' => 'gift cards', 'type' => 'currency', 'link' => 'tender_desc/gift_card'],
            'gift_certificates' => ['text' => 'gift certificates', 'type' => 'currency', 'link' => 'tender_desc/gift_certificate'],
+			  'square_gift_card' => ['text' => 'square gift card', 'type' => 'currency', 'link' => 'tender_desc/square_gift_card'],
+			  'gift_cards' => ['text' => 'gift cards', 'type' => 'currency', 'link' => 'tender_desc/gift_card'],
            'account' => ['text' => 'account', 'type' => 'currency', 'link' => 'account', 'link' => 'tender_desc/account'],
            'taxable' => ['text' => 'tax sales', 'type' => 'currency'],
            'split' => ['text' => 'split', 'type' => 'currency', 'link' => 'tax', 'link' => 'tender_desc/split'],
@@ -77,8 +79,16 @@ $format = function ($type, $totalCol) {
 		  
 		  foreach ($totals ['sales'] as $key => $total) {
 				
-				// skip zero totals
+				// separators
 				
+				if ($total == null) {
+
+					 echo '<tr class="table-secondary"><td colspan="9" class="text-center"><h5>' . $key. '</h5></td><tr>';
+					 continue;
+				}
+
+				// skip zero totals
+
 				if ($total [count ($total) - 1] == 0) {
 					 
 					 continue;
@@ -97,7 +107,7 @@ $format = function ($type, $totalCol) {
 						  
 						  $link = $titles [$key] ['link'];
 					 }
-				}	
+				}
 		  ?>
 
 		  <tr>

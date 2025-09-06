@@ -43,11 +43,23 @@
 
 		  foreach ($departments as $department) {
 				
-				echo '<tr><td colspan="9" align="center"><h5>' . $department ['department_desc'] . '</h5></td></tr>';
+				$departmentDesc = __ ('???');
+				if (isset ($department ['department_desc'])) {
+						  
+					 $departmentDesc = strtoupper ($department ['department_desc']);
+				}
+				
+				echo '<tr><td colspan="9" align="center"><h5>' . $departmentDesc . '</h5></td></tr>';
 				
 				foreach ($department ['items'] as $item) {
 
-					 $html = '<tr><td>' . strtoupper ($item ['item_desc']) . '</td>';
+					 $itemDesc = __ ('???');
+					 if (isset ($item ['item_desc'])) {
+						  
+						  $itemDesc = strtoupper ($item ['item_desc']);
+					 }
+
+					 $html = '<tr><td>' . strtoupper ($itemDesc) . '</td>';
 					 $col = 0;
 
 					 foreach ($item ['totals'] as $itemData) {

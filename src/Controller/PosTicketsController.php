@@ -154,6 +154,8 @@ class PosTicketsController extends PosApiController {
                 $this->ticket = $tickets->newEntity ($ticket);
                 
                 if ($t = $tickets->save ($this->ticket)) {
+
+						  $this->debug ('ticket create... ' . getmypid () . ' ' . $t ['id'] . ' ' . $t ['ticket_no'] . ' ' . $t ['alt_id'] . ' ' . $t ['start_time'] . ' ' . $t ['complete_time']);
 						  
                     if (isset ($this->ticket ['ticket_items'])) {
                         
@@ -164,11 +166,11 @@ class PosTicketsController extends PosApiController {
                             if (isset ($ti ['ticket_item_addons']) && (count ($ti ['ticket_item_addons']) > 0)) {
 
                                 foreach ($ti ['ticket_item_addons'] as $tia) {
-												
-                                    $tia = $ticketItemAddons->newEntity ($tia);
-                                    $tia ['ticket_item_id'] = $ti ['id'];
-                                    $ticketItemAddons->save ($tia);
-                                }
+														
+												$tia = $ticketItemAddons->newEntity ($tia);
+												$tia ['ticket_item_id'] = $ti ['id'];
+												$ticketItemAddons->save ($tia);
+										  }
                             }
                         }
                     }
@@ -427,7 +429,7 @@ class PosTicketsController extends PosApiController {
         if (!isset ($this->ticket ['ticket_tenders'])) return;
 		  
         foreach ($this->ticket ['ticket_tenders'] as $tt) {
-            
+				
             foreach ($this->bus as $businessUnit) {
                 
                 $bu = $businessUnit ['id'];
@@ -442,12 +444,9 @@ class PosTicketsController extends PosApiController {
                                                      'summary_type' => $summaryType,
                                                      "start_time = '$totalTime'",
                                                      'sales_key' => $tt ['tender_type']]);
+						  $total = null;
 						  
-                    $table = TableRegistry::get ('SalesTotals');
-                    $total = null;
-
-						  
-                    $amount = ($tt ['tendered_amount'] + $tt ['returned_amount']);
+                    $amount = $tt ['amount'];  //  + $tt ['returned_amount']);
                     $quantity = 1;
                     
                     if ($total = $query->first ()) {
@@ -605,8 +604,8 @@ class PosTicketsController extends PosApiController {
 		  $utc = $getSummaryDate ($t, $bu ['timezone']);
 
 		  $bu ['total_times'] = [date ('Y-m-d H:00:00', strtotime ($t)),
-										 $utc . sprintf (' %02d:00:00', $this->tzOffset ($bu ['timezone'])), 
-										 substr ($utc, 0, 8) . "01" . sprintf (' %02d:00:00', $this->tzOffset ($bu ['timezone']))];
+										 $utc . sprintf (' %02d:00:00', $this->utcOffsets [$bu ['timezone']]), 
+										 substr ($utc, 0, 8) . "01" . sprintf (' %02d:00:00', $this->utcOffsets [$bu ['timezone']])];
 		  
         $this->bus [] = $bu->toArray ();
         $timezone = $bu ['timezone'];
@@ -621,11 +620,13 @@ class PosTicketsController extends PosApiController {
 				$utc = $getSummaryDate ($t, $bu ['timezone']);
 				
 				$bu ['total_times'] = [date ('Y-m-d H:00:00', strtotime ($t)),
-											  $utc . sprintf (' %02d:00:00', $this->tzOffset ($bu ['timezone'])), 
-											  substr ($utc, 0, 8) . "01" . sprintf (' %02d:00:00', $this->tzOffset ($bu ['timezone']))];
+											  $utc . sprintf (' %02d:00:00', $this->utcOffsets [$bu ['timezone']]), 
+											  substr ($utc, 0, 8) . "01" . sprintf (' %02d:00:00', $this->utcOffsets [$bu ['timezone']])];
 				
             $this->bus [] = $bu->toArray ();
         }
+
+		  // ???
     }
     
     /**

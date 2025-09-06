@@ -86,4 +86,6 @@ define ("BU_CORP", 1);
 define ("BU_LOCATION", 2);
 define ("BU_REGION", 3);
 
+define ("MERCHANT_DB", 'merchants');
+
 ?>

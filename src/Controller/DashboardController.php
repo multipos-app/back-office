@@ -22,7 +22,6 @@ use Cake\Datasource\ConnectionManager;
 
 class DashboardController extends PeriodController {
 	 
-
     public $totals;
     public $date;
 
@@ -33,7 +32,8 @@ class DashboardController extends PeriodController {
     
     function index (...$args) {
 		  
-        $startDate = time ();
+        $startDate = $this->localtime ();
+		  		  
         $this->totals = [];
         $summaryType = 1;
         $this->periodType = 'weekly';
@@ -71,35 +71,13 @@ class DashboardController extends PeriodController {
 		  // get the periods structure
 		  
         $this->getPeriods ($startDate, $this->periodType);
-		  
         $len = count ($this->periods);
         
-        // initialize report rows
-		  		  
-        $this->totals = ['sales' => ['total' => array_fill (0, $len + 1, 0),
-                                     'net' => array_fill (0, $len + 1, 0),
-                                     'tax' => array_fill (0, $len + 1, 0),
-                                     'cash' => array_fill (0, $len + 1, 0),
-                                     'credit' => array_fill (0, $len + 1, 0),
-                                     'debit' => array_fill (0, $len + 1, 0),
-                                     'wallet' => array_fill (0, $len + 1, 0),
-                                     'ebt_foodstamp' => array_fill (0, $len + 1, 0),
-                                     'card' => array_fill (0, $len + 1, 0),
-                                     'check' => array_fill (0, $len + 1, 0),
-                                     'other' => array_fill (0, $len + 1, 0),
-                                     'gift_card' => array_fill (0, $len + 1, 0),
-                                     'account' => array_fill (0, $len + 1, 0),
-                                     'split' => array_fill (0, $len + 1, 0),
-                                     'taxable' => array_fill (0, $len + 1, 0),
-                                     'non_taxable' => array_fill (0, $len + 1, 0),
-                                     'avg_sale' => array_fill (0, $len + 1, 0),
-                                     'customer_count' => array_fill (0, $len + 1, 0),
-                                     'discounts' => array_fill (0, $len + 1, 0),
-                                     'tips' => array_fill (0, $len + 1, 0),
-                                     'void_sales' => array_fill (0, $len + 1, 0),
-                                     'void_items' => array_fill (0, $len + 1, 0),
-                                     'refunds' => array_fill (0, $len + 1, 0),
-                                     'no_sales' => array_fill (0, $len + 1, 0)]];
+        // initialize report total rows based on category
+
+		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . $this->merchant ['category'] . '-totals.php';
+
+        $this->totals = ['sales' => $totals];
         
         $minYear = date ('Y');
         
@@ -119,13 +97,13 @@ class DashboardController extends PeriodController {
         $col = 0;
         foreach ($this->periods as $period) {
 				
-            $start = $period ['start'];
+				$start = $period ['start'];
             $end = $period ['end'];
 				
             $where = ["start_time = '$start'",
                       "summary_type = $summaryType",
                       'business_unit_id = ' . $this->merchant ['bu_id']];
-            
+				
             $query = TableRegistry::get ('SalesTotals')
 											 ->find ()
 											 ->where ($where);
@@ -176,11 +154,12 @@ class DashboardController extends PeriodController {
 						  case 'OTHER':
 						  case 'BUY_NOW_PAY_LATER':
 						  case 'SQUARE_ACCOUNT':
+						  case 'SQUARE_GIFT_CARD':
 						  case 'EXTERNAL':
-
+								
 								$this->totals ['sales'] [strtolower ($salesTotal ['sales_key'])] [$col] += $salesTotal ['amount'];
 								$this->totals ['sales'] [strtolower ($salesTotal ['sales_key'])] [$len] += $salesTotal ['amount'];
-								break;
+  								break;
 								
 						  case 'TAXABLE':
 
@@ -226,9 +205,12 @@ class DashboardController extends PeriodController {
 						  case 'void_items':
 						  case 'discounts':
 						  case 'refunds':
-								
-								$this->totals ['sales'] [$salesExceptionTotal ['exception_key']] [$col] = $salesExceptionTotal ['amount'];
-								$this->totals ['sales'] [$salesExceptionTotal ['exception_key']] [$len] += $salesExceptionTotal ['amount'];
+
+								if (isset ($this->totals ['sales'] [$salesExceptionTotal ['exception_key']])) {
+									 
+									 $this->totals ['sales'] [$salesExceptionTotal ['exception_key']] [$col] = $salesExceptionTotal ['amount'];
+									 $this->totals ['sales'] [$salesExceptionTotal ['exception_key']] [$len] += $salesExceptionTotal ['amount'];
+								}
 								break;
 								
 						  default:

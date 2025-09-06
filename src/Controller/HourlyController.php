@@ -50,7 +50,7 @@ class HourlyController extends PeriodController {
         $dates = [];
         $count = 7;
 		  
-        $startDate = time ();
+        $startDate = $this->localTime ();
 
 		  while (count ($args) > 0) {
 				
@@ -108,7 +108,7 @@ class HourlyController extends PeriodController {
 					 /* $start = $this->isDST () ?  $t + ($hour * 60 * 60) : $t + (($hour - 1) * 60 * 60);
 						 $start = $t + ($hour * 60 * 60);*/
 					 
-					 $start = $t + (($hour + $this->tzOffset ($this->tz ())) * 60 * 60);			 
+					 $start = $t + (($hour + $this->utcOffsets [$this->tz ()]) * 60 * 60);			 
 					 $date = date ('Y-m-d H:00:00', strtotime ($period ['start']) + (ONE_HOUR * $index));
 					 
 					 $conditions = ['summary_type = 0',

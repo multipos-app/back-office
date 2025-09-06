@@ -30,7 +30,7 @@ class LaborController extends PeriodController {
         $this->debug ("labor...");
 		  $this->debug ($args);
 		  
-		  $startDate = time ();
+		  $startDate = time () - ($this->utcOffsets [$this->tz ()] * ONE_HOUR);
         $this->totals = [];
         $summaryType = 1;
         $this->periodType = 'weekly';

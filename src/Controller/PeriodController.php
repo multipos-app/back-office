@@ -47,7 +47,7 @@ class PeriodController extends PosAppController {
 					 $this->currPeriod = -1;
 					 
 					 $date = $startDate - ($startOffset * ONE_DAY);
-					 
+
 					 for ($period=0; $period < $this->len; $period++) {
 
 						  $diff = $startDate - $date;

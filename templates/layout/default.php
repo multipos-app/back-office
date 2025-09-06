@@ -22,8 +22,21 @@
 		  <meta charset="utf-8">
 		  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 		  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-
-		  <title>multiPOS</title>
+		  <?php
+		  
+		  switch ($merchant ['category']) {
+					 
+				case 'multipos':
+					 
+					 echo '<title>multiPOS</title>';
+					 break;
+					 
+				case  'square':
+					 
+					 echo '<title>VideoRegister</title>';
+					 break;
+		  }
+		  ?>
 		  <meta content="" name="description">
 		  <meta content="" name="keywords">
 
@@ -75,8 +88,20 @@
 				<div class="d-flex align-items-center justify-content-between">
 					 <a href="index.html" class="logo d-flex align-items-center">
 						  <span class="d-none d-lg-block">
-								<?php 
-								echo $this->element ('logo');
+								<?php
+
+								switch ($merchant ['category']) {
+
+									 case 'multipos':
+									 
+										  echo $this->element ('multipos-logo');
+										  break;
+
+									 case  'square':
+										  
+										  echo $this->element ('vr-logo');
+										  break;
+								}
 								?>
 						  </span>
 					 </a>
@@ -148,128 +173,51 @@
 
 				<ul class="sidebar-nav" id="sidebar-nav">
 
-					 <li class="nav-item">
-						  <a class="nav-link collapsed" href="/dashboard">
-								<i class="bx bx-home"></i>
-								<span><?= __ ('Dashboard') ?></span>
-						  </a>
-					 </li>
+					 <?php
+					 
+					 $menu = ROOT . DS . 'src' . DS  . 'Controller' . DS . $merchant ['category'] . '-menu.php';
+					 					 
+					 require_once $menu;
 
-					 <li class="nav-item">
-						  
+					 foreach ($menu as $menuItem) {
+
+						  if ($menuItem ['type'] == 'control') {
+					 ?>
 						  <li class="nav-item">
-								<a class="nav-link collapsed" href="/item-history">
-									 <i class="bx bxs-calendar"></i>
-									 <span><?= __ ('Item History') ?></span>
+								<a class="nav-link collapsed" href="<?= $menuItem ['controller']?>">
+									 <i class="<?= $menuItem ['icon'] ?>"></i>
+									 <span><?= $menuItem ['text'] ?></span>
 								</a>
 						  </li>
 						  
-						  <li class="nav-item">
-								<a class="nav-link collapsed" href="/hourly">
-									 <i class="bx bxs-time"></i>
-									 <span><?= __ ('Hourly') ?></span>
-								</a>
-						  </li>
+					 <?php
+					 }
+					 else if ($menuItem ['type'] == 'submenu') {
 						  
-						  <?php
-						  if ($merchant ['category'] == 'laundry') {
-						  ?>
-								<li class="nav-item">
-									 <a class="nav-link collapsed" href="/labor">
-										  <i class="bx bx-body"></i>
-										  <span><?= __ ('Labor') ?></span>
-									 </a>
-								</li>
-						  <?php
-						  }
-						  ?>
-
-						  <li class="nav-item">
-								<a class="nav-link collapsed" href="/tickets">
-									 <i class="bx bxs-receipt"></i>
-									 <span><?= __ ('Transactions') ?></span>
-								</a>
-						  </li>
-
-						  <?php
-						  if ($merchant ['category'] == 'pull-tabs') {
-						  ?>
-								<li class="nav-item">
-									 <a class="nav-link collapsed" href="/inventory">
-										  <i class="bx bx-bar-chart"></i>
-										  <span><?= __ ('Inventory') ?></span>
-									 </a>
-								</li>
-						  <?php
-						  }
-						  ?>
+					 ?>
 
 						  <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
-								<i class="bx bxs-business"></i><span><?= __ ('Store Ops') ?></span><i class="bi bi-chevron-down ms-auto"></i>
+								<i class="bx bxs-business"></i><span><?= $menuItem ['text'] ?></span><i class="bx bx-chevrons-down ms-auto"></i>
 						  </a>
-						  
 						  <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-								<li>
-									 <a href="/items">
-										  <i class="bi bi-circle"></i><span><?= __ ('Items') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/departments">
-										  <i class="bi bi-circle"></i><span><?= __ ('Departments') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/tax-groups">
-										  <i class="bi bi-circle"></i><span><?= __ ('Tax') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/employees">
-										  <i class="bi bi-circle"></i><span><?= __ ('Employees') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/profiles">
-										  <i class="bi bi-circle"></i><span><?= __ ('Employee Profiles') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/customers">
-										  <i class="bi bi-circle"></i><span><?= __ ('Customers') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/suppliers">
-										  <i class="bi bi-circle"></i><span><?= __ ('Suppliers') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/import">
-										  <i class="bi bi-circle"></i><span><?= __ ('Import') ?></span>
-									 </a>
-								</li>
-								<li>
-									 <a href="/business-units/receipts">
-										  <i class="bi bi-circle"></i><span><?= __ ('Receipts') ?></span>
-									 </a>
-								</li>
+
+								<?php
+								foreach ($menuItem ['submenu'] as $submenuItem) {
+								?>
+									 <li class="nav-item">
+										  <a class="nav-link collapsed" href="<?= $submenuItem ['controller']?>">
+												<i class="<?= $submenuItem ['icon'] ?>"></i>
+												<span><?= $submenuItem ['text'] ?></span>
+										  </a>
+									 </li>
+								<?php 
+								}
+								?>
 						  </ul>
-					 </li>
-
-					 <li class="nav-item">
-						  <a class="nav-link collapsed" href="/pos-configs">
-								<i class="bx bx-menu"></i>
-								<span><?= __ ('POS Menus/Config') ?></span>
-						  </a>
-					 </li>
-
-					 <li class="nav-item">
-						  <a class="nav-link collapsed" href="/business-units/batches">
-								<i class="bx bxs-cloud-download"></i>
-								<span><?= __ ('Downloads') ?></span>
-						  </a>
-					 </li>
+					 <?php
+					 }
+					 }
+					 ?>
 					 
 					 <li class="nav-item">
 						  <a class="nav-link collapsed" href="/">
@@ -277,7 +225,6 @@
 								<span>Logout</span>
 						  </a>
 					 </li>
-
 				</ul>
 
 		  </aside><!-- End Sidebar-->

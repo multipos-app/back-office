@@ -13,10 +13,17 @@
 	 cursor: pointer;
 }
 
+.icon-xlg {
+
+	 color: #012970;
+	 font-size: 400%;
+	 cursor: pointer;
+}
+
 .icon-warn {
 
 	 color: #8F2703;
-	 font-size: 150%;
+	 font-size: 200%;
 	 cursor: pointer;
 }
 
@@ -146,4 +153,32 @@ nav .pagination {
 .modal-large {
 
 	 width: 700px;
+}
+
+.modal-xlarge {
+
+	 width: 900px;
+}
+
+.void-item {
+
+	 text-decoration: line-through;
+}
+
+video {
+	 
+    background-color: #fff;
+    width: 75%;
+    border: solid 1px #ddd;
+	 border-radius: 4px;
+}
+
+.receipt {
+	 
+	 font-family: monospace, monospace;
+	 weight: 600;
+	 background-color: #eee;
+	 border-radius: 5px;
+	 padding: 20px;
+	 font-size: 120%;
 }

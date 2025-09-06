@@ -132,24 +132,22 @@ class ButtonsController extends PosAppController {
 						  break;
 						  
 					 case 'Navigate':
-
-						  $this->debug ($data ['button']);
 						  
-						  $menus = [null => __ ('Select a menu')];
+						  if (!isset ($data ['button'] ['params'])) {
+
+								$data ['button'] ['params'] = ["menu" => $menuName,
+																		 "menu_index" => null];
+						  }
+
 						  $subMenus = [null => __ ('Select a sub-menu')];
 
-						  foreach ($config ['pos_menus'] as $mn => $m) {
+						  foreach ($config ['pos_menus'] [$menuName] ['horizontal_menus'] as $subMenu) {
 
-								$menus [$mn] = $m ['menu_description'];
-
-								foreach ($m ['horizontal_menus'] as $subMenu) {
-
-									 $subMenus [$mn] [] = $subMenu ['name'];
-								}
+								$subMenus [] = $subMenu ['name'];
 						  }
-						  
-						  $this->set (['menus' => $menus,
-											'subMenus' => $subMenus]);
+						  					  
+						  $this->set (['subMenus' => $subMenus,
+											'subMenuIndex' => $data ['button'] ['params'] ['menu_index']]);
 						  
 						  break;
 						  

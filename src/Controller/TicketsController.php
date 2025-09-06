@@ -37,9 +37,7 @@ class TicketsController extends PosAppController {
     function index (...$args) {
 		  
 		  if (!empty ($this->request->getData ())) {
-				
-				$this->debug ($this->request->getData ());
-				
+								
 				$tmp = [];
 				foreach ($this->request->getData () as $key => $val) {
 
@@ -56,7 +54,9 @@ class TicketsController extends PosAppController {
 		  $this->conditions ($args);
 		  
         $timestamp = function ($t) {
-            
+
+				$this->debug ('timestamp... ' . $t . ' ' . get_class ($t));
+				
             return date ('m/d g:i a', strtotime ($this->utcToLocal ($t->i18nFormat ('yyyy-MM-dd H:mm:ss'),
 																						  $this->merchant ['business_units'] [$this->merchant ['bu_index']] ['timezone'])));
         };
@@ -74,17 +74,17 @@ class TicketsController extends PosAppController {
 		  $q = TableRegistry::get ('Tickets')
 								  ->find ()
 								  ->join ($this->join)
-        						  ->order (['Tickets.complete_time' => 'desc'])
-		  						  ->distinct (['Tickets.id']);
+        						  ->order (['Tickets.complete_time' => 'desc']);
+								  //->distinct (['Tickets.ticket_no']);
 		  
 		  $t = $this->paginate ($q);
 		  
         $tickets = [];
         
         foreach ($t as $ticket) {
-				
-            $ticket ['complete_time'] = $timestamp ($ticket ['complete_time']);
-            $t = $ticket->toArray ();            
+								
+            $ticket ['complete_time'] = date ('m/d g:i a', $this->localtime (strtotime ($ticket ['complete_time'])));
+				$t = $ticket->toArray ();            
             $tickets [] = $t;
         }
         
@@ -99,7 +99,7 @@ class TicketsController extends PosAppController {
 	  *
 	  */
 	 
-    function detail ($id = null, $dir = null) {
+    function detail ($id = null) {
 		  
         \Cake\I18n\FrozenTime::setToStringFormat('yyyy-MM-dd H:mm:ss');
 
@@ -138,35 +138,14 @@ class TicketsController extends PosAppController {
                 $i ++;
             }
         }
-		  
-        $ticketTime = strtotime ($ticket ['start_time']);
 
-        $ticket ['start_time'] = $this->timestamp ($ticket ['start_time']);
-        $ticket ['complete_time'] = $this->timestamp ($ticket ['complete_time']);
+ 		  $timestamp = strtotime ($ticket ['start_time']);
+ 		  $startTime = strtotime ($ticket ['start_time']);
+		  $ticketTime = date ('m/d g:i a', $this->localtime (strtotime ($ticket ['complete_time'])));
 
-        $ticketID = $ticket ['id'];
-        $buID = $ticket ['business_unit_id'];
-        $posNo = $ticket ['pos_no'];
-
-        $t = TableRegistry::get ('Tickets')
-								  ->find ()
-								  ->where (["id < $ticketID",
-												"business_unit_id = $buID",
-												"pos_no = $posNo"])
-								  ->first ();
+        $ticket ['start_time'] = $ticketTime;
+        $ticket ['complete_time'] = $ticketTime;
 		  
-        if ($t) { $next = $t ['id']; }
-		  
-        $t = TableRegistry::get ('Tickets')
-								  ->find ()
-								  ->where (["id < $ticketID",
-												"business_unit_id = $buID",
-												"pos_no = $posNo"])
-								  ->order (['id' => 'desc'])
-								  ->first ();
-		  
-        if ($t) { $next = $t ['id']; }
-
         $ticket ['details'] = [['desc' => __ ('TRANSACTION NUMBER'),
                                 'value' => $ticket ['id'] . ' - ' . $ticket ['ticket_no']],
                                ['desc' => __ ('START TIME'),
@@ -179,70 +158,86 @@ class TicketsController extends PosAppController {
 				$ticket ['details'] [] = ['desc' => __ ('REASON'),
 												  'value' => strtoupper ($ticket ['comment'])];
         }
-        
-        /**
-         * check for video
-         */
-		  
-        $videos = TableRegistry::get ('Videos');
-
-        $where = ["epoch_start_time <= '" . $ticketTime . "'",
-						"epoch_complete_time >= '" . $ticketTime . "'"];
-		  
-        $where = ["epoch_start_time <= '" . $ticketTime . "'"];
-		  
-        $video = $videos->find ()
-                        ->where ($where)
-								->order ("id desc")
-                        ->first ();
-		  
-        $videoID = 0;
-        $clip = null;
-        $offset = 0;
-        $hasVideo = false;
-		  
-        if ($video) {
-            
-            $videoID = $video ['id'];
-            $buID = $ticket ['business_unit_id'];
-            $posNo = $ticket ['pos_no'];
-            
-            $timezone = $this->tz ();
-            
-            $clip = '';
-				$videoID = $video ['id'];
-           	
-				$clip = '/files/clips/'
-						. $this->merchant ['dbname'] . '/'
-						. $video ['business_unit_id'] .'/'
-						. $ticket ['pos_no'] . '/'
-						. $video ['file_name'];
-				
-            $vs = $this->timestamp ($video ['start_time']);
-            
-            $videoStart = strtotime ($video ['start_time']);
-            
-            $offset = ($ticketTime - $videoStart) - 15;  // 15 seconds before
-            
-            if ($offset < 0) {  // might have gone past the start of the ticket
-					 
-                $offset = 0;
-            }
-            
-            $hasVideo = true;
-        }
 
 		  $flag = [null => __ ('Flag this transaction'),
 					  'suspicious' => __ ('Suspicious'),
 					  'excessive_tip' => __ ('Excessive tip'),
 					  'employee_theft' => __ ('Employee theft'),
 					  'customer_theft' => __ ('Customer theft')];
+
+		  $camera = null;
+		  $clipUrl = null;
+		  $accessToken = null;
+		  
+		  switch ($this->merchant ['video_provider']) {
+		  
+				case 'camcloud':
+					 
+					 $camera = TableRegistry::get ('Devices')
+													->find ()
+													->where (['device_type' => 'camera'])
+													->first ();
+					 
+					 if ($camera) {
+						  
+						  $cameraID = $camera ['alt_device_id'];
+						  $accessToken = $this->merchant ['video_provider_token'];
+						  $len = 2 * 60;  // 2 minute clips
+						  $timestamp = ($startTime - 10);
+						  
+						  $this->debug ("timestamp... " . date ("Y-m-d H:i:s", $timestamp));
+								
+						  $clipUrl = "https://vod.hostedcloudvideo.com/$cameraID/vod.m3u8?segment_type=FMp4&duration=$len&timestamp=$timestamp";
+								
+						  $this->debug ($camera);
+						  $this->debug ($clipUrl);
+					 }
+
+					 $device = TableRegistry::get ('Devices')
+													->find ()
+													->where (["id" => $ticket ['pos_no']])
+													->first ();
+					 /* 
+					  * 					 if ($device) {
+					  * 						  
+					  * 						  $this->debug ($device);
+					  * 						  
+					  * 						  $camera = TableRegistry::get ('Devices')
+					  * 														 ->find ()
+					  * 														 ->where (["id" => $device ['device_id'],
+					  * 																	  'device_type' => 'camera'])
+					  * 														 ->first ();
+					  * 
+					  * 						  if ($camera) {
+					  * 								
+					  * 								$cameraID = $camera ['alt_device_id'];
+					  * 								$accessToken = $this->merchant ['video_provider_token'];
+					  * 								$len = 2 * 60;  // 2 minute clips
+					  * 								$timestamp = (strtotime ($ticket ['start_time']) - 10);
+					  * 								
+					  * 								$clipUrl = "https://vod.hostedcloudvideo.com/$cameraID/vod.m3u8?segment_type=FMp4&duration=$len&timestamp=$timestamp";
+					  * 								
+					  * 								$this->debug ($camera);
+					  * 								$this->debug ($clipUrl);
+					  * 						  }
+					  * 						  else {
+					  * 
+					  * 								$this->debug ('camera not found...');
+					  * 						  }
+					  * 					 }
+					  * 					 else {
+					  * 
+					  * 						  $this->debug ('device not found...');
+					  * 					 }
+					  * 					 */
+					 break;
+		  }
 		  
 		  $this->set (['ticket' => $ticket,
-							'videoID' => $videoID,
-							'hasVideo' => $hasVideo,
-							'clip' => $clip,
-							'offset' => $offset,
+							'camera' => $camera,
+							'timestamp' => $timestamp,
+							'clipUrl' => $clipUrl,
+							'accessToken' => $accessToken,
 							'flag' => $flag]);
 
 		  $builder = $this->viewBuilder ()
@@ -257,6 +252,54 @@ class TicketsController extends PosAppController {
 		  $this->ajax (['status' => 0,
 							 'html' => $html]);
     }
+	 
+	 /**
+	  *
+	  *
+	  *
+	  */
+
+	 function nav ($action, $ticketID, $buID, $posNo) {
+ 
+
+		  $this->debug ("action... $action, $ticketID, $buID, $posNo");
+
+		  $where = ["business_unit_id = $buID",
+						"pos_no = $posNo"];
+		  
+		  $order = [];
+		  
+		  switch ($action) {
+					 
+				case 'ticket_forward':
+
+					 $where [] = "id > $ticketID";
+					 $order = ['id asc'];
+					 break;
+					 
+				case 'ticket_backward':
+					 
+					 $where [] = "id < $ticketID";
+					 $order = ['id desc'];
+					 break;
+		  }
+					 
+		  $this->debug ($where);
+					 
+		  $t = TableRegistry::get ('Tickets')
+								  ->find ()
+								  ->where ($where)
+								  ->order ($order)
+								  ->select (['id'])
+								  ->limit (1)
+								  ->first ();
+
+		  $this->debug ($t);
+
+		  return $this->detail ($t ['id']);
+
+		  // $this->ajax (['status' => 0]);
+	 }
 	 
 	 /**
 	  *

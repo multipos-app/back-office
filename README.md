@@ -1,7 +1,12 @@
 # multiPOS/cakePHP POS (point of sale) Back Office
 This project is the back office component of multipos-app/pos a cloud based back office for reporting, POS data management and control. The system is a mature application having been installed in retail and quick serve environments in the USA and Denmark. 
 
-## Update 7/25/2025
+### Update 9/55/2025
+
+- Complete UI makeover using bootstrapmade NiceAdmin
+-Add video surveilence features
+
+# Update 7/25/2025
 
 - General UI updates
 

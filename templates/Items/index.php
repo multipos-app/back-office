@@ -56,8 +56,6 @@
 		  $this->Form->select ('add_item',
 									  $pricingOptions,
 									  ['id' => 'add_item',
-										'data-bs-toggle' => 'modal',
-										'data-bs-target' => '#item_modal',
 										'value' => '',
 										'class' => 'form-select',
 										'label' => false,
@@ -231,6 +229,8 @@
 	 </div>
 </div>
 
+
+
 <div class="modal fade" id="item_modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content modal-large">
@@ -281,7 +281,9 @@
 					  success: function (data) {
 							
 							data = JSON.parse (data);
+							$('#modal_content').html ('');
 							$('#modal_content').html (data.html);
+							$('#item_modal').modal ('show');
 					  }
 				 });
 	  }
@@ -316,9 +318,5 @@
 	  window.location = '/items/index/department_id/' + $('#department_search').val ();
  }
  
-function pricingSearch () {
-	  
-	  window.location = '/items/index/pricing/' + $('#pricing_search').val ();
- }
- 
+
 </script>

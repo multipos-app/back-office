@@ -37,7 +37,7 @@ class ItemHIstoryController extends PeriodController {
  
 		  date_default_timezone_set ("UTC");
 
-        $startDate = time ();
+        $startDate = $this->localTime ();
 		  		  
 		  while (count ($args) > 0) {
 				
@@ -89,8 +89,8 @@ class ItemHIstoryController extends PeriodController {
             $query = TableRegistry::get ('SalesItemTotals')
 											 ->find ()
 											 ->where ($this->conditions)
-											 ->order (['sales_item_desc' => 'asc']);
-            
+            							 ->order (['amount' => 'desc']);
+
             foreach ($query as $salesTotal) {
 					 
                 if (!isset ($this->departments [$salesTotal ['department_id']])) {

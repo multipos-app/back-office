@@ -213,9 +213,6 @@ $buttonHeight = intval (50 * (50/count ($menu ['horizontal_menus'] [$menuIndex] 
 					  menu_index: <?= $menuIndex ?>,
 					  pos: pos,
 					  class: $('#class').val ()};
-
-			console.log ('create button...');
-			console.log (data);
 			
 			$.ajax ({url: '/buttons/index/',
 						type: 'POST',
@@ -223,7 +220,6 @@ $buttonHeight = intval (50 * (50/count ($menu ['horizontal_menus'] [$menuIndex] 
 						success: function (data) {
 							 
 							 data = JSON.parse (data);
-							 console.log (data);
 							 $('#modal_content').html (data.html);
 							 $('#menus_modal').modal ('show');
 						}

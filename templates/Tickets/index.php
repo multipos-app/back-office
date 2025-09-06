@@ -1,4 +1,4 @@
-
+	 
 <div class="row g-1 m-3">
 	 <div class="col-md-11"></div>
 	 <div class="col-md-1 text-center">
@@ -10,7 +10,7 @@
 	 <thead>
 		  <tr>
   				<th align="left"><?= __ ('#') ?></th>
-				<th align="left"><?= __ ('Location') ?></th>
+				<th align="left"><?= __ ('POS') ?></th>
 				<th><?= __ ('Complete time') ?></th>
 				<th style="text-align: center;"><?= __ ('Type') ?></th>
 				<th style="text-align: end;"><?= __ ('Items') ?></th>
@@ -23,6 +23,14 @@
 	 </thead>
 	 <tbody>
 		  <?php
+
+		  switch ($merchant ['has_video']) {
+		  
+				case 'camcloud':
+					 
+					 echo $this->element ('video', ['merchant' => $merchant]);
+					 break;
+		  }
 		  
 		  $row = 0;
 		  foreach ($tickets as $ticket) {
@@ -41,12 +49,16 @@
 					 $flag = '<i class="fa fa-flag fa-small fa-warn"></i>';
 				}
 
-				$location = $merchant ['bu_names'] [$ticket ['business_unit_id']];
+				$posNo = $ticket ['pos_no'];
+				if (isset ($merchant ['devices'] [$ticket ['pos_no']])) {
+
+					 $posNo = $merchant ['devices'] [$ticket ['pos_no']];
+				}
 		  ?>
 
 		  <tr role="button" data-bs-toggle="modal" data-bs-target="#ticket_modal" onclick="detail (<?= $ticket ['id'] ?>)">
 				<td><?= $ticket ['ticket_no'] ?></td>
-				<td><?= $location ?></td>
+				<td><?= $posNo ?></td>
 				<td><?= $ticket ['complete_time'] ?></td>
 				<td align="center"><?= $ticketTypes [$ticket ['ticket_type']] ?></td>
 				<td align="right"><?= $ticket ['item_count'] ?></td>
@@ -80,7 +92,7 @@
 
 <div class="modal fade" id="modal_search" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content" style="width:700px;">
             <div class="modal-header">
                 <h5 class="modal-title"><?= __ ('Search transactions') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -186,7 +198,7 @@
 
 <div class="modal fade" id="ticket_modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content modal-large">
+        <div class="modal-content modal-xlarge">
             <div class="modal-header">
                 <h5 id="item_desc" class="modal-title"><?= __ ('Ticket detail') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

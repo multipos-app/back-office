@@ -1,0 +1,135 @@
+
+.video-main-grid {
+
+    display: grid;
+    width: 100%;
+    grid-template-rows: auto;
+	 grid-template-columns: 1fr;
+	 grid-column-gap: 10px;
+	 margin-top: 25px;
+}
+
+.video-1-col-grid {
+	 
+    display: grid;
+    grid-template-rows: auto;
+	 grid-template-columns: 1fr;
+}
+
+.video-2-col-grid {
+	 
+    display: grid;
+    grid-template-rows: auto;
+	 grid-template-columns: 1fr 1fr;
+	 grid-column-gap: 15px;
+	 grid-row-gap: 15px;
+}
+
+.video-controls-grid {
+	 
+    display: grid;
+    grid-template-rows: auto;
+	 grid-template-columns: 1fr;
+}
+
+.video-search-grid {
+
+    display: grid;
+	 width: 75%;
+    grid-template-rows: auto;
+	 grid-template-columns: .5fr 1fr 1fr 1fr .5fr .5fr .5fr;
+	 grid-row-gap: 15px;
+	 grid-column-gap: 10px;
+	 margin: 25px;
+}
+
+.search-text {
+
+	 font-size: 2em;
+}
+
+.video-image {
+	 text-align: center;
+	 margin: 0;
+	 position: relative;
+	 top: 50%;
+	 transform: translateY(-50%);
+}
+
+.player-content {
+
+	 width: 100%;
+	 padding: 15px;
+}
+
+.bu-line {
+
+	 margin-top: 12px;
+}
+
+.locations-grid {
+
+    display: grid;
+    grid-template-rows: auto;
+	 grid-template-columns: .5fr 4fr 1fr 1fr;
+}
+
+#camera_settings {
+	 
+	 background: #fff;
+	 color: #333;
+	 position: fixed;
+	 top: 10px;
+	 right: -50%;
+	 width: 50%;
+	 height: 100%;
+	 padding: 15px;
+	 -webkit-transition-duration: 0.5s;
+	 -moz-transition-duration: 0.5s;
+	 -o-transition-duration: 0.5s;
+	 transition-duration: 0.5s;
+	 border-radius: 5px;
+	 box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+	 overflow: scroll;
+}
+
+#camera_settings.on {
+	 
+	 right: 0;
+}
+
+.bu-line {
+
+	 padding-top: 5px;
+}
+
+.camera-icon {
+
+	 padding-top: 5px;
+}
+
+select {
+
+	 height: 32px;
+}
+
+.grid-row-wrapper {
+
+}
+
+label {
+	 
+    display: inline-block;
+    width: 5em;
+}
+
+.camera-edit-grid {
+
+    width: 100%;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 2fr;
+	 grid-row-gap: 15px;
+	 margin: 15px;
+	 padding: 15px;
+ 	 box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.2);
+}

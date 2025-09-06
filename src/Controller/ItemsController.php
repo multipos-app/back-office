@@ -163,17 +163,23 @@ class ItemsController extends PosAppController {
 
 				if (count ($item ['item_links']) > 0) {
 
-					 foreach ($item ['item_links'] as &$link) {
+					 $links = [];
+					 foreach ($item ['item_links'] as $link) {
 
 						  $itemLink = $itemsTable->find ()
 														 ->where (['id' => $link ['item_link_id']])
 														 ->first ();
-
+						  
 						  if ($itemLink) {
 								
-								$link ['name'] = $itemLink ['sku'] . ' - ' . $itemLink ['item_desc'];
+								$links [] = ['item_link_id' => $link ['item_link_id'],
+												 'link_type' => $link ['link_type'],
+												 'link_desc' => $itemLink ['item_desc'],
+												 'name' => $itemLink ['item_desc']];
 						  }
 					 }
+
+					 $item ['item_links'] = $links;
 				}
 				
 				$pricing = $item ['item_prices'] [$this->merchant ['bu_index']] ['class'];
@@ -257,6 +263,8 @@ class ItemsController extends PosAppController {
      */
     
     public function update ($id, $item) {
+
+		  $this->debug ($item);
 		  
 		  require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 		  
@@ -274,7 +282,7 @@ class ItemsController extends PosAppController {
 				
 				$newItem = $itemsTable->newEmptyEntity ();
 				$newItem ['sku'] = $item ['sku'];
-				$newItem ['item_desc'] = strtoupper ($item ['item_desc']);
+				$newItem ['item_desc'] = trim (strtoupper ($item ['item_desc']));
 				$newItem ['department_id'] = $item ['department_id'];
 				
 				if ($itemsTable->save ($newItem)) {
@@ -344,7 +352,7 @@ class ItemsController extends PosAppController {
 		  else {
 				
 				$itemsTable->updateAll (['sku' => $item ['sku'],
-												 'item_desc' => strtoupper ($item ['item_desc']),
+												 'item_desc' => trim (strtoupper ($item ['item_desc'])),
 												 'department_id' => $item ['department_id'],
 												 'locked' => 0,
 												 'enabled' => isset ($item ['enabled']) ? 1 : 0],
@@ -457,7 +465,7 @@ class ItemsController extends PosAppController {
 				
 				$itemLinksTable = TableRegistry::get ('ItemLinks');
 				$itemLinksTable->deleteAll (['item_id' => $id]);
-				
+
 				if (isset ($item ['item_links']) && (count ($item ['item_links'])) > 0) {
 					 
 					 foreach ($item ['item_links'] as $itemLink) {

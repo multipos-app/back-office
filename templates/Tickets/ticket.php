@@ -167,7 +167,6 @@
 						  case 'DEBIT':
 								
 								$card = json_decode ($tt ['data_capture'], true);
-								$this->debug ($card);
 
 								foreach (['card_brand' => 'CARD BRAND', 'cardholder_name' => 'CARDHOLDER', 'last_4' => 'LAST 4 DIGITS'] as $key => $value) {
 

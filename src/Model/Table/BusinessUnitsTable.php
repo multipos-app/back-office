@@ -8,6 +8,7 @@ class BusinessUnitsTable extends Table {
     
     public function initialize (array $config): void {
         
+        $this->hasMany ('Devices', ['dependent' => true, 'cascadeCallbacks' => true]);
    }
 }
 

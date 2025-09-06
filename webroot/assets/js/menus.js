@@ -9,7 +9,7 @@ var copy = null;
 
 const menus = {
 
-	 modified: false,
+	 isModified: false,
 	 modal: new bootstrap.Modal (document.getElementById ("menus_modal"), {}),
 	 
 	 setModal: function (title, content) {
@@ -148,10 +148,7 @@ const menus = {
 				success: function (data) {
 					 
 					 $('#modal_content').html ('');
-					 data = JSON.parse (data);
-
-					 console.log (data);
-					 
+					 data = JSON.parse (data);					 
 					 $('#modal_content').html (data.html);
 					 menus.modal.show ();
 				}
@@ -167,7 +164,6 @@ const menus = {
 	 create: function (p) {
 		  
 		  pos = p;
-		  console.log (`create button... ${pos}`);
 		  $('#create_modal').modal ('show');
 	 },
 	 
@@ -254,10 +250,8 @@ const menus = {
 	  **/
 
 	 subMenu: function () {
-		  
-		  menuIndex = $('#sub_menu_index').val ();
-		  
-		  if (menus.modified) {
+		  		  
+		  if (menus.isModified) {
 				
 				if (!confirm (confirmChanges)) {
 					 
@@ -265,7 +259,7 @@ const menus = {
 				}
 		  }
 		  
-		  window.location = `/menus/index/${configID}/${menuName}/${menuIndex}`;
+		  window.location = `/menus/index/${configID}/${menuName}/${$('#sub_menu_index').val ()}`;
 	 },
 
 	 /**
@@ -276,7 +270,7 @@ const menus = {
 
 	 modified: function () {
 
-		  modified = true;
+		  menus.isModified = true;
 		  $('#save_menu').removeClass ('btn-secondary');
 		  $('#save_menu').addClass ('btn-success');
 	 }
@@ -316,8 +310,6 @@ function rgbToHex (rgb) {
  **/
 
  $('#menu_actions').change (function () {
-
-	  console.log ('m a... ' + $('#menu_actions').val ());
 	  
 	  if ($('#menu_actions').val () == 0) {
 			return;

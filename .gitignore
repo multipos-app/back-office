@@ -72,4 +72,6 @@ resources
 scripts
 pos-configs
 sql
-
+secrets.php
+exports
+webroot/exports

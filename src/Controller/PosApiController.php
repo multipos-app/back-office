@@ -26,7 +26,7 @@ require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 
 class PosApiController extends AppController {
 	 
-	 private $utcOffsets = ['America/New_York' => 5,
+	 public $utcOffsets = ['America/New_York' => 5,
 									'America/Chicago' => 6,
 									'America/Denver' => 7,
 									'America/Los_Angeles' => 8,
@@ -34,22 +34,7 @@ class PosApiController extends AppController {
 									'HST' => 10,
 									'Europe/London' => 0,
 									'Europe/Copenhagen' => 23];
-	 
-    public function dbconnect ($dbname) {
-		  
-        ConnectionManager::drop ('default');
-        ConnectionManager::setConfig ('default', ['className' => 'Cake\Database\Connection',
-                                                  'driver' => 'Cake\Database\Driver\Mysql',
-                                                  'persistent' => false,
-                                                  'host' => 'localhost',
-                                                  'username' => 'vr',
-                                                  'database' => $dbname,
-                                                  'encoding' => 'utf8',
-                                                  'timezone' => 'UTC',
-                                                  'cacheMetadata' => true,
-        ]);
-    }
-    
+	     
     public function jsonResponse ($response) {
 		  
         $this->viewBuilder ()->setLayout ('ajax');
@@ -100,9 +85,7 @@ class PosApiController extends AppController {
 
 				
             $json = $this->request->getData ();
-				
-				$this->debug ($json);
-				
+								
 				$this->dbconnect ($json ['dbname']);
 				
             $departmentTable = TableRegistry::get ('Departments');
@@ -209,9 +192,20 @@ class PosApiController extends AppController {
 		  return vsprintf ('%s%s-%s-%s-%s-%s%s%s', str_split (bin2hex ($data), 4));
 	 }
 	 
-    protected function tzOffset ($tz) {
+	 /**
+	  *
+	  * return epoch minus the timezone offset
+	  *
+	  */
+	 
+    protected function localTime ($t = 0) {
 
-		  return $this->utcOffsets [$tz];
+		  if ($t == 0) {
+
+				$t = time ();
+		  }
+		  
+		  return $t - ($this->utcOffsets [$this->tz ()] * ONE_HOUR);
 	 }
 }
 

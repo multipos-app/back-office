@@ -1,0 +1,27 @@
+<?php
+
+$totals = ['total' => array_fill (0, $len + 1, 0),
+           'net' => array_fill (0, $len + 1, 0),
+           'tax' => array_fill (0, $len + 1, 0),
+           'cash' => array_fill (0, $len + 1, 0),
+           'credit' => array_fill (0, $len + 1, 0),
+           'debit' => array_fill (0, $len + 1, 0),
+           'wallet' => array_fill (0, $len + 1, 0),
+           'ebt_foodstamp' => array_fill (0, $len + 1, 0),
+           'card' => array_fill (0, $len + 1, 0),
+           'check' => array_fill (0, $len + 1, 0),
+           'other' => array_fill (0, $len + 1, 0),
+           'gift_card' => array_fill (0, $len + 1, 0),
+           'account' => array_fill (0, $len + 1, 0),
+           'split' => array_fill (0, $len + 1, 0),
+           'taxable' => array_fill (0, $len + 1, 0),
+           'non_taxable' => array_fill (0, $len + 1, 0),
+           'avg_sale' => array_fill (0, $len + 1, 0),
+           'customer_count' => array_fill (0, $len + 1, 0),
+           'discounts' => array_fill (0, $len + 1, 0),
+           'tips' => array_fill (0, $len + 1, 0),
+           'void_sales' => array_fill (0, $len + 1, 0),
+           'void_items' => array_fill (0, $len + 1, 0),
+           'refunds' => array_fill (0, $len + 1, 0),
+           'no_sales' => array_fill (0, $len + 1, 0)];
+?>

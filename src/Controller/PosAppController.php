@@ -303,11 +303,6 @@ class PosAppController extends AppController {
 		  }
     }
 	 
-    protected function tzOffset ($tz) {
-		  
-      return utcOffsets ($tz);
-    }
-	 
     public function dow ($t = null) {
 
 		  if (gettype ($t) == 'string') {
@@ -344,21 +339,47 @@ class PosAppController extends AppController {
 
     protected function utcToLocal ($t, $timezone, $format = null) {
 
-        $t = str_replace ('.', ':', $t);  // where is this . coming from?
-        
+		  // $t = str_replace ('.', ':', $t);  // where is this . coming from?
+		  
+  		  $this->debug ('utc to local ... ' . get_class ($t));
+      
         $f = 'Y-m-d H:i:s';
         if ($format != null) {
 				
             $f = $format;
         }
 		  
-        $date = new DateTime ($t, new DateTimeZone ('UTC'));
-        $date->setTimezone (new DateTimeZone ($timezone));
-        return $date->format ($f);
+		  return date ($f, strtotime ($this->utcToLocal ($t->i18nFormat ('yyyy-MM-dd H:mm:ss'),
+																		 $this->merchant ['business_units'] [$this->merchant ['bu_index']] ['timezone'])));
 		  
+        $date = new DateTime ($t, new DateTimeZone ('UTC'));
+		  $date->setTimezone (new DateTimeZone ($timezone));
+		  return $date->format ($f);
     }
 
-    protected function localToUTC ($t, $timezone) {
+	 /**
+	  *
+	  * return epoch minus the timezone offset
+	  *
+	  */
+	 
+    protected function localTime ($t = 0) {
+
+		  if ($t == 0) {
+
+				$t = time ();
+		  }
+		  
+		  return $t - ($this->utcOffsets [$this->tz ()] * ONE_HOUR);
+	 }
+
+	 /**
+	  *
+	  * convert a local time string to epoch
+	  *
+	  */
+	 
+	 protected function localToUTC ($t, $timezone) {
 		  
         $t = str_replace ('.', ':', $t);  // where is this . coming from?
 

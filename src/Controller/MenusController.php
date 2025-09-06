@@ -26,11 +26,10 @@ require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
 class MenusController extends PosAppController {
 
 	 /**
-	 *
-	 *
-	 *
-	 **/
-    // public function index ($configID, $menuName, $menuIndex) {
+	  *
+	  * load menus 
+	  *
+	  **/
 		  
 	 function index (...$args) {
 		  
@@ -125,65 +124,11 @@ class MenusController extends PosAppController {
 	 }
 
 	 /**
-	 *
-	 *
-	 *
-	 **/
-    /* public function menu ($configID, $menuName = null, $menuIndex = 0) {
-		 
-	  *     $posConfigTable = TableRegistry::get ('PosConfigs');
-	  *     $posConfig = $posConfigTable
-	  *                ->find ()
-	  *                ->where (['id' => $configID])
-	  *                ->first ();
-	  *     
-	  *     $posConfig = $posConfig->toArray ();
-	  *     $posConfig ['config'] = json_decode ($posConfig ['config'], true);
-		 
-		 $menus = [];
-
-		 if ($menuName == null) {
-		 
-		 // get the name of the first menu
-		 
-		 foreach ($posConfig ['config'] ['pos_menus'] as $key => $value) {
-		 
-		 if (!$menuName) {
-		 
-		 $menuName = $key;
-		 break;
-		 }
-		 }
-		 }
-
-		 foreach ($posConfig ['config'] ['pos_menus'] [$menuName] ['horizontal_menus'] as $menu) {
-
-		 $menus [] = $menu ['name'];
-		 }
-		 
-		 $controls = TableRegistry::get ('PosControlCategories')
-		 ->find ()
-		 ->contain (['PosControls'])
-		 ->all ();
-		 
-	  *     $this-> set (['controls' => $controls,
-		 'posConfig' => $posConfig,
-		 'menus' => $menus,
-		 'menuName' => $menuName,
-		 'menuIndex' => $menuIndex,
-		 'menuActions' => [null => __ ('Actions'),
-		 'menu_action_insert' => __ ('Insert submenu'),
-		 'menu_action_append' => __ ('Append submenu'),
-		 'menu_action_resize' => __ ('Resize'),
-		 'menu_action_settings' => __ ('Settings'),
-		 'menu_action_delete' => __ ('Delete')]]);
-		 }
-	  */
-	 /**
-	 *
-	 *
-	 *
-	 **/
+	  *
+	  * save menus, client sends all menus json encoded
+	  *
+	  **/
+	 
 	 public function update () {
 
 		  if (!empty ($this->request->getData ())) {
@@ -216,10 +161,11 @@ class MenusController extends PosAppController {
 	 }
 	 
 	 /**
-	 *
-	 *
-	 *
-	 **/
+	  *
+	  * handle menu actions, insert...
+	  *
+	  **/
+	 
 	 public function action ($action, $configID, $menuName, $menuIndex) {
 
 		  $this->debug ("menu actions... $action, $configID, $menuName, $menuIndex");

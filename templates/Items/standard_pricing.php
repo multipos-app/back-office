@@ -1,4 +1,10 @@
 
+<?php
+
+$this->debug ($item);
+
+?>
+
 <form class="row g-1" id="<?= $item ['template']?>_edit" name="<?= $item ['template']?>_edit" needs-validation">
 
 	 <input type="hidden" name="id" value="<?= $item ['id'] ?>">
@@ -87,7 +93,7 @@
 				</div>
 
 				<div class="row g-1 mt-3">
-					 <label for="inv_item[package_size]" class="col-sm-4 form-label"><?= __ ('Package size') ?></label>
+					 <label for="inv_item[package_quantity]" class="col-sm-4 form-label"><?= __ ('Package size') ?></label>
   					 <div class="col-sm-8">
 						  <input type="text"
 											dir="rtl"
@@ -99,7 +105,7 @@
 				</div>
 				
 				<div class="row g-1 mt-3">
-					 <label for="inv_item[desired_on_hand]" class="col-sm-4 form-label"><?= __ ('Desired on hand') ?></label>
+					 <label for="inv_item[on_hand_req]" class="col-sm-4 form-label"><?= __ ('Desired on hand') ?></label>
   					 <div class="col-sm-8">
 						  <input type="text"
 											dir="rtl"
@@ -141,7 +147,8 @@
 						  <?=
 						  $this->Form->select ('link_type',
 													  $linkTypes,
-													  ['id' => 'link_type',
+													  ['name' => 'link_type',
+														'id' => 'link_type',
 														'class' => 'form-select',
 														'label' => false])
 						  ?>
@@ -205,21 +212,17 @@
 
  function links () {
 	  
-	  console.log (itemLinks);
-
 	  let html = '';
-	  let i = 0;
 	  
 	  $(itemLinks).each (function (i, link) {
 			
-			html += `<input type="hidden" name="item_links[${i}][item_link_id]" value="${link.id}">` +
-					  `<input type="hidden" name="item_links[${i}][link_type]" value="${$('#link_type').val ()}">` +
-					  `<div class="row g-1 mt-3 mt-1 ps-3">` +
-					  `<div class="col-sm-11">${link.name}</div>` + 
-					  `<div class="col-sm-1 text-end"><i onclick="unLink (${i})" class="bx bxs-minus-circle icon-lg"></i></div>` + 
-					  `</div>`;
-			
-			i ++;
+			html += 
+				 `<input type="hidden" name="item_links[${i}][item_link_id]" value="${link.item_link_id}">
+					  <input type="hidden" name="item_links[${i}][link_type]" value="${link.link_type}">
+					  <div class="row g-1 mt-3 mt-1 ps-3">
+					  <div class="col-sm-11">${link.link_desc}</div>
+					  <div class="col-sm-1 text-end"><i onclick="unLink (${i})" class="bx bxs-minus-circle icon-lg"></i></div>
+					  </div>`;
 	  });
 	  
 	  $('#linked_items').html (html);
@@ -227,7 +230,15 @@
  
  function addLink () {
 
-	  itemLinks.push (linkItem);	  
+	  if (linkItem == null) {
+
+			return;
+	  }
+
+	  itemLinks.push ({item_link_id: linkItem ['id'],
+							 link_type: $('#link_type').val (),
+							 link_desc: linkItem ['name']});
+
 	  $('#link_desc').val ("");
 	  links ();
  }
