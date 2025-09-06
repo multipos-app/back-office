@@ -1,4 +1,9 @@
 
+<?php
+
+require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'secrets.php';
+
+?>
 <div class="pt-4 pb-2">
 	 <h5 class="card-title text-center pb-0 fs-4">Get started</h5>
 	 <p class="text-center small">Enter your contact information to get stated.</p>
@@ -33,7 +38,7 @@
 	 </div>
 	 
 	 <div class="col-md-12 text-center">
-		  <div class="g-recaptcha" name="captcha" data-sitekey="6LfWUfcqAAAAACCz1lDqMx6L1s2f4XYIvWWXuaDP"></div>
+		  <div class="g-recaptcha" name="captcha" data-sitekey="<?= RECAPTCHA_SECRET ?>"></div>
 	 </div>
 	 
 	 <div id="msg" class="col-md-12 text-center"></div>

@@ -18,6 +18,7 @@ use Cake\ORM\TableRegistry;
 use Cake\Datasource\ConnectionManager;
 
 require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'constants.php';
+require_once ROOT . DS . 'src' . DS  . 'Controller' . DS . 'secrets.php';
 
 class MerchantsController extends AppController {
 	 
@@ -156,9 +157,7 @@ class MerchantsController extends AppController {
 				$contact = $this->request->getData ();
 				unset ($contact ['g-recaptcha-response']);
 				
-				$url = 'https://www.google.com/recaptcha/api/siteverify?secret=' .
-						 '6LfWUfcqAAAAAJGePvgrUB-gOEtbWu64VaHRViI9' . '&response=' .
-						 $contact ['recaptcha'];
+				$url = 'https://www.google.com/recaptcha/api/siteverify?secret=' . RECAPTCHA_SECRET . '&response=' . $contact ['recaptcha'];
 				
 				$ch = curl_init (); 
 		      curl_setopt ($ch, CURLOPT_URL, $url);
@@ -428,7 +427,7 @@ class MerchantsController extends AppController {
 				
 				// validate recaptcha against google
 
-				$siteVerify = ['secret' => '6LfGGVAqAAAAADauIzJHWVH9d2HzjLioj-WeuCmH',
+				$siteVerify = ['secret' => RECAPTCHA_SECRET,
 									'response' => $post ['g-recaptcha-response']];
 
 				$this->debug ($siteVerify);
