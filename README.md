@@ -4,7 +4,7 @@ This project is the back office component of multipos-app/pos a cloud based back
 ### Update 9/55/2025
 
 - Complete UI makeover using bootstrapmade NiceAdmin
--Add video surveilence features
+- Add video surveilence features
 
 # Update 7/25/2025
 
